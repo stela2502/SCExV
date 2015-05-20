@@ -1,0 +1,91 @@
+<tmpl_var form-start>
+ 
+<div id="horizontalLine"></div>
+<span id="formName">Add PCR data:</span>
+
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/PCRTable/','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+ <input type="file" id="PCRTable" name="PCRTable" multiple/>
+
+<!--
+<span id="formName">Add PCR data #2 (optional):</span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/PCRTable2/','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+ <input type="file" id="PCRTable2" name="PCRTable2" multiple/>
+  -->  
+    
+
+<span id="formName">Add FACS data (optional):</span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/facsTable/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+ <input type="file" id="facsTable" name="facsTable" multiple/>
+
+<div id="horizontalLine"></div>
+
+<div id="horizontalLine"></div>
+<span id="formName"><tmpl_var comment-orderKey></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/orderKey/','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-orderKey></span>
+<div id="horizontalLine"></div>
+
+<input id="_submit_3" name="_submit" onclick="this.form._submit.value = this.value;" type="submit" value="Upload Data">
+
+</div>
+
+
+<div id='sidebarEntry'>
+<b>Data pre-processing options:</b>
+</div>
+
+<span id="formName"><tmpl_var comment-use_pass_fail></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/use_pass_fail/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-use_pass_fail></span>
+<div id="horizontalLine"></div>
+
+<span id="formName" ><tmpl_var comment-negContr></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/negContr/','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-negContr></span>
+<div id="horizontalLine"></div>
+
+<span id="formName"><tmpl_var comment-controlG1></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/controlGenes/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> </BR>
+<span id="formField"><tmpl_var field-controlG1></span></BR>
+<span id="formName"><tmpl_var comment-controlG2></span></BR>
+<span id="formField"><tmpl_var field-controlG2></span></BR>
+<span id="formName"><tmpl_var comment-controlG3></span></BR>
+<span id="formField"><tmpl_var field-controlG3></span></BR>
+<span id="formName"><tmpl_var comment-controlG4></span></BR>
+<span id="formField"><tmpl_var field-controlG4></span></BR>
+<div id="horizontalLine"></div>
+Remove cell if <span id="formField"><tmpl_var field-maxGenes></span> control gene(s) Ct value > <span id="formField"><tmpl_var field-maxCT></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/maxGenes/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<div id="horizontalLine"></div>
+<span id="formName"><tmpl_var comment-normalize2></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/normalize2/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> </BR>
+<span id="formField"><tmpl_var field-normalize2></span></BR>
+<div id="horizontalLine"></div>
+
+<tmpl_var form-submit>
+<tmpl_var form-end>

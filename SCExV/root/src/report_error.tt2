@@ -1,0 +1,16 @@
+<tr>
+<td id='tab20100'></td><td>
+
+[% FormBuilder.jshead %]
+
+<h1>Thank you for reporting the error!</h1>
+
+<p>Please describe <ol><li>What you wanted to do</li><li> when you detected the error </li><li> and how you detected the error.</li></ol>
+The more specific you are in your description the easier it is for us to identify and correct the error.</br> If you leave your e-mail address in the error log we can contact you when we fixed the problem.</p>
+
+<p> The error report will store all your data on the server and make it available to the error team.</p>
+
+
+[% form.render %]
+
+</td></tr>

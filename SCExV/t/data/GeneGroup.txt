@@ -1,0 +1,5 @@
+GeneGrouping 0.1
+markers	control	control.1
+extends	nothing
+Gr1	-12	-5	-20	-12
+Gr2	-12	-6	-5	0

@@ -1,0 +1,16 @@
+<td id='tab20100' rowspan="4" valign='top'>
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<div id='message'> [% message | html %] </div>
+
+
+
+</td></tr><tr>
+
+<td id='tab4050'>
+
+[% scrapbook %]
+
+</tr></td>

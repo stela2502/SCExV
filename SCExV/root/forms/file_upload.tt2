@@ -1,0 +1,75 @@
+[% form.start %]
+
+[% template.title or site.title %]
+
+ [% form.start %]
+ 
+ 
+<div id="horizontalLine"></div>
+<span id="formName">Add PCR data:</span>
+<a href="#" onClick="MyWindow=window.open([% c.uri_for('/help/index/files/upload/PCRTable/') %],'MyWindow',
+ 'width=500,heig‌​ht=500',); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField">[% form.field.PCRTable.field %]</span></BR>
+
+<span id="formName">Add FACS data (optional):</span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/facsTable/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField">[% form.field.facsTable.field %]</span></BR>
+<div id="horizontalLine"></div>
+
+<input id="_submit_3" name="_submit" onclick="this.form._submit.value = this.value;" type="submit" value="Upload Data">
+</div>
+
+
+<h3>Data pre-processing options</h3>
+<div id="sidebar">
+
+
+<span id="formName">[% form.field.rmGenes.comment %]</span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/rmGenes/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField">[% form.field.rmGenes.field %]</span>
+<div id="horizontalLine"></div>
+
+<span id="formName">[% form.field.negContr.comment %]</span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/negContr/','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField">[% form.field.negContr.field %]</span>
+<div id="horizontalLine"></div>
+
+
+<span id="formName">[% form.field.controlG1.comment %]</span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/controlGenes/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> </BR>
+<span id="formField">[% form.field.controlG1.field %]</span></BR>
+<span id="formName">[% form.field.controlG2.comment %]</span></BR>
+<span id="formField">[% form.field.controlG2.field %]</span></BR>
+<span id="formName">[% form.field.controlG3.comment %]</span></BR>
+<span id="formField">[% form.field.controlG3.field %]</span></BR>
+<span id="formName">[% form.field.controlG4.comment %]</span></BR>
+<span id="formField">[% form.field.controlG4.field %]</span></BR>
+<div id="horizontalLine"></div>
+Remove cell if <span id="formField">[% form.field.maxGenes.field %]</span> control gene(s) Ct value > <span id="formField">[% form.field.maxCT.field %]</span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/maxGenes/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<div id="horizontalLine"></div>
+<span id="formName">[% form.field.normalize2.comment %]</span>
+<a href="#" onClick="MyWindow=window.open('/help/index/files/upload/normalize2/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> </BR>
+<span id="formField">[% form.field.normalize2.field %]</span></BR>
+<div id="horizontalLine"></div>
+
+[% form.submit %]
+[% form.end %]

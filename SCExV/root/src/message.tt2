@@ -1,0 +1,15 @@
+
+[% IF message %]
+<p>
+[% message %]
+</p>
+[% END %]
+[% IF error %]
+<p id="warning">
+[% error %]
+</p>
+[% END %]
+[% IF form %]
+[% form.render %]
+[% END %]
+

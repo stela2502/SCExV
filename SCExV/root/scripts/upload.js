@@ -1,0 +1,1 @@
+var userInformedOnNegControls=0;

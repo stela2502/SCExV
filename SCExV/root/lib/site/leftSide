@@ -1,0 +1,17 @@
+<b>Last entries:</b>
+
+[% IF leftSide %]
+  [% IF leftSideTarget %]
+    [% FOREACH entry IN leftSide %]
+  	<div id="sidebarEntry"> <a  style="text-decoration:none;" href="[% leftSideTarget %][% c.session.LabBook_id %]/[% entry.id %]" ><FONT color="#7d7c7c"> 
+  	<b>[% entry.header %]</b> <br>[% entry.creation_date %]</FONT></a>
+  	[% END %]
+  [% ELSE %]
+  	[% FOREACH entry IN leftSide %]
+  	<div id="sidebarEntry"> <a  style="text-decoration:none;" href="/labbook/LabBook_Reader/[% c.session.LabBook_id %]/[% entry.id %]" ><FONT color="#7d7c7c"> 
+  	<b>[% entry.header %]</b> <br>[% entry.creation_date %]</FONT></a>
+  	[% END %]
+  [% END %]
+[% END %]
+
+<div id="sidebarEntry"> <a style="text-decoration:none;" href="/jobcenter/showJobs/"><b>Your Jobs</b></a></div>

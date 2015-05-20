@@ -1,0 +1,11 @@
+
+[% META title = 'Delete All' %]
+
+
+<tr>
+<td id='tab20100'></td><td>
+
+[% form.render %]
+
+
+</td></tr>

@@ -1,0 +1,4 @@
+<!-- BEGIN site/header -->
+<!-- <h1 class="title"><a href="[%c.uri_for('/') %]">[% template.title or site.title %]</a></h1> -->
+
+<!-- END site/header -->

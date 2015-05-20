@@ -1,0 +1,163 @@
+.stop-scrolling {
+  height: 100%;
+  overflow: hidden;
+}
+
+#tab20100 {
+	width : 20%;
+}
+#tab4050 {
+	min-height : 47%;
+	width : 40%;
+}
+#logo {
+	position : relative;
+	top : 7px;
+}
+#headerBar {
+	background-color : #e3e6ea;
+	border-color : #e3e6ea;
+	border-style : solid;
+	border-width : 1px;
+}
+.sub {
+	background-color : white;
+}
+.resizableContainer {
+	background : white;
+	border-color : black;
+	border-style : solid;
+	border-width : 1px;
+	color : #ffffff;
+	display : inline;
+	float : left;
+	height : 70px;
+	overflow : auto;
+	padding : 10px;
+	resizer : both;
+	width : 100px;
+}
+#disabled {
+	background-color : white;
+	color : #ff3636;
+}
+#warning {
+	background-color : #ffff00;
+	color : #ff3300;
+}
+#analyse {
+	float : right;
+}
+#centered {
+	text-align : center;
+}
+#sidebar {
+	background : #e3e6ea;
+	float : left;
+	padding : 5px;
+	width : 220px;
+}
+#sidebarEntry {
+	background-color : #ffffff;
+	margin-bottom : 15px;
+	margin-top : 15px;
+	width : 100%;
+}
+#horizontalLine {
+	background-color : white;
+	height : 1px;
+	width : 100%;
+}
+div, p, ul, li, td, td p {
+	font-family : Arial, Verdana, Sans-Serif;
+	font-size : 14px;
+}
+#error {
+	float : left;
+	top : 0;
+}
+#message {
+	color : red;
+}
+#news {
+	color : blue;
+}
+#formName {
+	font-weight : bold;
+	padding : 10px 5px 3px 5px;
+}
+#footer {
+	bottom : 0;
+	float : right;
+	text-align : center;
+	width : 19.5%;
+}
+#header {
+	background-color : #e3e6ea;
+	top : 0%;
+}
+body {
+	color : #46494c;
+	width : 100%;
+}
+#content {
+	margin : 1px auto;
+	position : relative;
+	width : 1200px;
+}
+#px40 {
+	float : left;
+	height : 50px;
+	text-align : left;
+}
+#menu {
+	background-color : #e3e6ea;
+	float : left;
+	height : 50px;
+	padding : 20px;
+	text-align : right;
+}
+ul.menu, ul.menu ul {
+	list-style-type : none;
+}
+ul.menu a {
+	color : #c0c0c0;
+	display : block;
+	font-weight : bold;
+	padding : 3px 10px 3px 10px;
+}
+ul.menu ul a {
+	padding : 0 10px;
+}
+ul.menu li {
+	background-color : #e3e6ea;
+	background-image : none;
+	float : left;
+	margin : 0;
+	padding : 0;
+}
+ul.menu ul {
+	background-color : #ffffff;
+	border : 1px solid #ffffff;
+	display : none;
+	margin-left : 0;
+	min-width : 180px;
+	padding : 0 0 5px 0;
+	position : absolute;
+}
+ul.menu ul.hover, ul.menu li.hover ul, ul.menu li:hover ul {
+	background-color : #c0c0c0;
+	display : block;
+	opacity : 1.0;
+	text-align : left;
+	z-index : 99;
+}
+ul.menu ul li {
+	background-color : white;
+	color : #000000;
+	float : none;
+	opacity : 1.0;
+	text-align : left;
+	z-index : 99;
+}
+

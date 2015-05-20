@@ -1,0 +1,120 @@
+<tmpl_var form-start>
+
+<span id="formName"><tmpl_var comment-UG></span>
+<a href="#" onClick="MyWindow=window.open( '/help/index/analyse/index/UG/' ,'MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField" class="formField_UG" ><tmpl_var field-UG></span></BR>
+<div id="horizontalLine"></div>
+
+<span id="formName"><tmpl_var comment-mds_alg></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/mds_alg/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+
+<span id="formField"><tmpl_var field-mds_alg></span></BR>
+<div id="horizontalLine"></div>
+
+<div id="LLE", class='sub', display='none'>
+<span id="formName"><tmpl_var comment-K></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/K/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-K></span></BR>
+<div id="horizontalLine"></div>
+</div>
+<div id="ISOMAP", class='sub', display='none'>
+<span id="formName"><tmpl_var comment-K></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/K/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-K></span></BR>
+<div id="horizontalLine"></div>
+</div>
+
+<span id="formName"><tmpl_var comment-cluster_on></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/cluster_on/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-cluster_on></span></BR>
+<div id="horizontalLine"></div>
+<span id="formName"><tmpl_var comment-cluster_by></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/cluster_by/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-cluster_by></span></BR>
+<div id="horizontalLine"></div>
+
+<span id="formName"><tmpl_var comment-cluster_type></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/cluster_type/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-cluster_type></span></BR>
+<div id="horizontalLine"></div>
+
+
+<div id='hierarchical clust' class='sub' diplay='none'>
+<!-- this is the hclust specific clustering part -->
+<span id="formName"><tmpl_var comment-cluster_alg></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/cluster_alg/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-cluster_alg></span></BR>
+<div id="horizontalLine"></div>
+</div>
+
+
+<div id='tclust' diplay='none'>
+<!-- this is the tclust specific clustering part-->
+<span id="formName"><tmpl_var comment-tclust_alpha></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/tclust_alpha/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-tclust_alpha></span></BR>
+<div id="horizontalLine"></div>
+
+<span id="formName"><tmpl_var comment-tclust_rfact></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/tclust_rfact/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-tclust_rfact></span></BR>
+<div id="horizontalLine"></div>
+
+</div>
+
+<div id='mclust', diplay='none'>
+<!-- this is the mclust specific clustering part CHANGE THAT-->
+
+</div>
+
+<div id='kmeans', diplay='none'>
+<!-- this is the kmeans specific clustering part CHANGE THAT-->
+
+</div>
+
+
+<span id="formName"><tmpl_var comment-cluster_amount></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/cluster_amount/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-cluster_amount></span></BR>
+
+
+<span id="formField"><tmpl_var field-x1></span>
+<span id="formField"><tmpl_var field-x2></span>
+<span id="formField"><tmpl_var field-y1></span>
+<span id="formField"><tmpl_var field-y2></span>
+
+<tmpl_var form-submit>
+<tmpl_var form-end>

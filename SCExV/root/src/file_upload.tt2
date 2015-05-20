@@ -1,0 +1,44 @@
+
+<td id='tab20100' rowspan="4" valign='top'  >
+
+[% INCLUDE 'File_area.tt2' %]
+
+<div id="sidebarHeader">
+[% form.render %]
+</div>
+
+
+</div>
+
+
+
+<div id='message'> [% message | html %] </div>
+
+
+</td></tr><tr>
+
+
+</td><td id='tab4050'>
+
+[% GOI_1 %]
+
+</td><td id='tab4050'>
+
+[% GOI_2 %]
+
+</td>
+
+</tr><tr>
+
+<td id='tab4050'>
+
+[% GOI_3 %]
+
+</td><td id='tab4050'>
+
+[% GOI_4 %]
+
+</td></tr>
+
+
+

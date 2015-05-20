@@ -1,0 +1,15 @@
+#controller	function	variable	text
+files	upload	PCRTable	Help 4 the PCR tables
+files	upload	facsTable	Help 4 the FACS	tables
+files	upload	normalize2	Help 4 the normalization options
+files	upload	rmGenes	What does the remove genes (none expressed) option mean?
+files	upload	userGroup	This is not used at the moment - do not bother!
+files	upload	maxGenes	Explain the option to remove samples where the control genes are not expressed.
+files	upload	controlGenes	Explain how to select the control genes
+analyse	index	cluster_on	Please select the data set to apply the non supervised clustering to - the data you provided (Expression data) or the MDS data. (Ignored if you select a user defined grouping)
+analyse	index	cluster_by	If you provided FACS data you can select to cluster the samples based on the FACS expression values or FACS MDS data. If you only provided us with PCR data this option is ignored.
+analyse	index	cluster_alg	Internally the R hclust method is used. This are the clustering options provided by this function. Please read the <a href="http://stat.ethz.ch/R-manual/R-patched/library/stats/html/hclust.html" target="_blank">R documentation for the hclust function</a> for more information.
+analyse	index	mds_alg	Select the <b>m</b>ulti<b>d</b>imensional <b>s</b>caling algorithm that should be used for this analysis. PUT IN 3 LINKS TO PUBMED TO DESCRIBE THE OPTIONS 
+analyse	index	cluster_amount	You can specify the number of groups you want to separate the data into. The MDS plot should give you a hint on whether you should increase or reduce this number.
+analyse	index	K	This option is only important for the LLE and ISOMAP mds analysis. Low numbers speed up the analysis.
+analyse	index	UG	Here you can select one of the previously created groupings. The plate ID is automatically created during the upload process. All other groupings are based on gene expression differences (<a href="/gene_group/" target="_blank">based on one gene</a> or <a href="/grouping_2d/index/" target="_blank" >based on two genes</a>. You need to reload the analysis page to show new groups.

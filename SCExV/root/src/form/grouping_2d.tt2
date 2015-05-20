@@ -1,0 +1,24 @@
+<tmpl_var form-start>
+
+<span id="formName"><tmpl_var comment-gx></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/grouping_2d/index/gx/','MyWindow',
+ 'width=500,heig‌​ht=500' ); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-gx></span></BR>
+
+<span id="formName"><tmpl_var comment-gy></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/grouping_2d/index/gy/','MyWindow',
+ 'width=500,heig‌​ht=500' ); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-gy></span></BR>
+<div id="horizontalLine"></div>
+
+<span id="formField"><tmpl_var field-x1></span>
+<span id="formField"><tmpl_var field-x2></span>
+<span id="formField"><tmpl_var field-y1></span>
+<span id="formField"><tmpl_var field-y2></span>
+
+<tmpl_var form-submit>
+<tmpl_var form-end>

@@ -1,0 +1,27 @@
+[% IF sidebar %]
+
+<div id="px40">
+<!-- BEGIN site/menu -->
+  <ul class="menu">
+  
+  [% FOREACH container IN sidebar.container %]
+  
+    [% IF container.objects %]
+    <li onmouseover="show(this)" onmouseout="hide(this)" >
+  	  <a onfocus="blurLink(this);" style="color: #7d7c7c; text-decoration: none;"  href="[% container.link %]">[% container.name %]</a>
+  	    <ul class="submenu" onmouseover="show(this)" onmouseout="hide(this)" >
+  	  	[%  FOREACH object IN container.objects %]
+          <li><a style="color: #7d7c7c; text-decoration: none;"  href="[% object.link %]">[% object.name %]</a> </li>
+        [% END %]
+        </ul>
+    </li>
+    [% ELSE %]
+    <li ><a style="color: #7d7c7c; text-decoration: none;" href="[% container.link %]">[% container.name %]</a></li>
+    [% END %]
+  [%END %]
+</ul>
+
+</div>
+<!-- END site/menu -->
+
+[% END %]

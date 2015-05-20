@@ -1,0 +1,16 @@
+[% META title = 'Control figures' %]
+
+<h1>Is there any unexpected pattern in the data?</h1>
+<p> The two figures show the expression in the different samples (x axis) using the order defined in your files. You should not see any obvious pattern in the data.</p>
+<p>In case you see a pattern you can <a href="[% c.uri_for('/files/upload') %]">go back</a> and try another normalization method.</p>
+
+<div id='centered'>
+<table width ='60%'> 
+<tr> <td> [% boxplot %] 
+<p>the colored lines depict the median expression in the different arrays. The color(s) always denote the different arrays on all three figures on the page.</p>
+</td></tr>
+<tr> <td> [% heatmap %] </td></tr>
+<tr> <td> <p>Here you can look up the distribution of expression values for one gene over all arrays.</p>
+ [% histograms %] </td></tr>
+ </table>
+ </div>

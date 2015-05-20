@@ -1,0 +1,13 @@
+
+<tmpl_var form-start>
+
+<span id="formName"><tmpl_var comment-Genes></span>
+<a href="#" onClick="MyWindow=window.open( '/help/index/dropgenes/index/Genes/' ,'MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-Genes></span></BR>
+
+	
+<tmpl_var form-submit>
+<tmpl_var form-end>

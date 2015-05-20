@@ -1,0 +1,38 @@
+
+
+<td id='tab20100', rowspan="5", valign='top' >
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<div id='message'> [% message | html %] </div>
+
+
+
+
+</td></tr><tr>
+
+<td >
+
+<h2>Regroup your data</h2>
+<p>Here you can merge your actual groups by drawing the existing groups from one field to an other.</p>
+<p>Empty group fields will be removed from the analysis. The coloring of your groups will change!</p>
+
+[% IF sourceGroups %]
+<h3> The actual grouping </h3>
+ [% sourceGroups %]
+[% END %]
+
+</td></tr><tr>
+
+<td >
+
+<h2>Submit the form to store the new grouping</h2>
+
+
+[% form.render %]
+
+</td></tr>
+</table>
+
+

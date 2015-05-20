@@ -1,0 +1,27 @@
+.even {
+	background-color:#EEEEEE;
+}
+.hover {
+	background-color:#EEEEFF;
+}
+
+td.asc, th.asc { 
+    background-color: #CCCCFF; 
+} 
+
+th.desc { 
+    background-color: #CCCCFF; 
+}
+
+th { 
+    cursor: pointer; 
+    background-repeat: no-repeat; 
+    background-position: center left; 
+    padding-left: 20px; 
+		text-align:left;
+} 
+#up,
+#down {
+	padding:4px;
+	background-color:#CCCCCC;
+}

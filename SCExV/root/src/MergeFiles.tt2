@@ -1,0 +1,23 @@
+
+
+<td id='tab20100', valign='top'>
+
+
+</div>
+<div id="sidebar">
+[% form.render %]
+</div>
+
+
+
+
+
+
+</td><td id='tab4050'>
+
+<p>Here you can create summary tables for one group of cells. This tool is mean to merge 48 well PCR plates before uploading them together with a 96 well FACS dataset to the main analysis tool.</p>
+</tr><tr>
+
+<div id='message'> [% message | html %] </div>
+
+</tr><tr>

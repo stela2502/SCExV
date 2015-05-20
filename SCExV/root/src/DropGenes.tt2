@@ -1,0 +1,43 @@
+
+
+<td id='tab20100' rowspan="4" valign='top'>
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<div id='message'> [% message | html %] </div>
+
+
+
+
+</td></tr><tr>
+
+<td id='tab4050' valign='top'>
+
+<h2>Exclude genes from the analysis</h2>
+
+<p>Please select the genes you want to exclude from the analysis:</p>
+
+[% form.render %]
+
+<p>Please note, that you can always regenerate all genes by visiting the file upload page once more and click on the analysis button.</p>
+
+</td><td id='tab4050'>
+
+<h3>MDS visualization</h3>
+[% webGL %]
+
+</td>
+
+</tr><tr>
+
+<td colspan="2">
+
+[% PCRHeatmap %]
+
+</td></tr>
+
+
+
+
+

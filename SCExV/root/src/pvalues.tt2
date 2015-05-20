@@ -1,0 +1,56 @@
+
+
+<td id='tab20100' rowspan="4" valign='top'>
+
+<div >
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<p><a href="[% c.uri_for('/files/upload/') %]" target="_self">Upload more files</a></p>
+
+
+
+[% form.render %]
+
+
+</div>
+
+[% FOREACH name IN formNames %]
+<p>[% name %]</p>
+[% END %]
+
+<div id='message'> [% message | html %] </div>
+
+
+
+
+</td></tr><tr>
+
+[% IF stat_res %]
+
+<td id='tab4050'>
+<div id="tools">
+	<a id="down" href="#">&lt; </a>
+	
+	<span id="msg"></span><a id="up" href="#"> &gt;</a>
+</div>
+
+<p>
+<a href="#" onClick="MyWindow=window.open('/help/index/pvalues/index/stat_table/','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</p>
+[% stat_res %]
+
+[% END %]
+</td><td id='tab4050'>
+
+[% figure_2d %]
+
+</td>
+
+</tr>
+
+
+

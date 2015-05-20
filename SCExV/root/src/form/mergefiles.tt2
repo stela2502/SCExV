@@ -1,0 +1,44 @@
+
+<tmpl_var form-start>
+
+<div id="horizontalLine"></div>
+
+
+<span id="formName"><tmpl_var comment-datatype></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/mergefiles/index/datatype','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-datatype></span>
+
+<div id="horizontalLine"></div>
+
+</BR>
+<span id="formName"><tmpl_var comment-name></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/mergefiles/index/name','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-name></span>
+
+<span id="formName"><tmpl_var comment-use_pass_fail></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/mergefiles/index/use_pass_fail','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-use_pass_fail></span>
+
+
+<div id="horizontalLine"></div>
+
+<span id="formName"><tmpl_var comment-source></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/mergefiles/index/source/','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+ <input type="file" id="source" name="source" multiple/>
+ 
+ <div id="horizontalLine"></div>
+ 
+ <tmpl_var form-submit>
+<tmpl_var form-end>

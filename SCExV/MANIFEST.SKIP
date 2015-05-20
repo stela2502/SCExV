@@ -1,0 +1,14 @@
+root/tmp/
+.svn
+blib/
+old_version/
+Output/
+rainbow
+.Rout
+tar.gz
+nytprof
+^\.
+rainbow
+Poster.*zip$
+.autosave
+old_form

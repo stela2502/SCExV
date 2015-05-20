@@ -1,0 +1,20 @@
+<tmpl_var form-start>
+
+<span id="formName"><tmpl_var comment-GOI></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/gene_group/index/GOI/','MyWindow',
+ 'width=500,heig‌​ht=500' ); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-GOI></span></BR>
+
+<span id="formName"><tmpl_var comment-Cutoff></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/gene_group/index/Cutoff/','MyWindow',
+ 'width=500,heig‌​ht=500' ); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-Cutoff></span></BR>
+<div id="horizontalLine"></div>
+
+
+<tmpl_var form-submit>
+<tmpl_var form-end>

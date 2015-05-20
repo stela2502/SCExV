@@ -1,0 +1,19 @@
+## yum install fontconfig-devel freetype-devel libX11-devel libXau-devel libXdamage-devel libXext-devel libXfixes-devel libXft-devel libXmu-devel libXp-devel libXrender-devel  libXt-devel libXxf86vm-devel libdrm-devel libgcj-devel libjpeg-turbo-devel libpng-devel libstdc++-devel libxcb-devel
+
+
+install.packages( c('gplots', 'rgl', 'vioplot', 'stringr', 'RSvgDevice', 'ks') )
+
+source("http://bioconductor.org/biocLite.R")
+biocLite("RDRToolbox")a
+biocLite("Biobase")
+biocLite("BiocGenerics")
+
+## randomForest support
+## CITE: Tao Shi and Steve Horvath (2006) Unsupervised Learning with Random Forest Predictors. Journal of Computational and Graphical Statistics. Volume 15, Number 1, March 2006, pp. 118-138(21)
+install.packages( c('MASS', 'cluster', 'survival', 'randomForest', 'Hmisc') )
+
+install.packages( c('abind', 'reshape', 'ggplot2', 'boot', 'devtools' ) )
+
+
+library(devtools)
+install_github('SingleCellAssay', 'RGLab')

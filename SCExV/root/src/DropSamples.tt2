@@ -1,0 +1,53 @@
+
+
+<td id='tab20100' rowspan="4" valign='top'>
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<div id='message'> [% message | html %] </div>
+
+
+
+
+</td></tr><tr>
+
+<td id='tab4050'>
+
+<h2>Group based sample removal</h2>
+<p>You have detected a group of samples in your data set, that might block the view on the interesting information?</p> 
+
+[% IF buttons %]
+<p> click on one of the buttons to delete the group using the color code </p>
+ [% buttons %]
+[% END %]
+
+
+<h2>Sample name based sample removal</h2>
+
+<p>You have prior knowledge about several samples and want to exclude them?</p>
+<p>You can select multiple samples or give me a string that matches all samples you want to remove.
+
+[% form.render %]
+
+<p>Please note, that you can always regenerate all samples by visiting the file upload page once more and click on the analysis button.</p>
+
+</td><td id='tab4050'>
+
+<h3>MDS visualization</h3>
+[% webGL %]
+
+</td>
+
+</tr><tr>
+
+<td colspan="2">
+
+[% PCRHeatmap %]
+
+</td></tr>
+
+
+
+
+

@@ -1,0 +1,17 @@
+
+<tr>
+<td id='tab20100', rowspan="3", valign='top'>
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+</td></tr><tr>
+[% IF figure %]
+
+</td><td><p> You have selected this figure to be stored in the scrapbook.</p> <img src="[% figure %]", width='60%'> </td></tr>
+[% END %]
+</tr><td> 
+<p>Please add a caption to this figure.</p>
+[% form.render %]
+
+</td></tr>

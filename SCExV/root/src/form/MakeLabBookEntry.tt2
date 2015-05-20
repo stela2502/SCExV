@@ -1,0 +1,21 @@
+<tmpl_var js-head>
+
+<tmpl_var form-start>
+
+The download file's name: <tmpl_var field-filename><br>
+
+<table>
+<tr valign="top">
+  <td> <script language = "JavaScript" type =
+  "text/javascript" > <!--
+  buildForm();
+//-- >
+  </script> </td>
+</tr>
+<tr valign="top"><td colspan="2" align="center"><tmpl_var form-submit>
+</td>
+</tr>
+</tbody></table>
+
+<tmpl_var form-end>
+

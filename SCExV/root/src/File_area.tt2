@@ -1,0 +1,36 @@
+<div id="sidebar">
+
+<b>Uploaded data files:</b>
+<div id="sidebarHeader">PCR:</div>
+<div id="sidebarEntry">
+[% IF PCRTable %]
+	[% FOREACH entry IN PCRTable %]
+		[% IF c.session.gcolors  %] 
+			<mark style="background-color: white;color:[% entry.color %]">[% entry.filename %]</mark></br>
+		[% ELSE %]
+			[% entry.filename %]</BR>
+		[% END %]
+		
+	[% END %]
+	[% IF PCRTable.size == '0' %]
+	none</BR>
+	[% END %]
+[% END %]
+</div>
+
+
+<div id="sidebarHeader">FACS:</div>
+<div id="sidebarEntry">
+[% IF facsTable %]
+	[% FOREACH entry IN facsTable %]
+		[% IF c.session.gcolors %]
+			<mark style="background-color: white;color:[% entry.color %]">[% entry.filename %]</mark></br>
+		[% ELSE %]
+			[% entry.filename %]</BR>
+		[% END %]
+	[% END %]
+	[% IF facsTable.size == '0' %]
+	none</BR>
+	[% END %]
+[% END %]
+</div>

@@ -1,0 +1,58 @@
+
+<tr>
+<td id='tab20100', rowspan="3", valign='top'>
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<p><a href="[% c.uri_for('/files/upload/') %]" target="_self">Ignore changes and upload more files</a></p>
+<p><a href="[% c.uri_for('/analyse/') %]" target="_self">Back to analysis</a></p>
+
+
+<p>This feature allows you to group the cells based on the expression of a single gene. 
+When a gene is selected a histogram will be shown. 
+The histogram can help you to define the intervals on which the grouping will be based. 
+</p> <p>
+Black vertical lines will mark your defined group in the histogram.</p>
+
+<div id="horizontalLine"></div>
+
+[% form.render %]
+
+</div>
+
+
+<!-- <a href="[% c.uri_for('/gene_group/recreate_figures/') %]" target="_self">Re-Create the figures</a> -->
+
+
+<div id='message'> [% message | html %] </div>
+
+
+</td></tr><tr>
+
+</td><td id='tab4050'>
+
+[% Genes %]
+
+</td><td id='tab4050'>
+
+[% webGL %]
+
+</td>
+
+</tr><tr>
+
+<td colspan="2">
+
+[% PCRHeatmap %]
+
+</td></tr>
+
+<tr> <td colspan="2" >
+
+[% HeatmapStatic %]
+
+</td></tr>
+
+
+

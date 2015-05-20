@@ -1,0 +1,114 @@
+
+<td id='tab20100', valign='top'>
+
+</div>
+<div id="sidebar">
+
+[% IF news %]
+<div id='news'>
+<h3>News:</h3>
+[% FOREACH i IN news %]
+<p>[% i %]</p>
+[% END %]
+</div>
+[% END %]
+
+</div>
+
+
+
+<div id='message'> [% message | html %] </div>
+
+
+</td><td id='tab4050'>
+
+<h1> Welcome to the Single Cell expression Visualiser.</h1>
+
+<h3>Supported browsers: </br>
+SCexV uses WebGL which is supported by Firefox and Chrome, less so by Internet Explorer,
+and not at all by Safari. We therefore recommend that you use Firefox or Chrome to get the full visualisaton capabilities of SCexV.
+</h3>
+<p>SCexV is separated into two modules:
+<ol type="A">
+<li><a href="[% c.uri_for( '/files/upload/' ) %]">File upload</a> or 
+<a href="[% c.uri_for( '/files/start_from_zip_file/' ) %]">upload a (recently) saved zip file</a>
+</li>
+
+<li>Analysis</li>
+</ol>
+</p>
+
+<p>Supported files: </p><p>
+
+
+The Fluidigm Real-Time PCR Analysis software suite allows 
+you to export files in two formats, both of which are supported.
+<ol><li>Table format</li><li>
+Heatmap format</li><li>
+In addition simple tab separated files with genes in row 1 and samples in column 1 are supported.</li>
+</ol>
+
+ 
+
+<p>The file upload section enables you to:
+<ol>
+<li>Upload and link PCR expression and surface marker intensity data</li>
+<li>Merge multiple plates from one experiment</li>
+<li>To identify and remove problematic samples</li>
+<li>Normalize data</li>
+</ol>
+</p>
+
+<p>The subsequent analysis section allows you to:
+<ol>
+<li>Visualise the expression/marker data as heatmaps</li>
+<li>Show the data after multidimensional scaling (PCR, isomaps) in 2/3
+dimensions.</li>
+<li>Merge groups</li>
+<li>Select cells to define custom group based on gene expression levels</li>
+<li>Remove cells/genes not of interest</li>
+<li>Visualise genes which discriminate populations as violin plots.</li>
+</ol></p>
+
+<p>The analysis groups the samples according to the unsupervised clustering
+and colors the samples consistently over all plot types:
+<ol>
+<li>Expression data for single markers is plotted using violin plots</li>
+<li>Expression of all all markers is plotted using heatmaps (one for the
+FACS and one for the PCR data)</li>
+<li>And finally the MDS data is visualized either as interactive 3D model or
+as static 2D scatterplot</li>
+<li>Example data</li>
+</ol>
+</p>
+
+<p>This tool comes with accompanying example data (courtesy of the <a href="http://www.med.lu.se/english/expmed/research/developmental_hematopoiesis/" target="_blank">Bryder Lab</a>) comprised of three plates
+of sorted single-cell expression data paired with surface marker
+expression data via index sorting. You can either:<p>
+<ul><li><a href="[% c.uri_for( '/files/use_example_data/' ) %]">start a new session using this data</a></li>
+<li>or <a href="[% c.uri_for( '/files/download_example_data/' ) %]">download this data and use it as yours</a></li>
+</ul>
+
+<h1>Instructional videos</h1>
+
+<table style="border-spacing: 10px 50px;">
+<tr><td><iframe width="336" height="252" src="//www.youtube.com/embed/QeFDU7q9tI8" frameborder="0" allowfullscreen></iframe></td><td>This video will take you through the steps needed to upload and cluster your
+data to get an initial view of how things look.</td></tr>
+<tr><td>  <iframe width="336" height="252" src="//www.youtube.com/embed/OOkIWjeKR7s" frameborder="0" allowfullscreen></iframe>   </td><td> This demonstration will show you how to remove cells or genes which are
+no longer needed in the analysis.  </td></tr>
+<tr><td>  <iframe width="336" height="252" src="//www.youtube.com/embed/eVeRg79hypA" frameborder="0" allowfullscreen></iframe>  </td><td>  Images can be saved using the scrapbook. This video shows how that can
+be done while also keeping a log of events. </td></tr>
+<tr><td>   <iframe width="336" height="252" src="//www.youtube.com/embed/EvhhdYtsalU" frameborder="0" allowfullscreen></iframe>  </td><td> Data can be partitioned using custom groups, and this video demonstrates
+that using 2 gene comparisons, and partitioning the cells based on the
+expression of a single gene.   </td></tr>
+
+</table>
+
+</td><td id='tab20100'>
+
+</td>
+
+</tr><tr>
+
+
+

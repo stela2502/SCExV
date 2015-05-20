@@ -1,0 +1,51 @@
+
+<tr>
+<td id='tab20100', rowspan="3", valign='top'>
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<p><a href="[% c.uri_for('/files/upload/') %]" target="_self">Ignore changes and upload more files</a></p>
+<p><a href="[% c.uri_for('/analyse/') %]" target="_self">Back to analysis</a></p>
+
+
+
+<p>Here you are able to create XY scatter plot based groupings. Select a gene for the x axis and one for the y axis. Submit the form and you will see the requested scatterplot.</p>
+<p>Please select a are using the mouse and submit the form again. The figure will be updated to show the selected area and highlight the selected samples.</p>
+
+<span id='warning'><ul><li>Groups without a single sample in will break the analysis R script</li><li>You must not select all samples as this will also break the analysis R script</li></ul></span>
+<div id="horizontalLine"></div>
+
+[% form.render %]
+
+</div>
+
+
+<div id='message'> [% message | html %] </div>
+
+</td></tr><tr>
+
+
+</td><td align="right">
+<button onclick='capture2D("data")'>Insert this figure into the Scrapbook</button> 
+</tr><tr></td><td >
+<img id='data' src='[% data %]'  border="2">
+
+
+
+</tr><tr>
+
+<td colspan="2">
+
+[% PCRHeatmap %]
+
+</td></tr>
+
+<tr> <td colspan="2" >
+
+[% HeatmapStatic %]
+
+</td></tr>
+
+
+

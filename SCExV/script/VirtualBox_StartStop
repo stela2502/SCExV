@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# VirtualBox:   VirtualBox start stop demon
+#
+# description:  This is a daemon to start and stop VirtualBox images \
+#               during system start and stor events
+#
+#
+
+exec_=/usr/bin/VBoxManage
+VB_user=med-sal
+ls_vms="VBoxManage list runningvms | tr -s '\" {' '%{' | cut -d '%' -f3 "
+
+echo ${ls_vms}
+
+##:.,$s/med-sal/$VB_user/g
+
+# Sanity checks.
+[ -x $exec_ ] || exit 1
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# so we can rearrange this easily
+
+RETVAL=0
+
+
+start()
+{
+	echo -n $"Starting VM HTpcrA ... "
+	for name in HTpcrA
+	do
+		su - ${VB_user} -s /bin/bash -c "$exec_ startvm '$name'  --type headless"
+	done
+	/etc/init.d/vboxweb-service restart
+	success
+	echo
+
+}
+
+stop()
+{
+	echo -n $"Stopping Virtual Box instances: "
+	for uuid in `su - ${VB_user} -s /bin/bash -c "${ls_vms}"`
+	do
+	   echo $uuid
+	   su - ${VB_user} -s /bin/bash -c "$exec_ controlvm $uuid acpipowerbutton"
+	done
+
+	/etc/init.d/vboxweb-service restart
+
+	while [ `su - ${VB_user} -s /bin/bash -c "${ls_vms}"`  ]
+	do
+        	echo waiting for VMs to shutdown
+	        sleep 3
+	    done
+}
+
+# See how we were called.
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	status)
+		status -p $pidfile $processname
+		RETVAL=$?
+		;;
+	restart)
+		stop
+		start
+		;;
+	*)
+		echo $"Usage: $0 {start|stop|status|restart}"
+		;;
+esac
+exit $RETVAL

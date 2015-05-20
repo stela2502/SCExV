@@ -1,0 +1,21 @@
+<tr>
+<td id='tab20100'></td><td>
+
+
+[% FormBuilder.jshead %]
+
+<h1> Download all data and result files</h1>
+
+<p>You think this analysis is worth storing on your computer - great!</p>
+
+<p> I strongly recommend you describe why you want to download this data set using this form. </p>
+
+<p>The information you enter will be stored in a html file in the downloaded archive together with a list of options you have selected.</p>
+
+
+[% form.render %]
+
+</td></tr>
+
+
+

@@ -1,0 +1,33 @@
+<td id='tab20100' rowspan="4" valign='top'>
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<div id='message'> [% message | html %] </div>
+
+
+
+</td><td>
+
+<h3>Custom Grouping</h3>
+
+<p>This page describes the different options to change existing or create new groupings from your data.</p>
+<p>The different options are described in more detail on the respective pages.</p>
+
+<ol>
+<li> <a href="[% c.uri_for('/regroup/reorder/') %]" >Modify your actual grouping</a> </BR> Merge or re-order the actual groups.</li>
+<li> <a href="[% c.uri_for('/regroup/samplenames/') %]" >Sample name based grouing</a> </BR> If you have added additional information to the sample names you can make use of this information to create groups.</li>
+<li> <a href="[% c.uri_for('/gene_group/') %]" >Expression based grouping (1 gene)</a></BR> Group your samples according to the expression of one gene</li>
+<li> <a href="[% c.uri_for('') %]">Expression based grouping (2 genes)</a></BR> Group your samples according to the expression of two gene</li>
+</ol>
+</td></tr>
+
+<td >
+[% IF Form %]
+<h3>Delete Groupings</h3>
+<p>Here you can delete one or more of your previous groupings:</p>
+[% form.render %]
+[% END %]
+
+</td></tr>
+

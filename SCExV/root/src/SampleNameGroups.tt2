@@ -1,0 +1,31 @@
+<td id='tab20100' rowspan="4" valign='top'>
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<div id='message'> [% message | html %] </div>
+
+
+
+</td></tr><tr>
+
+<td >
+
+<h3>Sample Name based grouping</h3>
+
+<p>This grouping is based on additional information in the cell names. The additional information should be coded like that: 
+GROUPNAME_PlateID (e.g. 24h_A4, 6h_H6, ... ) in order to use this grouping method.</p>
+<p>Specifying a list of group names like "24h 6h" in the text filed below would create two groups including all samples from the 24h and the 6h cells. 
+Each group name will define a own group in the order you write them down. </p>
+<p>All samples which do not contain any given group name will be put into a separate group - the FIRST group. </p> 
+
+ 
+</td></tr>
+
+<td >
+
+
+[% form.render %]
+
+
+</td></tr>

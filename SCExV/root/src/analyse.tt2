@@ -1,0 +1,62 @@
+
+
+<td id='tab20100' rowspan="4" valign='top'>
+
+<div >
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<p><a href="[% c.uri_for('/files/upload/') %]" target="_self">Upload more files</a></p>
+
+
+
+[% form.render %]
+
+
+</div>
+
+[% FOREACH name IN formNames %]
+<p>[% name %]</p>
+[% END %]
+
+<div id='message'> [% message | html %] </div>
+
+
+
+
+</td></tr><tr>
+
+<td id='tab4050'>
+
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/gege_expreesion/','MyWindow',
+ 'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	
+[% figure_2d %]
+
+
+
+</td><td id='tab4050'>
+
+<h3>MDS visualization</h3>
+[% webGL %]
+
+</td>
+
+</tr><tr>
+
+<td colspan="2">
+
+[% PCRHeatmap %]
+
+</td></tr>
+
+<tr> <td colspan="2" >
+
+[% HeatmapStatic %]
+
+</td></tr>
+
+
+
