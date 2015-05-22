@@ -193,7 +193,7 @@ PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, 
 vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL, 
 		horizontal = FALSE, col = 'magenta', border = 'black', lty = 1, 
 		lwd = 1, rectCol = 'black', colMed = 'white', pchMed = 19, 
-		at, add = FALSE, wex = 1, drawRect = TRUE, main=NULL) 
+		at, add = FALSE, wex = 1, drawRect = TRUE, main=NULL, cex.axis=1) 
 {
 	datas <- list(x, ...)
 	n <- length(datas)
@@ -270,8 +270,8 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 	if (!horizontal) {
 		if (!add) {
 			plot.window(xlim = xlim, ylim = ylim)
-			axis(2)
-			axis(1, at = at, label = label)
+			axis(2, cex.axis=cex.axis)
+			axis(1, at = at, label = label, cex.axis=cex.axis)
 		}
 		box()
 		for (i in 1:n) {
@@ -291,8 +291,8 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 	else {
 		if (!add) {
 			plot.window(xlim = ylim, ylim = xlim)
-			axis(1)
-			axis(2, at = at, label = label)
+			axis(1,cex.axis =cex.axis)
+			axis(2, at = at, label = label, cex.axis=cex.axis)
 		}
 		box()
 		for (i in 1:n) {
@@ -446,6 +446,7 @@ plot.violines <- function ( ma, groups.n, clus, boot = 1000) {
 		dev.off()
 		if ( plotsvg == 1 ) {
 			devSVG( file=paste(n[i],'.svg',sep=''), width=6,height=6)
+			lila$cex.axis=0.5
 			try(do.call(vioplot,lila), silent=F )
 			dev.off()
 		}
@@ -458,6 +459,8 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 	outt <- NULL
 	
 	if ( is.null(obj$FACS)) {
+		onwhat="Expression"
+	} else if ( ncol(obj$FACS)< 4 ) {
 		onwhat="Expression"
 	}
 	
