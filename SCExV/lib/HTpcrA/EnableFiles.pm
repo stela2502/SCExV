@@ -688,7 +688,7 @@ s/ canvas.getContext\("experimental-webgl"\)/ canvas.getContext("experimental-we
 sub slurp_Heatmaps {
 	my ( $self, $c, $path ) = @_;
 	$path ||= $c->session_path();
-	if ( -f $path . 'facs_Heatmap.svg' ) {
+	if ( -f $path . 'facs_Heatmap.png' ) {
 		$c->stash->{'PCRHeatmap'} = join(
 			"",
 			$self->create_multi_image_scalable_canvas(

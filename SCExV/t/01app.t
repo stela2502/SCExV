@@ -47,7 +47,6 @@ $mech->content() =~
   m!http://localhost/files/index([/\w\-\.\d]+)/preprocess/Cdkn1a.png!;
 my $path = $1;
 ok( -d $path, "the data path has been created" );
-die;
 
 my $drop_path = 1;
 my ( $md5, $type );
@@ -401,8 +400,8 @@ sub test_analysis {
 		$tmp_fail = 0;
 		foreach (
 			"Lineage.PE.Cy5.A.png",          'Ebf1.png',
-			"PCR_color_groups_Heatmap.svg",  "PCR_Heatmap.svg",
-			"facs_color_groups_Heatmap.svg", "facs_Heatmap.svg"
+			"PCR_color_groups_Heatmap.png",  "PCR_Heatmap.png",
+			"facs_color_groups_Heatmap.png", "facs_Heatmap.png"
 		  )
 		{
 			unless ( ok( -f $path . "/" . $_, "$str: file ' $path/$_' exists" ) ){

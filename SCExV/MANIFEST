@@ -7,6 +7,7 @@
 amol_index_wt_pl2.csv
 amol_index_wt_plate2.2.csv
 Amol_indexsort_wt_pl1.csv
+bin/test_randomForestServer_send.pl
 bin/test_server.pl
 Changes
 Changes.new
@@ -929,6 +930,7 @@ root/static/images/SCexV_logo.gif
 root/static/images/SCexV_logo.png
 root/static/images/Untitled.xcf
 root/static/images/ViSex_logo.gif
+script/.install.pl.swp
 script/CleanTemp.pl
 script/htpcra_cgi.pl
 script/htpcra_create.pl

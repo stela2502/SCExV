@@ -17,7 +17,7 @@ FACS.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA,
 	if( nrow(dataObj$data) > 2 ){
 		for ( i in 1:2 ){
 			rownames( dataObj$data ) <- paste( dataObj$genes, dataObj$names)
-			if ( i == 1 ) {
+			if ( i == 1 && plotsvg == 1 ) {
 				devSVG( file=paste(ofile,'_Heatmap.svg',sep='') , width=width, height=height)
 			}
 			else {
@@ -108,27 +108,14 @@ collapsed_heatmaps <- function ( dataObj, what='PCR', functions = c('median', 'm
 }
 
 PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, ColSideColors=NA, RowSideColors=F,
-		width=6, height=6, margins = c(1,11) ,lwid = c( 1,6), lhei=c(1,5), hclustfun = function(c){hclust( c, method='ward')}, distfun = function (x) as.dist( 1- cor(t(x), method='pearson') ), Rowv=T, ... ) {
+		width=6, height=6, margins = c(1,11) ,lwid = c( 1,6), lhei=c(1,5), hclustfun = function(c){hclust( c, method='ward.D')}, distfun = function (x) as.dist( 1- cor(t(x), method='pearson') ), Rowv=T, ... ) {
 	##plot the heatmap as svg image
 	if ( nrow(dataObj$data) > nmax ) {
 		stop (paste('No plooting for file ',ofile,'- too many genes selected (',nrow(dataObj$data),')' ))
 	}
 	if( nrow(dataObj$data) > 2 ){
-		for ( i in 1:2 ){
 		brks <- as.vector(c(-20,quantile(dataObj$data[which(dataObj$data!= -20)],seq(0,1,by=0.1)),max(dataObj$data)))
 		#rownames( dataObj$data ) <- paste( dataObj$genes, dataObj$names)
-		if ( i == 1 ) {
-			devSVG( file=paste(ofile,'_Heatmap.svg',sep='') , width=width, height=height)
-		}
-		else {
-			if ( nrow(dataObj$data) > 50 ) {
-				png( file=paste(ofile,'_Heatmap.png',sep='') , width=width*150, height=height*250 )
-			}
-			else {
-				png( file=paste(ofile,'_Heatmap.png',sep='') , width=width*150, height=height*200 )
-			}
-			
-		}
 		if ( is.na(hc.row) ){
 			hc.row <- hclustfun(distfun(dataObj$data)) #hclust( as.dist( 1- cor(t(dataObj$data), method='spearman')), method='ward')
 		}
@@ -149,6 +136,32 @@ PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, 
 				dendrogram='none'
 			}
 		}
+		if (  plotsvg == 1) {
+			devSVG( file=paste(ofile,'_Heatmap.svg',sep='') , width=width, height=height)
+			if ( ! is.na(ColSideColors) ) {
+				if ( RowSideColors != F) {
+					heatmap.2(as.matrix(ma), breaks=brks,col=c("darkgrey",bluered(length(brks)-2)), key=F, symkey=FALSE,trace='none', 
+							cexRow=0.7,cexCol=0.7, main=title,margins = margins, ColSideColors=ColSideColors, RowSideColors=RowSideColors, Rowv=F,dendrogram=dendrogram,lwid = lwid, lhei=lhei, ... )
+				}
+				else {
+					heatmap.2(as.matrix(ma), breaks=brks,col=c("darkgrey",bluered(length(brks)-2)), key=F, symkey=FALSE,
+							trace='none', cexRow=0.7,cexCol=0.7, main=title,margins = margins, 
+							ColSideColors=ColSideColors, hclustfun = hclustfun, distfun = distfun, Rowv=T,dendrogram=dendrogram,lwid = lwid, lhei=lhei, ...)
+				}
+			}
+			else {
+				heatmap.2(as.matrix(ma), breaks=brks,col=c("darkgrey",bluered(length(brks)-2)), Rowv=F,  key=F, symkey=FALSE,
+						trace='none', cexRow=0.7,cexCol=0.7, main=title,margins = margins,
+						hclustfun = hclustfun, distfun = distfun, dendrogram=dendrogram,lwid = lwid, lhei=lhei )
+			}
+			dev.off()
+		}
+		if ( nrow(dataObj$data) > 50 ) {
+			png( file=paste(ofile,'_Heatmap.png',sep='') , width=width*150, height=height*250 )
+		}
+		else {
+			png( file=paste(ofile,'_Heatmap.png',sep='') , width=width*150, height=height*200 )
+		}
 		if ( ! is.na(ColSideColors) ) {
 			if ( RowSideColors != F) {
 				heatmap.2(as.matrix(ma), breaks=brks,col=c("darkgrey",bluered(length(brks)-2)), key=F, symkey=FALSE,trace='none', 
@@ -166,7 +179,6 @@ PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, 
 					hclustfun = hclustfun, distfun = distfun, dendrogram=dendrogram,lwid = lwid, lhei=lhei )
 		}
 		dev.off()
-		}
 		write.table( cbind ( 'GeneSymbol' = rownames(ma), 'groupsID' = hc.row$order[hc.row$order], ma),file= paste(ofile,'_data4Genesis.xls', sep=''),sep='\t' )
 		write ( rownames(ma),file= paste(ofile,'_Genes_in_order.txt',sep='') ,ncolumns = 1 )
 	}
@@ -175,6 +187,8 @@ PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, 
 	}
 	hc.row
 }
+
+
 
 vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL, 
 		horizontal = FALSE, col = 'magenta', border = 'black', lty = 1, 
@@ -430,6 +444,11 @@ plot.violines <- function ( ma, groups.n, clus, boot = 1000) {
 		lila$main=n[i]
 		try(do.call(vioplot,lila), silent=F )
 		dev.off()
+		if ( plotsvg == 1 ) {
+			devSVG( file=paste(n[i],'.svg',sep=''), width=6,height=6)
+			try(do.call(vioplot,lila), silent=F )
+			dev.off()
+		}
 	}
 }
 
