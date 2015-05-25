@@ -1,16 +1,22 @@
-<tr>
-<td id='tab20100'></td><td>
+
+<td id='tab20100' valign='top'>[% INCLUDE 'File_area.tt2' %]</td><td>
 
 [% FormBuilder.jshead %]
 
-<h1>Thank you for reporting the error!</h1>
+<h1>Sorry that you encountered an error!</h1>
 
-<p>Please describe <ol><li>What you wanted to do</li><li> when you detected the error </li><li> and how you detected the error.</li></ol>
-The more specific you are in your description the easier it is for us to identify and correct the error.</br> If you leave your e-mail address in the error log we can contact you when we fixed the problem.</p>
+[% IF error %]
+<p>the original error:</br>
+[% error | html %]<p>
+<p><a href="[% errorfile %]">more...</a></p>
+[% END %]
 
-<p> The error report will store all your data on the server and make it available to the error team.</p>
 
+<p>You can give us additional information about the error and if you leave your e-mail address we can contact you as soon as the problem is solved.</p>
+
+<p><b>The error report will store all your data on the server and make it available to the error team!</b></p>
 
 [% form.render %]
 
-</td></tr>
+
+</td>

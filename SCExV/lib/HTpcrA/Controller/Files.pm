@@ -461,9 +461,6 @@ sub R_script {
 			}
 		}
 	}
-	$dataset->{'negContr'} = []
-	  unless ( ref( $dataset->{'negContr'} ) eq "ARRAY" );
-	$dataset->{'negControllGenes'} = [];
 	$dataset->{'negControllGenes'} =
 	  [ map { $_ =~ m/preprocess\/(.+).png/; $1; }
 		  @{ $dataset->{'negContr'} } ];
@@ -515,6 +512,24 @@ sub R_script {
 	  ->Add("<h3>File Upload</h3>\n<i>options:"
 		  . $self->options_to_HTML_table($dataset)
 		  . "</i>\n" );
+	unless ( -f $path."../norm_data.RData" ) {
+		if ( defined @{$dataset->{'negControllGenes'}}[0] ) {
+			my $spath = $c->session_path();
+			open ( OUT ,">".$spath."Error_system_message.txt");
+			print OUT "<h3>The file upload did not produce a usable dataset</h3> You have selected at least one negative control gene which does lead to a drop of all cells expressing any of these genes. Most likely this did lead to the error message. Please re-upload your files without selecting a negative controle gene.";
+			close OUT;
+			open ( OUT ,">".$spath."back_to.txt");
+			print OUT '/files/upload/'; ## uri_for call on the error page
+			close ( OUT );
+			
+			$c->res->redirect( $c->uri_for("/error/error/") );
+			$c->detach();
+		}
+		open ( IN, "<$path/Preprocess.Rout");
+		my $error = join ("", <IN>);
+		close ( IN );
+		Carp::confess ( "I encountered an error in the file upload: No Data created\n"."$path../norm_data.RData is missing\n".$error );
+	}
 	return 1;
 }
 
@@ -666,10 +681,24 @@ sub report_error : Local : Form {
 	$self->message_form($c);
 	$c->model('Menu')->Reinit();
 	$c->cookie_check();
+	$self->{'form_array'} = [];
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'name'  => 'text',
+			'type'  => 'textarea',
+			'cols'  => 80,
+			'rows'  => 20,
+			'value' => '',
+		}
+	);
+	foreach ( @{ $self->{'form_array'} } ) {
+		$c->form->field( %{$_} );
+	}
 	if ( $c->form->submitted && $c->form->validate ) {
 		my $dataset = $self->__process_returned_form($c);
 		if ( $dataset->{'text'} =~ m/\w/ ) {
-			open( OUT, ">", $c->session_path() . "ErrorLog.html" );
+			open( OUT, ">", $c->session_path() . "ErrorLog.txt" );
 			print OUT $dataset->{'text'};
 			close(OUT);
 		}
@@ -681,11 +710,14 @@ sub report_error : Local : Form {
 			  . "$filename "
 			  . $c->session_path()
 			  . "../" );
+		if ( -f '/usr/local/bin/report_SCexV_error.pl' ) {
+			system ( '/usr/local/bin/report_SCexV_error.pl -error_file '. $c->session_path(). "../$filename" );
+		}
 		$c->res->redirect( $c->uri_for("/files/upload/") );
 		$c->detach();
 	}
-	$c->form->template(
-		$c->path_to( 'root', 'src' ) . '/form/MakeLabBookEntry.tt2' );
+	#$c->form->template(
+	#	$c->path_to( 'root', 'src' ) . '/form/MakeLabBookEntry.tt2' );
 	$c->stash->{'template'} = 'report_error.tt2';
 }
 
