@@ -17,12 +17,12 @@ To install the server files to your web path you should use the SCexV install.pl
 <p>command line switches for install.pl</p>
 
 <table>
-<tr><td>-install_path</td><td>:</td><td>your server path</td></tr>
-<tr><td>-server_user</td><td>:</td><td>the system user that needs to have access to all files</td></tr>
-<tr><td>-web_root</td><td>:</td><td>the root of the web server - css and jscript files are installed there (default to '/var/www/html/')</td></tr>
-<tr><td>-options</td><td>:</td><td>additional option for the SCexV server like  randomForest 1 ncore 4 </td></tr>
-<tr><td>-help</td><td>:</td><td>print this help </td></tr>
-<tr><td>-debug</td><td>:</td><td>verbose output </td></tr></table>
+<tr><td>-install_path</td><td>your server path</td></tr>
+<tr><td>-server_user</td><td>the system user that needs to have access to all files</td></tr>
+<tr><td>-web_root</td><td>the root of the web server - css and jscript files are installed there (default to '/var/www/html/')</td></tr>
+<tr><td>-options</td><td>additional option for the SCexV server like  randomForest 1 ncore 4 </td></tr>
+<tr><td>-help</td><td>print this help </td></tr>
+<tr><td>-debug</td><td>verbose output </td></tr></table>
 
 <p>This script will copy the required files from &#60;path to the source&#62;/root into the install_path. If the web_root is not the same as the install_path all internal links are changed.</p>
 
