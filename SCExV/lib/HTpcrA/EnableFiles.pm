@@ -81,20 +81,32 @@ sub colors_Hex {
 	return @colors;
 }
 
-sub file_upload {
-	my ( $self, $c, $processed_form ) = @_;
+sub init_file_cookie {
+	my ( $self, $c, $force ) = @_;
+	$force ||=0;
 	my $session_hash = $c->session();
 	unless ( defined $session_hash ) {
 		return 0;
 	}
+	if ( $force ){
+		map { $session_hash->{$_} = [] }  'PCRTable', 'PCRTable2', 'facsTable' ;
+	}
+	else {
+		map { $session_hash->{$_} = [] unless ( ref( $session_hash->{$_} ) eq "ARRAY" ) }  'PCRTable', 'PCRTable2', 'facsTable' ;
+	}
+	return $session_hash;
+}
 
+sub file_upload {
+	my ( $self, $c, $processed_form ) = @_;
+	my $session_hash = $self->init_file_cookie($c);
+	unless ( $session_hash ) {
+		return 0;
+	}
 	my $files = 0;
 	my $unique;
 	$self->{'new_files'} = 0;
 	foreach my $filetype ( 'PCRTable', 'PCRTable2', 'facsTable' ) {
-		unless ( ref( $session_hash->{$filetype} ) eq "ARRAY" ) {
-			$session_hash->{$filetype} = [];
-		}
 		for ( my $i = @{ $session_hash->{$filetype} } ; $i >= 0 ; $i-- ) {
 			next unless ( defined @{ $session_hash->{$filetype} }[$i] );
 			unless ( -f @{ $session_hash->{$filetype} }[$i]->{'total'} ) {

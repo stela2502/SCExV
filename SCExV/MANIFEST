@@ -43,6 +43,7 @@ lib/HTpcrA.pm
 lib/HTpcrA/Controller/analyse.pm
 lib/HTpcrA/Controller/DropGenes.pm
 lib/HTpcrA/Controller/DropSamples.pm
+lib/HTpcrA/Controller/Error.pm
 lib/HTpcrA/Controller/Filemerger.pm
 lib/HTpcrA/Controller/Files.pm
 lib/HTpcrA/Controller/gene_group.pm
@@ -108,6 +109,7 @@ root/css/mag.css
 root/css/site.css
 root/css/style.css
 root/css/table_sorter.css
+root/Error_report_2015-05-25_13_22_20.zip
 'root/example_data/Array1 Index sort.csv'
 'root/example_data/Index sort Array2.csv'
 'root/example_data/Index sort Array3.csv'
@@ -274,6 +276,7 @@ t/Check_01.1_input_multiple_files_R.t
 t/Check_01_input_files_R.t
 t/Check_04_analysis_R.t
 t/controller_analyse.t
+t/controller_Error.t
 t/controller_fluidigm_analysis.t
 t/controller_gene_group.t
 t/controller_grouping_2d.t

@@ -83,8 +83,8 @@ sub index : Local : Form {
 			  . "$filename "
 			  . $c->session_path()
 			  . "../" );
-		if ( -f '/usr/local/bin/report_SCexV_error.pl' ) {
-			system( '/usr/local/bin/report_SCexV_error.pl -error_file '
+		if ( -f '/usr/local/bin/report_SCExV_error.pl' ) {
+			system( '/usr/local/bin/report_SCExV_error.pl -error_file '
 				  . $c->session_path()
 				  . "../$filename" );
 		}
