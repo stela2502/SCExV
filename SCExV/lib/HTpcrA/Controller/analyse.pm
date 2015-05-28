@@ -316,6 +316,11 @@ sub index : Path : Form {
 		$c->res->redirect( $c->uri_for("/files/upload/") );
 		$c->detach();
 	}
+	if ( -f $path . "RScript.Rout"  && ! -f $path . '2D_data.xls' ){ ## the R run did not finish sucessfully
+		system ( "cp $path"."RScript.Rout  $path"."Error_system_message.txt" );
+		$c->res->redirect( $c->uri_for("/error/error/") );
+		$c->detach();
+	}
 	if ( -f $path . "RandomForest_create_groupings.R" ) {
 		chdir($path);
 		system(

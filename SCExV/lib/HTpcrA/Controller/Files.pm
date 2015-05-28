@@ -392,7 +392,7 @@ sub upload : Local : Form {
 			$self->file_upload( $c, $dataset );
 			$self->R_script( $c, $dataset );
 			unless ( -f $path . "../norm_data.RData" ) {
-				if ( defined @{ $dataset->{'negControllGenes'} }[0] ) {
+				if ( defined @{ $dataset->{'negControllGenes'} }[0] && length(@{ $dataset->{'negControllGenes'} }[0]) > 0 ) {
 					my $spath = $c->session_path();
 					open( OUT, ">" . $spath . "Error_system_message.txt" );
 					print OUT
@@ -419,13 +419,23 @@ sub upload : Local : Form {
 				}
 				else {
 					## this does mean, that no file could be uploaded
-					$c->stash->{'ERROR'} = "Sorry, an error in the file upload occured. "
-					  ."Please check if your files are supported and probably upload one after the "
-					  ."other to identify the problematic file. <a href='".$c->uri_for( "/error/error")."'>Full error message...</a>";
-					$self->init_file_cookie( $c, 1);
+					$c->stash->{'ERROR'} =
+					    "Sorry, an error in the file upload occured. "
+					  . "Please check if your files are supported and probably upload one after the "
+					  . "other to identify the problematic file "
+					  . "<a href='#' onclick=\"MyWindow=window.open('"
+					  . $c->uri_for('/help/index/files/upload/PCRTable/')
+					  . "','MyWindow', 'width=500,heig‌​ht=500'); return false;\" >"
+					  . "<img style='border:0px;' src='/static/images/Questions.gif' width='20px'></a>"
+					  . ". <a href='"
+					  . $c->uri_for("/error/error")
+					  . "'>Full error message...</a>";
+					$self->init_file_cookie( $c, 1 );
 					$self->file_upload($c);
 					my $spath = $c->session_path();
-					system( "cp $path/Preprocess.Rout ".$spath . "Error_system_message.txt");
+					system( "cp $path/Preprocess.Rout "
+						  . $spath
+						  . "Error_system_message.txt" );
 				}
 			}
 			$self->update_form($c);
