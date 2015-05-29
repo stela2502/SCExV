@@ -44,6 +44,16 @@ sub update_form {
 	push(
 		@{ $self->{'form_array'} },
 		{
+			'comment' => 'Create svg figures',
+			'name'    => 'plotsvg',
+			'options' => { '0' => 'No', '1' => 'Yes' },
+			'value' => $hash->{'plotsvg'} ||= 0,
+			'required' => 1,
+		}
+	);
+	push(
+		@{ $self->{'form_array'} },
+		{
 			'comment'  => 'Cluster on:',
 			'name'     => 'cluster_by',
 			'options'  => [ 'Expression', 'FACS' ],
@@ -79,8 +89,9 @@ sub update_form {
 	push(
 		@{ $self->{'form_array'} },
 		{
-			'comment'  => 'randomForest gene groups',
-			'name'     => 'randomForest',
+			'comment' => 'randomForest gene groups',
+			'name'    => 'randomForest',
+			'value'   => $hash->{'randomForest'} ||= 10,
 		}
 	);
 	push(
@@ -128,7 +139,8 @@ sub update_form {
 			,    ## you will break the R_script changing this text!
 			'value'    => $hash->{'UG'},
 			'required' => 0,
-			'jsclick'  => "form_fun_match( 'master', 'UG', 'randomForest', 'randomForest')",
+			'jsclick' =>
+			  "form_fun_match( 'master', 'UG', 'randomForest', 'randomForest')",
 		}
 	);
 	closedir(DIR);
@@ -257,6 +269,8 @@ sub init_dataset {
 		'mds_alg'        => 'PCA',
 		'cluster_on'     => 'MDS',
 		'UG'             => 'none',
+		'randomForest'   => 10,
+		'plotsvg'        => 0,
 		'cluster_type'   => 'hierarchical clust',
 	};
 }
@@ -300,6 +314,11 @@ sub index : Path : Form {
 	my $path = $self->path($c);
 	unless ( -f $path . "/norm_data.RData" ) {
 		$c->res->redirect( $c->uri_for("/files/upload/") );
+		$c->detach();
+	}
+	if ( -f $path . "RScript.Rout"  && ! -f $path . '2D_data.xls' ){ ## the R run did not finish sucessfully
+		system ( "cp $path"."RScript.Rout  $path"."Error_system_message.txt" );
+		$c->res->redirect( $c->uri_for("/error/error/") );
 		$c->detach();
 	}
 	if ( -f $path . "RandomForest_create_groupings.R" ) {
@@ -408,7 +427,7 @@ sub index : Path : Form {
 		}
 	}
 
-	if ( -d $path.'webGL' ) {
+	if ( -d $path . 'webGL' ) {
 		my $path = $c->session_path();
 		if ( -f $path . "R.error" ) {
 			open( IN, "<$path" . "R.error" );
@@ -440,7 +459,7 @@ sub index : Path : Form {
 
 sub R_script {
 	my ( $self, $c, $dataset ) = @_;    #the dataset created from the input form
-	$dataset->{'K'} |= 2;
+	$dataset->{'K'} ||= 2;
 	$dataset->{'rad'} =~ s/,/./g if ( defined $dataset->{'rad'} );
 
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {
@@ -462,7 +481,10 @@ sub R_script {
 	  . "load( 'norm_data.RData')\n"
 	  . "source ('libs/Tool_grouping.R')\n";
 	if ( -f $path . "Gene_grouping.randomForest.txt" ) {
-		$script .= "source ('Gene_grouping.randomForest.txt')\n";
+		$script .= "source ('libs/Tool_RandomForest.R')\n"
+		  . "load('RandomForestdistRFobject_genes.RData')\n"
+		  . "createGeneGroups_randomForest (data.filtered, $dataset->{'randomForest'})\n"
+		  . "source ('Gene_grouping.randomForest.txt')\n";
 	}
 	if ( -f $path . 'userDefGrouping.data'
 		&& $dataset->{'UG'} eq "Use my grouping" )
@@ -485,7 +507,8 @@ sub R_script {
 	}
 
 	$script .=
-"onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
+	    "plotsvg = $dataset->{'plotsvg'}\n"
+	  . "onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
 	  . " onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
 	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "
 	  . " ctype= '$dataset->{'cluster_type'}' )\n"
@@ -584,24 +607,24 @@ sub md5_table {
 
 sub Javascript {
 	my ( $self, $c ) = @_;
-	return $self->Script( $c, 
-	    '<link rel="stylesheet" type="text/css" href="'
-	  . $c->uri_for('/css/imgareaselect-default.css') . '" />' . "\n"
-	  . '<script type="text/javascript" src="'
-	  . $c->uri_for('/scripts/jquery.min.js')
-	  . '"></script>' . "\n"
-	  . '<script type="text/javascript" src="'
-	  . $c->uri_for('/scripts/jquery.imgareaselect.pack.js')
-	  . '"></script>' . "\n"
-	  . '<script type="text/javascript" src="'
-	  . $c->uri_for('/scripts/jquery.bridget.js') . '"'
-	  . "></script>\n"
-	  . '<script type="text/javascript" src="'
-	  . $c->uri_for('/scripts/figures.js')
-	  . '"></script>'."\n"
-	  . '<script type="text/javascript" src="'
-	  . $c->uri_for('/scripts/analysis_index.js') . '"'
-	  . "></script>\n" );
+	return $self->Script( $c,
+		    '<link rel="stylesheet" type="text/css" href="'
+		  . $c->uri_for('/css/imgareaselect-default.css') . '" />' . "\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/jquery.min.js')
+		  . '"></script>' . "\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/jquery.imgareaselect.pack.js')
+		  . '"></script>' . "\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/jquery.bridget.js') . '"'
+		  . "></script>\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/figures.js')
+		  . '"></script>' . "\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/analysis_index.js') . '"'
+		  . "></script>\n" );
 }
 
 sub R_process_data_part {

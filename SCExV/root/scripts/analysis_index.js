@@ -21,9 +21,9 @@ function form_fun ( formn, fieldn, all ) {
 	var x = document.forms[formn].elements[fieldn].value;
 	for (t in all) {
 		document.getElementById(all[t]).style.display ='none';
-	}
-	if ( ! document.getElementById(x) == null ) {
-		document.getElementById(x).style.display ='inline'; 
+		if ( x.match(all[t])){
+			document.getElementById(x).style.display ='inline';
+		}
 	}
 }
 function form_fun_match ( formn, fieldn, showThis, match ) { 
@@ -39,6 +39,7 @@ function form_fun_match ( formn, fieldn, showThis, match ) {
 $(document).ready(function () {	
 	clust_show();
 	mds_show();
+	clust_show_rf();
 /*	var intervalID = setInterval(function(){
 		$.getJSON('/scrapbook/ajaxgroups/', {}, function(data){
 			var SB  = document.getElementsByClassName('formField_UG')[0];
