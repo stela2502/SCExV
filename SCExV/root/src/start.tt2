@@ -25,10 +25,10 @@
 <h1> Welcome to the Single Cell Expression Visualiser.</h1>
 
 <h3>Supported browsers: </br>
-SCexV uses WebGL which is supported by Firefox and Chrome, less so by Internet Explorer,
-and not at all by Safari. We therefore recommend that you use Firefox or Chrome to get the full visualisaton capabilities of SCexV.
+SCExV uses WebGL which is supported by Firefox and Chrome, less so by Internet Explorer,
+and not at all by Safari. We therefore recommend that you use Firefox or Chrome to get the full visualisaton capabilities of SCExV.
 </h3>
-<p>SCexV is separated into two modules:
+<p>SCExV is separated into two modules:
 <ol type="A">
 <li><a href="[% c.uri_for( '/files/upload/' ) %]">File upload</a> or 
 <a href="[% c.uri_for( '/files/start_from_zip_file/' ) %]">upload a (recently) saved zip file</a>

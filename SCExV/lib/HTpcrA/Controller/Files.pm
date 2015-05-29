@@ -240,7 +240,7 @@ sub update_form {
 			'required' => 0,
 			'multiple' => 1,
 			'jsclick' =>
-'if ( userInformedOnNegControls===0) {alert("WARNING   All cells expressing a neg control gene will be dropped!   WARNING");userInformedOnNegControls=1;}',
+'if ( userInformedOnNegControls===0) {alert("WARNING: All cells expressing a negative control gene will be dropped.");userInformedOnNegControls=1;}',
 		}
 	);
 
@@ -396,7 +396,9 @@ sub upload : Local : Form {
 					my $spath = $c->session_path();
 					open( OUT, ">" . $spath . "Error_system_message.txt" );
 					print OUT
-"<h3>The file upload did not produce a usable dataset</h3> You have selected at least one negative control gene which does lead to a drop of all cells expressing any of these genes. Most likely this did lead to the error message. Please re-upload your files without selecting a negative controle gene.";
+"<h3>The file upload did not produce a usable dataset</h3> 
+You have selected at least one negative control gene which is likely have lead to the dropping of all cells.  
+Please re-upload your files without selecting negative controle gene(s).";
 					close OUT;
 					open( OUT, ">" . $spath . "back_to.txt" );
 					print OUT
@@ -421,8 +423,8 @@ sub upload : Local : Form {
 					## this does mean, that no file could be uploaded
 					$c->stash->{'ERROR'} =
 					    "Sorry, an error in the file upload occured. "
-					  . "Please check if your files are supported and probably upload one after the "
-					  . "other to identify the problematic file "
+					  . "Please check if your files are supported, or try loading each one individually "
+					  . "to identify the problematic file "
 					  . "<a href='#' onclick=\"MyWindow=window.open('"
 					  . $c->uri_for('/help/index/files/upload/PCRTable/')
 					  . "','MyWindow', 'width=500,heig‌​ht=500'); return false;\" >"
