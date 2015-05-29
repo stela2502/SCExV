@@ -73,7 +73,9 @@ sub index : Path : Form {
 		$c->model('PValues')->create_script( $c, $hash );
 		
 		$c->model('scrapbook')->init( $path."/Scrapbook/Scrapbook.html" )
-	  ->Add_Table("<h3>P values calculation</h3>\n<p>You can <a href='TABLE_FILE'>download the stat results</a>.</p>\n", $self->path($c)."Summary_Stat_Outfile.xls" );
+	  ->Add_Table("<h3>P values calculation</h3>\n<i>options:"
+		  . $self->options_to_HTML_table($hash)
+		  . "</i>\n<p>You can <a href='TABLE_FILE'>download the stat results</a>.</p>\n", $self->path($c)."Summary_Stat_Outfile.xls" );
 	}
 	if ( -f $path . "Summary_Stat_Outfile.xls" ) {
 		my $data_table = stefans_libs::GeneGroups::R_table->new(

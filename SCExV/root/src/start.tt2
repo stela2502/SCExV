@@ -89,6 +89,10 @@ expression data via index sorting. You can either:<p>
 <li>or <a href="[% c.uri_for( '/files/download_example_data/' ) %]">download this data and use it as yours</a></li>
 </ul>
 
+<h1>Source</h1>
+
+<p>This software is open source. You can get a copy at <a href="https://github.com/StemSysBio/SCExV/">GitHub</a>.</p>
+
 <h1>Instructional videos</h1>
 
 <table style="border-spacing: 10px 50px;">
