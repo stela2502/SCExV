@@ -33,7 +33,7 @@ sub create_script {
 	$dataset->{'boot'} ||= 1000,
 	  $dataset->{'lin_lang_file'} ||= 'lin_lang_stats.xls';
 	$dataset->{'sca_ofile'} ||= "Significant_genes.csv";
-	unless ( -f $path . "createPvalues.R" ) {
+#	unless ( -f $path . "createPvalues.R" ) {
 		my $script =
 		    "source('libs/Tool_PValues.R')\nload('analysis.RData')\n"
 		  . "stat_obj <- create_p_values( data, boot = $dataset->{'boot'}, "
@@ -42,7 +42,7 @@ sub create_script {
 		open( OUT, ">" . $path . "createPvalues.R" ) or die "$!\n";
 		print OUT $script;
 		close(OUT);
-	}
+#	}
 	chdir($path);
 	system(
 '/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- createPvalues.R >> R.run.log"'

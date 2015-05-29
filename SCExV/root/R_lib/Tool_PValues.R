@@ -4,7 +4,6 @@ library(reshape)
 library(ggplot2)
 library(boot)
 
-
 SingleCellAssay_Pvalues <- function ( obj, ofile="Significant_genes.csv" ) {
 	d <- obj$z$PCR
 	d[which(d==-20)] <- NA
@@ -12,11 +11,7 @@ SingleCellAssay_Pvalues <- function ( obj, ofile="Significant_genes.csv" ) {
 	d[is.na(d)] <- 0
 	sca <- FromMatrix('SingleCellAssay', as.matrix(d), data.frame(wellKey=rownames(d)), data.frame(primerid=colnames(d)) )
 	groups <- cData(sca)$GroupName <- obj$clusters
-	
 	zlm.output <- zlm.SingleCellAssay(~ GroupName, sca, method='glm', ebayes=T)
-#	coefAndCI <- summary(zlm.output, logFC=FALSE)
-#	coefAndCI <- coefAndCI[contrast != '(Intercept)',]
-#	coefAndCI[,contrast:=abbreviate(contrast)]
 	zlm.lr <- lrTest(zlm.output,'GroupName')
 	pvalue <- ggplot(melt(zlm.lr[,,'Pr(>Chisq)']), aes(x=primerid, y=-log10(value)))+ geom_bar(stat='identity')+facet_wrap(~test.type) + coord_flip()
 	png ('Analysis1.png', width=800, height=800)
@@ -25,8 +20,6 @@ SingleCellAssay_Pvalues <- function ( obj, ofile="Significant_genes.csv" ) {
 	write.table( zlm.lr[,,'Pr(>Chisq)'], file=ofile, sep='\t')
 	zlm.lr[,,'Pr(>Chisq)']
 }
-
-
 
 calc.lin.lang.4_list <- function ( l =list() ) {
 	n = length(l)
@@ -69,7 +62,7 @@ p.lin.lang <- function ( x, groups.n, clus, n=1000 ) {
 	## get one obj with all data
 	stat_real = calc.lin.lang.4_list ( real_list )
 	p_value = 1
-	print (stat_real$cor)
+	#print (stat_real$cor)
 	if ( is.null(stat_real$cor) ) {
 		stat_real$cor = 0.001
 	}
@@ -85,6 +78,7 @@ p.lin.lang <- function ( x, groups.n, clus, n=1000 ) {
 		cmp = vector( 'numeric', n )
 		medians <- vector ( 'numeric', groups.n)
 		or <- vector ( 'numeric', groups.n)
+		expo = 2
 		for ( i in 1:n ) {
 			for( gid in stat_real$groupIDs){
 				tmp =sample(x,random_length[gid])
@@ -100,16 +94,24 @@ p.lin.lang <- function ( x, groups.n, clus, n=1000 ) {
 				}
 			}
 			cmp[i] = corr( cbind(or[stat_real$groupIDs], medians[stat_real$groupIDs]), w = stat_real$weight / sum(stat_real$weight) )
+			if ( i %% 10^expo == 0 ){
+			#	expo = expo + 1
+				t <- boot_p_value ( cmp, stat_real$cor, i )
+				#print (paste( "I check whether the p value (",t,") is already saturated",i))
+				if ( t > 20/i ) {
+					
+					break
+				}
+			}
 			if (is.na(cmp[i]) ){
-				cmp[i]=0.0001
+				cmp[i]=1/n
 			}
 		} 
 		#hist( cmp )
 		#abline(v=stat_real$cor, col='red')
 		stat_real$bootstrapedcor = cmp
-		a <- length(which(cmp > stat_real$cor))
-		if ( a == 0 ) { a<-1}
-		p_value = a /n
+		p_value <- boot_p_value ( cmp, stat_real$cor, sum( cmp != 0 ) )
+		#print ( paste('Final p value = ',p_value, 'Using stat real cor =',stat_real$cor,"and n =",sum( cmp != 0 ),"values"))
 	}
 	else {
 		p_value = 1 
@@ -118,6 +120,12 @@ p.lin.lang <- function ( x, groups.n, clus, n=1000 ) {
 	stat_real
 }
 
+boot_p_value <- function (cmp, real_val, i ) {
+	a <- length(which(cmp > real_val))
+	if ( a == 0 ) { a<-1}
+	p_value = a / i
+	p_value
+}
 
 create_p_values <- function ( obj, boot = 1000, lin_lang_file='lin_lang_stats.xls', sca_ofile="Significant_genes.csv" ) {
 	stat_res = try ( SingleCellAssay_Pvalues ( obj, sca_ofile ))

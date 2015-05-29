@@ -81,20 +81,32 @@ sub colors_Hex {
 	return @colors;
 }
 
-sub file_upload {
-	my ( $self, $c, $processed_form ) = @_;
+sub init_file_cookie {
+	my ( $self, $c, $force ) = @_;
+	$force ||=0;
 	my $session_hash = $c->session();
 	unless ( defined $session_hash ) {
 		return 0;
 	}
+	if ( $force ){
+		map { $session_hash->{$_} = [] }  'PCRTable', 'PCRTable2', 'facsTable' ;
+	}
+	else {
+		map { $session_hash->{$_} = [] unless ( ref( $session_hash->{$_} ) eq "ARRAY" ) }  'PCRTable', 'PCRTable2', 'facsTable' ;
+	}
+	return $session_hash;
+}
 
+sub file_upload {
+	my ( $self, $c, $processed_form ) = @_;
+	my $session_hash = $self->init_file_cookie($c);
+	unless ( $session_hash ) {
+		return 0;
+	}
 	my $files = 0;
 	my $unique;
 	$self->{'new_files'} = 0;
 	foreach my $filetype ( 'PCRTable', 'PCRTable2', 'facsTable' ) {
-		unless ( ref( $session_hash->{$filetype} ) eq "ARRAY" ) {
-			$session_hash->{$filetype} = [];
-		}
 		for ( my $i = @{ $session_hash->{$filetype} } ; $i >= 0 ; $i-- ) {
 			next unless ( defined @{ $session_hash->{$filetype} }[$i] );
 			unless ( -f @{ $session_hash->{$filetype} }[$i]->{'total'} ) {
@@ -688,7 +700,7 @@ s/ canvas.getContext\("experimental-webgl"\)/ canvas.getContext("experimental-we
 sub slurp_Heatmaps {
 	my ( $self, $c, $path ) = @_;
 	$path ||= $c->session_path();
-	if ( -f $path . 'facs_Heatmap.svg' ) {
+	if ( -f $path . 'facs_Heatmap.png' ) {
 		$c->stash->{'PCRHeatmap'} = join(
 			"",
 			$self->create_multi_image_scalable_canvas(
@@ -703,8 +715,8 @@ sub slurp_Heatmaps {
 			$self->create_selector_table_4_figures(
 				$c,                 'heatmaps_s',
 				'heatpic_s',        'picture_s',
-				'PCR_Heatmap.png',  'PCR_color_groups_Heatmap.png',
-				'facs_Heatmap.png', 'facs_color_groups_Heatmap.png',
+				  'PCR_Heatmap.png','PCR_color_groups_Heatmap.png',
+				 'facs_Heatmap.png','facs_color_groups_Heatmap.png',
 			)
 		);
 	}
@@ -713,8 +725,8 @@ sub slurp_Heatmaps {
 			"",
 			$self->create_multi_image_scalable_canvas(
 				$c, 'heatmaps', 'heatpic', 'picture',
-				'PCR_color_groups_Heatmap.png',
-				'PCR_Heatmap.png',
+				'PCR_color_groups_Heatmap.png','PCR_Heatmap.png',
+				
 			)
 		);
 		$c->stash->{'HeatmapStatic'} = join(
@@ -789,9 +801,14 @@ sub create_multi_image_scalable_canvas {
 		  . $c->uri_for( '/files/index' . $path . "$_" )
 		  . "' id='$boxname"
 		  . "_$id' style='display:none'>\n";
-
-		$self->{'select_box'} .=
-		  "<option selected value='$boxname" . "_" . $id . "'>$key</option>\n";
+		unless ( $self->{'select_box'} =~ m/option selected value/ ){
+			$self->{'select_box'} .=
+		  "<option selected value='$boxname" . "_" . $id . "'>$key</option>\n" ;
+		}else {
+			$self->{'select_box'} .=
+		  "<option value='$boxname" . "_" . $id . "'>$key</option>\n" ;
+		}
+		
 		$id++;
 	}
 	$default .= "</td>";
@@ -832,18 +849,24 @@ sub create_selector_table_4_figures {
 		$map = $self->filemap($_);
 		$key = $map->{'filename_core'};
 		$key .= $goi->{$key} if ( defined $goi->{$key} );
-		$default =
-		    "<td width='100%'><p align='center'><img src='"
-		  . $c->uri_for( '/files/index' . $path . "$_" )
-		  . "' width='100%' id='$view_name'></p></td>\n";
 		push(
 			@{ $self->{'select_options'} },
 			{ $c->uri_for( '/files/index' . $path . "$_" ) => $key }
 		);
-		$self->{'select_box'} .=
-		    "<option selected value='"
+		unless ( $self->{'select_box'} =~ m/option selected value/ ){
+			$default =
+		    "<td width='100%'><p align='center'><img src='"
 		  . $c->uri_for( '/files/index' . $path . "$_" )
-		  . "'>$key</option>\n";
+		  . "' width='100%' id='$view_name'></p></td>\n";
+			$self->{'select_box'} .=
+		  "<option selected value='"
+		  . $c->uri_for( '/files/index' . $path . "$_" )
+		  . "'>$key</option>\n" ;
+		}else {
+			$self->{'select_box'} .=
+		  "<option value='" . $c->uri_for( '/files/index' . $path . "$_" )
+		  . "'>$key</option>\n" ;
+		}
 	}
 	my $d = $self->__process_returned_form($c);
 
