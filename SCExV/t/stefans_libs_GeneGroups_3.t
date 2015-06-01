@@ -13,6 +13,7 @@ is_deeply ( ref($stefans_libs_GeneGroups) , 'stefans_libs::GeneGroups', 'simple 
 
 
 my $test_table = stefans_libs::GeneGroups::R_table->new();
+is_deeply ( ref($test_table), 'stefans_libs::GeneGroups::R_table', 'simple test of function stefans_libs::GeneGroups::R_table -> new()' );
 $test_table ->Add_2_Header( [ 'Sample', 'gA', 'gB', 'gC', 'gD' ] );
 
 $test_table ->{'data'} = [
@@ -35,8 +36,11 @@ $test_table ->{'data'} = [
 
 mkdir ($plugin_path.'/data/Output/' ) unless ( -d $plugin_path.'/data/Output/');
 $test_table->write_file($plugin_path.'/data/Output/TestTable.xls');
+ok( -f $plugin_path.'/data/Output/TestTable.xls', "The data file is present");
 
 my ( $xaxis, $yaxis) = $test_table -> plotXY( $plugin_path.'/data/Output/noG_gA_gB.png', 'gA', 'gB', $stefans_libs_GeneGroups );
+is_deeply ( {$xaxis => $xaxis, $yaxis => $yaxis }, $exp, "Axes created as expected" );
+
 $test_table -> plotXY( $plugin_path.'/data/Output/noG_gC_gD.png', 'gC', 'gD', $stefans_libs_GeneGroups );
 
 $stefans_libs_GeneGroups->AddGroup( 'gA', 'gB', -1, -0.5, 0.5, 1 );
