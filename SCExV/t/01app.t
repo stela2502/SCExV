@@ -237,8 +237,8 @@ if ( $check->{'exclude genes'} ) {
 	$mech->click_button( value => 'Submit' );
 	&test_analysis($type);
 	foreach ( 'Gapdh', 'FSC.A', 'FSC.H', 'FSC.W' ) {
-		ok( !-f $path . $_ . ".png",
-			"file ' $path$_.png' does not exist any longer!" )
+		ok( !-f $path ."/" . $_ . ".png",
+			"file ' $path/$_.png' does not exist any longer!" )
 		  or $drop_path = 0;
 	}
 	&print_last_page("some genes were not removed from the analysis!")

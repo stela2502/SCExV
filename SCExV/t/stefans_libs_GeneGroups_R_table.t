@@ -104,7 +104,13 @@ $exp = [
 
 is_deeply( [$color->{'header'}, @{ $color->{'data'} }[ 0 .. 4 ] ], $exp, 'color results read in' );
 
-$stefans_libs_GeneGroups_R_table->plotXY_fixed_Colors( $plugin_path . "/data/Output/2Dplot-png", 'V1', 'V2', $color );
+unlink -f $plugin_path . "/data/Output/2Dplot.png"  if ( -f $plugin_path . "/data/Output/2Dplot.png" );
 
+$stefans_libs_GeneGroups_R_table->plotXY_fixed_Colors( $plugin_path . "/data/Output/2Dplot.png", 'V1', 'V2', $color );
 
+ok ( -f $plugin_path . "/data/Output/2Dplot.png" , "created the figure file '$plugin_path/data/Output/2Dplot.png'");
+
+unlink -f $plugin_path . "/data/Output/2Dplott_no_extra_color.png"  if ( -f $plugin_path . "/data/Output/2Dplott_no_extra_color.png" );
+$stefans_libs_GeneGroups_R_table->plotXY( $plugin_path . "/data/Output/2Dplot_no_extra_color.png", 'V1', 'V2', $stefans_libs_GeneGroups_R_table );
+ok ( -f $plugin_path . "/data/Output/2Dplot.png" , "created the figure file '$plugin_path/data/Output/2Dplot_no_extra_color.png'");
 #print "\$exp = ".root->print_perl_var_def(\@values ).";\n";

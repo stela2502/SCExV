@@ -113,7 +113,7 @@ sub StoreFile {
 sub Add {
 	my ( $self, $text, $file ) = @_;
 	my $str;
-	if ( -f $file ) {
+	if (defined $file &&  -f $file ) {
 		unless ( $file =~ m!^$self->{'path'}/?Pictures! ) {
 			$file = $self->StoreFile($file);
 		}

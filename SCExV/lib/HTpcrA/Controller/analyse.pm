@@ -368,7 +368,7 @@ sub index : Path : Form {
 
 #my $tmp = root::get_hashEntries_as_string( $dataset , 3, "why not remove some samples?? before conversion");
 				my ( $xaxis, $yaxis ) =
-				  $data->axies( @{ $data->{'header'} }[ 1, 2 ] );
+				  $data->axies( @{ $data->{'header'} }[ 1, 2 ] , GD::Image->new( 10,10) );
 				foreach ( 'x1', 'x2' ) {
 					$dataset->{$_} =
 					  $xaxis->pix2value( $dataset->{$_} * 2 );   ## html scaling

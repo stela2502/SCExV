@@ -146,7 +146,7 @@ sub index : Path : Form {
 			}
 			else {
 				my ( $xaxis, $yaxis ) =
-				  $data->axies( $geneA, $geneB );
+				  $data->axies( $geneA, $geneB , GD::Image->new(10,10) );
 				if ( $dataset->{'x1'} =~ m/\d+/ ) {
 					foreach ( 'x1', 'x2' ) {
 						$dataset->{$_} = $xaxis->pix2value( $dataset->{$_} );

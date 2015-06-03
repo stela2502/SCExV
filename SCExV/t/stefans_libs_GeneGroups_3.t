@@ -35,11 +35,14 @@ $test_table ->{'data'} = [
 ];
 
 mkdir ($plugin_path.'/data/Output/' ) unless ( -d $plugin_path.'/data/Output/');
+$test_table->line_separator("\t");
 $test_table->write_file($plugin_path.'/data/Output/TestTable.xls');
+$test_table->line_separator('"?\s"?');
 ok( -f $plugin_path.'/data/Output/TestTable.xls', "The data file is present");
-
+unlink ( $plugin_path.'/data/Output/noG_gA_gB.png' ) if ( -f $plugin_path.'/data/Output/noG_gA_gB.png');
 my ( $xaxis, $yaxis) = $test_table -> plotXY( $plugin_path.'/data/Output/noG_gA_gB.png', 'gA', 'gB', $stefans_libs_GeneGroups );
-is_deeply ( {$xaxis => $xaxis, $yaxis => $yaxis }, $exp, "Axes created as expected" );
+ok( -f  $plugin_path.'/data/Output/noG_gA_gB.png', "plotXY() '$plugin_path/data/Output/noG_gA_gB.png");
+#is_deeply ( {$xaxis => $xaxis, $yaxis => $yaxis }, $exp, "Axes created as expected" );
 
 $test_table -> plotXY( $plugin_path.'/data/Output/noG_gC_gD.png', 'gC', 'gD', $stefans_libs_GeneGroups );
 
@@ -86,17 +89,30 @@ $exp = {
 
 is_deeply($value, $exp, 'right perl groupng' );
 
-$stefans_libs_GeneGroups->write_R(  $plugin_path.'/data/Output/grouping.R', 'testObj');
+#print "\$exp = ".root->print_perl_var_def( {%{$stefans_libs_GeneGroups}} ).";\n";
+#print "\$exp = ".root->print_perl_var_def( { data=>{%{$stefans_libs_GeneGroups->{'data'}}}} ).";\n";
+#print "\$exp = ".root->print_perl_var_def( { "GS 'gA gB'" =>{%{$stefans_libs_GeneGroups->{'GS'}->{'gA gB'}}}} ).";\n";
 
-open ( RS, ">".$plugin_path.'/data/Output/RScript.R' ) or die "I could not create the test R script!\n$!\n";
-print RS "setwd('$plugin_path/data/Output/')\ntestObj <- read.delim('TestTable.xls',row.names=0)\nsource ('grouping.R')\nwrite.table(userGroups, 'R_result.txt', sep='\t', quote=F)\n";
+my $fname = $plugin_path.'/data/Output/grouping.R';
+unlink( $fname) if ( -f $fname);
+$stefans_libs_GeneGroups->write_R(  $plugin_path.'/data/Output/grouping.R', 'testObj');
+ok( -f $fname, "Created file '$fname'");
+
+$fname =$plugin_path.'/data/Output/RScript.R';
+unlink( $fname) if ( -f $fname);
+open ( RS, ">". $fname) or die "I could not create the test R script!\n$!\n";
+print RS "source ('$plugin_path/../root/R_lib/Tool_grouping.R')\nsetwd('$plugin_path/data/Output/')\ntestObj <- list ( 'PCR' = read.delim('TestTable.xls', row.names=1))\nsource ('grouping.R')\nwrite.table(userGroups, 'R_result.txt', sep='\t', quote=F)\n";
 close ( RS );
+#warn ( 'R CMD BATCH --no-save --no-restore --no-readline -- '. $plugin_path.'/data/Output/RScript.R' );
+
+$fname =$plugin_path.'/data/Output/R_result.txt';
+unlink( $fname) if ( -f $fname);
 system ( 'R CMD BATCH --no-save --no-restore --no-readline -- '. $plugin_path.'/data/Output/RScript.R' );
+ok( -f $fname, "Created file '$fname'") or system( "cat $plugin_path/data/Output/RScript.Rout" );
 
 $value = stefans_libs::GeneGroups::R_table->new();
 $value -> line_separator("\t");
 $value ->read_file(  $plugin_path.'/data/Output/R_result.txt' );
-
 
 #print "\$exp = ".root->print_perl_var_def( [$value->GetAsHash( 'groupID', 'cellName' )] ).";\n";
 $exp = {
