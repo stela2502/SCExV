@@ -328,8 +328,14 @@ get.GOI <- function ( ma, group, exclude = NULL ) {
 	ret <- d[which(d< 0.05 )]
 	ret
 }
-mds.and.clus <-function(tab,clusterby="raw",mds.type="PCA", groups.n, LLEK=2, cmethod='ward.D', ctype='hierarchical clust',... ) {
-	
+mds.and.clus <-function(dataObj,clusterby="raw",mds.type="PCA", groups.n, LLEK=2, cmethod='ward.D', ctype='hierarchical clust',onwhat="Expression",... ) {
+	if(onwhat=="Expression"){
+		tab <- dataObj$z$PCR
+	} 
+	else {
+		print ( paste ( "I work on the FACS data!" ) )
+		tab <- dataObj$FACS
+	}
 	mds.proj <- NULL
 	pr <- NULL
 	system ( 'rm  loadings.png' )
@@ -357,19 +363,26 @@ mds.and.clus <-function(tab,clusterby="raw",mds.type="PCA", groups.n, LLEK=2, cm
 	if ( exists('geneGroups') ) {
 		geneC <- geneGroups$groupID
 	}
-	ret <- clusters ( tab=tab, clusterby=clusterby, mds.proj =  mds.proj, groups.n = groups.n, ctype = ctype, cmethod=cmethod )
+	dataObj$mds.coord <- mds.proj
+	dataObj$geneC <- geneC
+	dataObj <- clusters ( dataObj, onwhat=onwhat, clusterby=clusterby, mds.proj =  mds.proj, groups.n = groups.n, ctype = ctype, cmethod=cmethod )
 	
-	lst <- list(mds.coord=mds.proj,clusters=ret$clusters, hc = ret$hc, geneC= geneC )
-	lst
-	
+	dataObj
 }
 
 ## cclusters calculates all possible clusters on the dataset
 ## supported are hclust cclust and tclust with there respective options
-clusters <- function(tab,clusterby="raw", mds.proj=NULL,groups.n = 3, ctype='hierarchical clust', cmethod='ward.D', tc_restr="eigen", tc_alpha=0.05, tc_nstart=50, tc_iter.max=20, tc_restr.fact=20 ){
+clusters <- function(dataObj,clusterby="raw", mds.proj=NULL,groups.n = 3, ctype='hierarchical clust',onwhat="Expression", cmethod='ward.D', tc_restr="eigen", tc_alpha=0.05, tc_nstart=50, tc_iter.max=20, tc_restr.fact=20 ){
 		## custering	
 	clusters <- NULL
 	hc <- NULL
+	if(onwhat=="Expression"){
+		tab <- dataObj$z$PCR
+	} 
+	else {
+		print ( paste ( "I work on the FACS data!" ) )
+		tab <- dataObj$FACS
+	}
 	if ( exists('userGroups') ) {
 		clusters <- userGroups$groupID
 	}else if(clusterby=="MDS"){
@@ -395,7 +408,11 @@ clusters <- function(tab,clusterby="raw", mds.proj=NULL,groups.n = 3, ctype='hie
 		plot ( hc);
 		dev.off()
 	}
-	list( clusters= clusters, hc=hc )
+	dataObj$clusters <- clusters
+	dataObj$hc <- hc
+#	dataObj <- reorder_on_correlation ( dataObj )
+#	print (cbind ( old= as.vector(dataObj$oldclusters), new=as.vector(dataObj$clusters)))
+	dataObj
 }
 
 difference <- function ( x, obj ) {
@@ -456,51 +473,39 @@ plot.violines <- function ( ma, groups.n, clus, boot = 1000) {
 analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='MDS', ctype='hierarchical clust', ...){
 	
 	cols = rainbow( groups.n )
-	outt <- NULL
 	
 	if ( is.null(obj$FACS)) {
 		onwhat="Expression"
 	} else if ( ncol(obj$FACS)< 4 ) {
 		onwhat="Expression"
 	}
-	
-	if(onwhat=="Expression"){
-		outt <- mds.and.clus(obj$z$PCR,groups.n = groups.n, cmethod, clusterby=clusterby,ctype=ctype, ...)
-	} 
-	else {
-		print ( paste ( "I work on the FACS data!" ) )
-		outt <- mds.and.clus(obj$FACS,groups.n = groups.n, cmethod, clusterby=clusterby,ctype=ctype, ...)
+	obj <- mds.and.clus(obj,onwhat= onwhat,groups.n = groups.n, cmethod, clusterby=clusterby,ctype=ctype, ...)
+
+	plotcoma(obj)
+	if ( length(which(obj$clusters == 0)) > 0 ){
+		obj$clusters <- obj$clusters + 1
 	}
-	
-	obj$mds.coord <- outt$mds.coord
-	if ( length(which(outt$clusters == 0)) > 0 ){
-		outt$clusters <- outt$clusters + 1
-	}
-	obj$clusters <- outt$clusters
-	obj$colors <- apply( t(col2rgb( cols ) ), 1, paste,collapse=' ')[outt$clusters]
-	obj$hc <- outt$hc
-	obj$geneC <- outt$geneC
-	
+	obj$colors <- apply( t(col2rgb( cols ) ), 1, paste,collapse=' ')[obj$clusters]
+		
 	## plot the mds data
-	try(plotDR( outt$mds.coord[order(outt$clusters),], col=cols, labels=outt$clusters[order(outt$clusters)], cex=par3d('cex'=0.01)),silent=F)
+	try(plotDR( obj$mds.coord[order(obj$clusters),], col=cols, labels=obj$clusters[order(obj$clusters)], cex=par3d('cex'=0.01)),silent=F)
 	try(writeWebGL( width=470, height=470 ),silent=F)
 	png(file='./webGL/MDS_2D.png', width=800,height=800)
-	plotDR( outt$mds.coord[order(outt$clusters),1:2], col=cols, labels=outt$clusters[order(outt$clusters)], cex=par3d('cex'=0.01))
+	plotDR( obj$mds.coord[order(obj$clusters),1:2], col=cols, labels=obj$clusters[order(obj$clusters)], cex=par3d('cex'=0.01))
 	dev.off()
-	save( outt, file='clusters.RData' )
 	
-	write.table (outt$mds.coord[order(outt$clusters),1:2], file = './2D_data.xls' )
-	sample.cols.rgb <-t(col2rgb( cols[outt$clusters[order(outt$clusters)]]))
-	sample.cols.rgb <- cbind(sample.cols.rgb,  colorname = cols[outt$clusters[order(outt$clusters)]] )
-	rownames(sample.cols.rgb) <- rownames(obj$PCR)[order(outt$clusters)]
+	write.table (obj$mds.coord[order(obj$clusters),1:2], file = './2D_data.xls' )
+	sample.cols.rgb <-t(col2rgb( cols[obj$clusters[order(obj$clusters)]]))
+	sample.cols.rgb <- cbind(sample.cols.rgb,  colorname = cols[obj$clusters[order(obj$clusters)]] )
+	rownames(sample.cols.rgb) <- rownames(obj$PCR)[order(obj$clusters)]
 	write.table ( sample.cols.rgb , file = './2D_data_color.xls' )
 	write.table (cbind( names = cols, t(col2rgb( cols))), file='./webGL/MDS_2D.png.cols', sep='\\t',  row.names=F,quote=F )
 	
 	## plot the violoines
 	if ( ! is.null(obj$FACS)){
-		plot.violines( obj$FACS, groups.n, clus =  outt$clusters, boot = 1000 )
+		plot.violines( obj$FACS, groups.n, clus =  obj$clusters, boot = 1000 )
 	}
-	plot.violines( obj$z$PCR, groups.n, clus =  outt$clusters, boot = 1000  )
+	plot.violines( obj$z$PCR, groups.n, clus =  obj$clusters, boot = 1000  )
 	obj$quality_of_fit = quality_of_fit(obj)
 #	browser()
 	RowV = TRUE
@@ -531,8 +536,8 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 			hclustfun = function(c){hclust( c, method=cmethod)}
 	), silent=T)
 	
-	try( collapsed_heatmaps (obj, what='PCR', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
-	try( collapsed_heatmaps (obj, what='FACS', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
+#	try( collapsed_heatmaps (obj, what='PCR', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
+#	try( collapsed_heatmaps (obj, what='FACS', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
 	try( PCR.heatmap ( list( data= t(obj$z$PCR), genes = colnames(obj$z$PCR)), 
 				'./PCR', 
 				title='PCR data', 
@@ -549,7 +554,7 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 					ColSideColors=cols[obj$clusters],
 					width=12,
 					height=6, 
-					hc.col= outt$hc,
+					hc.col= obj$hc,
 					margins = c(1,11), 
 					lwid = c( 1,6), lhei=c(1,5),
 					hclustfun = function(c){hclust( c, method=cmethod)}
@@ -561,7 +566,7 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 				ColSideColors=cols[obj$clusters][order(obj$clusters)],
 				width=12,
 				height=6, 
-				hc.col= outt$hc,
+				hc.col= obj$hc,
 				margins = c(1,11), 
 				lwid = c( 1,6), lhei=c(1,5),
 				Colv=F,

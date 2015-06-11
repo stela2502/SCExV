@@ -129,6 +129,13 @@
 	</BR>
 <span id="formField"><tmpl_var field-plotsvg></span></BR>
 
+<span id="formName"><tmpl_var comment-automaticReorder></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/automaticReorder/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-automaticReorder></span></BR>
+
 <div id="horizontalLine"></div>
 
 <span id="formField"><tmpl_var field-x1></span>

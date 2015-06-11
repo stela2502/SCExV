@@ -45,6 +45,24 @@ sub colors_rgb {
 	return @colors;
 }
 
+sub check {
+	my ( $self, $c , $what ) = @_;
+	$what ||= 'analysis';
+	my $path = $c->session_path();
+	unless ( -f $path . "/norm_data.RData" ) {
+		$c->res->redirect( $c->uri_for("/files/upload/") );
+		$c->detach();
+	}
+	if ( $what eq 'analysis' ){
+		unless ( -d $path . 'webGL' ) {
+		$c->res->redirect( $c->uri_for("/analyse/") );
+		$c->detach();
+		}
+	}
+	$c->model('Menu')->Reinit();
+	return 1;
+}
+
 sub colors_Hex {
 	my ( $self, $c, $path ) = @_;
 	my @colors;
@@ -659,6 +677,11 @@ sub slurp_webGL {
 		foreach ( $tmp =~ m/function (\w+)\(/g ) {
 			$tmp =~ s/$_/K$_/g;
 		}
+		## and in the new version 
+		# var rgl = new rglClass();
+		# rgl.start = function() {
+		$tmp =~ s/var rgl = new rglClass/var Krgl = new rglClass/g;
+		$tmp =~ s/rgl.start = function/Krgl.start = function/g;
 		$script .= $tmp;
 	}
 	my $uri =
@@ -692,8 +715,16 @@ s/ canvas.getContext\("experimental-webgl"\)/ canvas.getContext("experimental-we
 		  . $c->uri_for( '/files/index' . $path . 'loadings.png' )
 		  . "' alt='2D gene loadings' width='400px'>\n";
 	}
+	if ( ! ($script =~ m/webGLStart/) ){
+		## new version
+		$script .= '<script type="text/javascript">'."\nwebGLStart = function(){rgl.start();}\n";
+		if (-f "$path/densityWebGL/index.html"){
+			$script .= "KwebGLStart = function(){Krgl.start();}\n";
+		}
+		$script .= "</script>\n";
+	}
 	$c->stash->{'webGL'}           = $script;
-	$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();"';
+	$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();nothingatall();"';
 
 }
 

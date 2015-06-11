@@ -54,16 +54,8 @@ sub index_form {
 sub index : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $c->session_path();
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
-	unless ( -f $path . 'merged_data_Table.xls' ) {
-		$c->res->redirect( $c->uri_for("/analyse/") );
-		$c->detach();
-	}
-	$c->model('Menu')->Reinit();
-
+	$self->check($c);
+	
 	my @files = $self->index_form( $c, $path );
 
 	if ( $c->form->submitted && $c->form->validate ) {
@@ -91,15 +83,7 @@ sub index : Local : Form {
 sub samplenames : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $c->session_path();
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
-	unless ( -f $path . 'Sample_Colors.xls' ) {
-		$c->res->redirect( $c->uri_for("/analyse/") );
-		$c->detach();
-	}
-	$c->model('Menu')->Reinit();
+	$self->check($c);
 
 	$c->form->field(
 		'type'     => 'textarea',
@@ -136,18 +120,10 @@ sub samplenames : Local : Form {
 sub reorder : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $c->session_path();
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
-	unless ( -f $path . 'Sample_Colors.xls' ) {
-		$c->res->redirect( $c->uri_for("/analyse/") );
-		$c->detach();
-	}
-	$c->model('Menu')->Reinit();
-
+	$self->check($c);
+	
 	$self->source_groups($c);
-	$self->javaScript($c);
+	$self->JavaScript($c);
 	$self->{'form_array'} = [];
 	foreach ( 1 .. $c->stash->{'groups'} ) {
 		$c->form->field(    #HTML defined in $self->source_groups($c)
@@ -179,6 +155,29 @@ sub reorder : Local : Form {
 			$c->detach();
 		}
 	}
+	if ( -f $path . 'facs_Heatmap.png' ) {
+		$c->stash->{'HeatmapStatic'} = join(
+			"",
+			$self->create_selector_table_4_figures(
+				$c,                 'heatmaps_s',
+				'heatpic_s',        'picture_s', 'CorrelationPlot.png',
+				  'PCR_Heatmap.png','PCR_color_groups_Heatmap.png',
+				 'facs_Heatmap.png','facs_color_groups_Heatmap.png',
+			)
+		);
+	}
+	else {
+		$c->stash->{'HeatmapStatic'} = join(
+			"",
+			$self->create_selector_table_4_figures(
+				$c,                'heatmaps_s',
+				'heatpic_s',       'picture_s', 'CorrelationPlot.png',
+				'PCR_Heatmap.png', 'PCR_color_groups_Heatmap.png',
+
+			)
+		);
+	}
+	$self->JavaScript($c);
 	$c->stash->{'template'} = 'Regroup.tt2';
 }
 
@@ -340,7 +339,7 @@ sub source_groups {
 	return $str;
 }
 
-sub javaScript {
+sub JavaScript {
 	my ( $self, $c ) = @_;
 	$self->Script(
 		$c,
@@ -350,11 +349,15 @@ sub javaScript {
 "copyNames( document.getElementById( 'div$_' ).children, form.g$_ )\n"
 			  } 1 .. $c->stash->{'groups'})
 			  . "\n}\n</script>\n"
+			  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/analysis_index.js') . '"' . "></script>\n" . '<script type="text/javascript" src="'
+		. $c->uri_for('/scripts/figures.js') . '"'
+		  . "></script>\n"
 		);
 	open( LOG, ">>" . $c->session_path() . "Logfile_Regroup.txt" );
-	print LOG "javaScript: script:n"
+	print LOG "JavaScript: script:n"
 	  . $self->Script($c)
-	  . "\njavaScript groups: $c->{stash}->{' groups '}\n";
+	  . "\nJavaScript groups: $c->{stash}->{' groups '}\n";
 	close(LOG);
 }
 

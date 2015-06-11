@@ -22,16 +22,9 @@ Catalyst Controller.
 
 sub index : Path : Form {
 	my ( $self, $c ) = @_;
-	$c->model('Menu')->Reinit();
 	my $path = $c->session->{'path'};
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
-	unless ( -d $path . 'webGL' ) {
-		$c->res->redirect( $c->uri_for("/analyse/") );
-		$c->detach();
-	}
+	$self->check($c);
+	
 	$self->{'form_array'} = [];
 	my $hash = $self->config_file( $c, 'Pvalues.Configs.txt' );
 	$hash = $self->defined_or_set_to_default( $hash, $self->init_dataset() );

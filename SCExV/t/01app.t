@@ -192,17 +192,16 @@ if ( $check->{'analysis'} ) {    ## in depth check of the analysis functions
 	&test_analysis($type);
 
 	#############################
-	$type = 'default values';
+	$type = 'default values +svg';
 	#############################
 	$mech->field( 'cluster_type',   'hierarchical clust' );
 	$mech->field( 'cluster_by',     'Expression' );
 	$mech->field( 'cluster_on',     'MDS' );
 	$mech->field( 'cluster_amount', 3 );
+	$mech->field( 'plotsvg', 'Yes');
 	$mech->click_button( value => 'Run Analysis' );
-	&test_analysis($type);
-
-	##todo I need to test the 2D sample removal tool!
-	warn "I need to test the actually broken 2D sample removal tool!\n";
+	&test_analysis($type, "PCR_color_groups_Heatmap.svg",  "PCR_Heatmap.svg",
+			"facs_color_groups_Heatmap.svg", "facs_Heatmap.svg");
 }
 
 if ( $check->{'exclude cells'} ) {
@@ -364,7 +363,7 @@ sub test_analysis {
 		, ## FACS data in 6 samples is random and therefore a problem in reproducability!
 		'cluster_on Expression 2 groups kmeans' =>
 		  'no check',    ## kmeans is not 100% reproducable either!
-		'default values'           => 'no check',
+		'default values +svg'           => 'no check',
 		'cluster_on FACS 3 groups' => [
 			'kU+JSZCyFtObwYgZdY8tEg', '7zpNExkKG4viKAb2RpP5sQ',
 			'CAFJ/8CFMc6Wz3VzD92TJw'

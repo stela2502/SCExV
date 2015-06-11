@@ -31,6 +31,17 @@ sub update_form {
 	$c->form->name('master');
 	$self->{'form_array'} = [];
 	$hash = $self->defined_or_set_to_default( $hash, $self->init_dataset() );
+	
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment'  => 'Automatic Re-Order',
+			'name'     => 'automaticReorder',
+			'options'  =>  { '0' => 'No', '1' => 'Yes' },
+			'value'    => $hash->{'automaticReorder'} || 1,
+			'required' => 1,
+		}
+	);		
 	push(
 		@{ $self->{'form_array'} },
 		{
@@ -185,10 +196,6 @@ sub update_form {
 
 #$c->stash->{'formNames'} = [map { $_->{'name'} } @{$self->{'form_array'}}[2..(@{$self->{'form_array'}}-1)] ];
 	$c->form->method('post');
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
 	foreach ( @{ $self->{'form_array'} } ) {
 		$c->form->field( %{$_} );
 	}
@@ -241,6 +248,7 @@ sub run_first : Local : Form {
 	my $dataset =
 	  $self->defined_or_set_to_default( { 'UG' => 'Group by plateID' },
 		$self->init_dataset() );
+	$dataset->{'automaticReorder'} = 0;
 	$self->R_script( $c, $dataset );
 	my $gg   = $c->model('GeneGroups');
 	my $data = $gg->read_data( $path . '2D_data.xls' );
@@ -272,16 +280,14 @@ sub init_dataset {
 		'randomForest'   => 10,
 		'plotsvg'        => 0,
 		'cluster_type'   => 'hierarchical clust',
+		'automaticReorder' => 1,
 	};
 }
 
 sub re_run : Local {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->path($c);
-	unless ( -f $path . "/norm_data.RData" ) {
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
+	$self->check($c,'upload');
 	my $dataset;
 	if ( -f "$path/rscript.Configs.txt" ) {
 		$dataset = $self->config_file( $c, 'rscript.Configs.txt' );
@@ -312,22 +318,13 @@ sub re_run : Local {
 sub index : Path : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->path($c);
-	unless ( -f $path . "/norm_data.RData" ) {
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
-	if ( -f $path . "RScript.Rout"  && ! -f $path . '2D_data.xls' ){ ## the R run did not finish sucessfully
-		system ( "cp $path"."RScript.Rout  $path"."Error_system_message.txt" );
-		$c->res->redirect( $c->uri_for("/error/error/") );
-		$c->detach();
-	}
+	$self->check($c,'upload');
 	if ( -f $path . "RandomForest_create_groupings.R" ) {
 		chdir($path);
 		system(
 '/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- RandomForest_create_groupings.R > R.run.log "'
 		);
 	}
-	$c->model('Menu')->Reinit();
 	$c->stash->{'figure_2d'} =
 "<h1> The analysis section</h1>\n<p>Here you can analyse your uploaded data using the options on the left side.</p>";
 	$self->update_form($c);
@@ -478,6 +475,7 @@ sub R_script {
 	## init script
 	my $script =
 	    "source ('libs/Tool_Plot.R')\n"
+	  .  "source ('libs/Tool_Coexpression.R')\n"
 	  . "load( 'norm_data.RData')\n"
 	  . "source ('libs/Tool_grouping.R')\n";
 	if ( -f $path . "Gene_grouping.randomForest.txt" ) {
@@ -508,6 +506,7 @@ sub R_script {
 
 	$script .=
 	    "plotsvg = $dataset->{'plotsvg'}\n"
+	  . "automaticReorder = $dataset->{'automaticReorder'}\n" 
 	  . "onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
 	  . " onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
 	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "

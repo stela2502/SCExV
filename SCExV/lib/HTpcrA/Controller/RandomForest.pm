@@ -70,10 +70,7 @@ sub index : Local : Form  {
 
 sub recalculate : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
+	$self->check($c,'upload');
 	$self->{'form_array'} = [];
 	$c->form->field(
 			'comment'  => 'total tree count (more is better and slower)',
