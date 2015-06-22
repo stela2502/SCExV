@@ -472,6 +472,9 @@ plot.violines <- function ( ma, groups.n, clus, boot = 1000) {
 
 analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='MDS', ctype='hierarchical clust', ...){
 	
+	if ( exists( 'userGroups' )) {
+		userGroups <- checkGrouping(userGroups, obj)
+	}
 	cols = rainbow( groups.n )
 	
 	if ( is.null(obj$FACS)) {
@@ -493,7 +496,7 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 	png(file='./webGL/MDS_2D.png', width=800,height=800)
 	plotDR( obj$mds.coord[order(obj$clusters),1:2], col=cols, labels=obj$clusters[order(obj$clusters)], cex=par3d('cex'=0.01))
 	dev.off()
-	
+	save( obj, file='clusters.RData')
 	write.table (obj$mds.coord[order(obj$clusters),1:2], file = './2D_data.xls' )
 	sample.cols.rgb <-t(col2rgb( cols[obj$clusters[order(obj$clusters)]]))
 	sample.cols.rgb <- cbind(sample.cols.rgb,  colorname = cols[obj$clusters[order(obj$clusters)]] )

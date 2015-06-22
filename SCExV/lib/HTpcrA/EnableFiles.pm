@@ -724,7 +724,7 @@ s/ canvas.getContext\("experimental-webgl"\)/ canvas.getContext("experimental-we
 		$script .= "</script>\n";
 	}
 	$c->stash->{'webGL'}           = $script;
-	$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();nothingatall();"';
+	$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();"';
 
 }
 

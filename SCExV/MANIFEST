@@ -127,8 +127,8 @@ root/Error_report_2015-05-25_13_22_20.zip
 'root/example_data/PCR Array1.csv'
 'root/example_data/PCR Array2.csv'
 'root/example_data/PCR Array3.csv'
-root/example_data/SCexV_example_data.zip
 root/example_data/SCExV_example_data.zip
+root/example_data/SCexV_example_data.zip
 root/forms/file_upload.tt2
 root/help/help_strings.xls
 root/jquery.imgareaselect-0.9.10.zip
@@ -149,6 +149,7 @@ root/md5_hashes.xls
 root/norm_data.RData
 root/R_lib/R_example_read_files.R
 root/R_lib/R_examples_analyze.R
+root/R_lib/Tool_Coexpression.R
 root/R_lib/Tool_grouping.R
 root/R_lib/Tool_Pipe.R
 root/R_lib/Tool_Pipe_buggy_Read_Heatmap_function.R
@@ -227,6 +228,7 @@ root/src/error.tt2
 root/src/File_area.tt2
 root/src/file_upload.tt2
 root/src/form/analysis.tt2
+root/src/form/Coexpression_form.tt2
 root/src/form/dropgenes.tt2
 root/src/form/dropsamples.tt2
 root/src/form/gene_group.tt2
