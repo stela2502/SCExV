@@ -291,7 +291,7 @@ sub plotXY {
 	Carp::confess ( "I do not have data to plot" ) if ( scalar(@data) == 0 ); 
 	foreach my $group_table ( $GeneGroups->splice_expression_table($self) ) {
 		$colors[$id] = $color->getNextColor() unless ( defined $colors[$id] );
-		Carp::confess ( "Color is not defined!".root->print_perl_var_def( { ref( $color) => {%$color} } ) ) unless ( defined $colors[$id] );
+		Carp::confess ( "Color is not defined!".root->print_perl_var_def( { ref( $color) => {%$color},  } ) ) unless ( defined $colors[$id] );
 		if ( defined $group_table->{'group_area'} )
 		{    ## the not grouped do not have this value
 			$im->rectangle(

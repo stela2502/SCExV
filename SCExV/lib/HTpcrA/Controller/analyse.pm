@@ -237,18 +237,30 @@ sub fileok : Local : Form {
 	$c->stash->{'template'} = 'message.tt2';
 }
 
+
+sub init_dataset {
+	return {
+		'cluster_amount' => 3,
+		'cluster_alg'    => 'ward.D',
+		'K'              => 2,
+		'cluster_by'     => 'Expression',
+		'mds_alg'        => 'PCA',
+		'cluster_on'     => 'MDS',
+		'UG'             => 'none',
+		'randomForest'   => 10,
+		'plotsvg'        => 0,
+		'cluster_type'   => 'hierarchical clust',
+	};
+}
+
 sub run_first : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->path($c);
-	unless ( -f $path . "/norm_data.RData" ) {
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
+	$self->check($c,'upload');
 	## I need to write the first config file? NO!
 	my $dataset =
 	  $self->defined_or_set_to_default( { 'UG' => 'Group by plateID' },
 		$self->init_dataset() );
-	$dataset->{'automaticReorder'} = 0;
 	$self->R_script( $c, $dataset );
 	my $gg   = $c->model('GeneGroups');
 	my $data = $gg->read_data( $path . '2D_data.xls' );
@@ -268,33 +280,11 @@ sub run_first : Local : Form {
 	$c->detach();
 }
 
-sub init_dataset {
-	return {
-		'cluster_amount' => 3,
-		'cluster_alg'    => 'ward.D',
-		'K'              => 2,
-		'cluster_by'     => 'Expression',
-		'mds_alg'        => 'PCA',
-		'cluster_on'     => 'MDS',
-		'UG'             => 'none',
-		'randomForest'   => 10,
-		'plotsvg'        => 0,
-		'cluster_type'   => 'hierarchical clust',
-		'automaticReorder' => 1,
-	};
-}
-
 sub re_run : Local {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->path($c);
 	$self->check($c,'upload');
-	my $dataset;
-	if ( -f "$path/rscript.Configs.txt" ) {
-		$dataset = $self->config_file( $c, 'rscript.Configs.txt' );
-	}
-	else {
-		$dataset = $self->init_dataset();
-	}
+	my $dataset = $self->defined_or_set_to_default( $self->config_file( $c, 'rscript.Configs.txt' ), $self->init_dataset() );
 	$args[0] ||= '';
 	if ( -f $path . "/" . $args[0] ) {
 		$dataset->{'UG'} = $args[0];
@@ -311,6 +301,9 @@ sub re_run : Local {
 		@{ $data->{'Header'} }[ 1, 2 ],
 		$data->new( { 'filename' => $path . '2D_data_color.xls' } )
 	);
+	$self->colors_Hex( $c, $path );
+	$c->session->{'first_run'} = 1;
+	warn ( "start to redirect");
 	$c->res->redirect( $c->uri_for("/analyse/index/") );
 	$c->detach();
 }
@@ -325,6 +318,7 @@ sub index : Path : Form {
 '/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- RandomForest_create_groupings.R > R.run.log "'
 		);
 	}
+	warn "not broken #1";
 	$c->stash->{'figure_2d'} =
 "<h1> The analysis section</h1>\n<p>Here you can analyse your uploaded data using the options on the left side.</p>";
 	$self->update_form($c);
@@ -423,7 +417,7 @@ sub index : Path : Form {
 			$c->detach();
 		}
 	}
-
+	warn "not broken #2";
 	if ( -d $path . 'webGL' ) {
 		my $path = $c->session_path();
 		if ( -f $path . "R.error" ) {
@@ -447,9 +441,8 @@ sub index : Path : Form {
 		$c->stash->{'figure_2d'} =
 		  "<h3>Show expression for </h3>" . $c->stash->{'figure_2d'};
 	}
+	warn "not broken #3";
 	$c->form->type('TT2');
-
-#$c->form->template({ type => 'TT2', 'template' => 'root/src/form/analysis.tt2', variable => 'form' });
 	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/analysis.tt2' );
 	$c->stash->{'template'} = 'analyse.tt2';
 }
@@ -493,7 +486,7 @@ sub R_script {
 	}
 	elsif ( $dataset->{'UG'} eq "Group by plateID" ) {
 		$script .=
-		    "userGroups <- list(groupID = data.filtered\$ArrayID ) \n "
+		    "userGroups <- data.frame(cellName = rownames(data.filtered\$PCR), groupID = data.filtered\$ArrayID ) \n "
 		  . "groups.n <-length (levels(as.factor(userGroups\$groupID) ))\n ";
 	}
 	elsif ( -f $path . $dataset->{'UG'} ) {    ## an expression based grouping!
@@ -506,7 +499,6 @@ sub R_script {
 
 	$script .=
 	    "plotsvg = $dataset->{'plotsvg'}\n"
-	  . "automaticReorder = $dataset->{'automaticReorder'}\n" 
 	  . "onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
 	  . " onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
 	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "
