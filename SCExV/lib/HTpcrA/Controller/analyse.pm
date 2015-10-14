@@ -303,7 +303,6 @@ sub re_run : Local {
 	);
 	$self->colors_Hex( $c, $path );
 	$c->session->{'first_run'} = 1;
-	warn ( "start to redirect");
 	$c->res->redirect( $c->uri_for("/analyse/index/") );
 	$c->detach();
 }
@@ -318,7 +317,6 @@ sub index : Path : Form {
 '/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- RandomForest_create_groupings.R > R.run.log "'
 		);
 	}
-	warn "not broken #1";
 	$c->stash->{'figure_2d'} =
 "<h1> The analysis section</h1>\n<p>Here you can analyse your uploaded data using the options on the left side.</p>";
 	$self->update_form($c);
@@ -417,7 +415,6 @@ sub index : Path : Form {
 			$c->detach();
 		}
 	}
-	warn "not broken #2";
 	if ( -d $path . 'webGL' ) {
 		my $path = $c->session_path();
 		if ( -f $path . "R.error" ) {
@@ -441,7 +438,6 @@ sub index : Path : Form {
 		$c->stash->{'figure_2d'} =
 		  "<h3>Show expression for </h3>" . $c->stash->{'figure_2d'};
 	}
-	warn "not broken #3";
 	$c->form->type('TT2');
 	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/analysis.tt2' );
 	$c->stash->{'template'} = 'analyse.tt2';

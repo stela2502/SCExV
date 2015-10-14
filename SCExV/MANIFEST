@@ -127,8 +127,8 @@ root/Error_report_2015-05-25_13_22_20.zip
 'root/example_data/PCR Array1.csv'
 'root/example_data/PCR Array2.csv'
 'root/example_data/PCR Array3.csv'
-root/example_data/SCExV_example_data.zip
 root/example_data/SCexV_example_data.zip
+root/example_data/SCExV_example_data.zip
 root/forms/file_upload.tt2
 root/help/help_strings.xls
 root/jquery.imgareaselect-0.9.10.zip
@@ -286,6 +286,7 @@ t/.RData
 t/01app.t
 t/02_1_app_RandomForest.t
 t/02_3_dropSamples_only.t
+t/02_4_check_analysis_page.t
 t/02pod.t
 t/03podcoverage.t
 t/Check_01.1_input_multiple_files_R.t
@@ -336,6 +337,7 @@ t/data/source_data/test.png
 t/data/source_data/Unreadable_modified_Heatmap.csv
 t/data/test.data.f1.xls
 t/data/test.data.f2.tab
+t/data/TestDatasetAnalyzed.zip
 t/data/upload.tt2
 t/data/z
 t/data_table_2.t

@@ -198,7 +198,7 @@ if ( $check->{'analysis'} ) {    ## in depth check of the analysis functions
 	$mech->field( 'cluster_by',     'Expression' );
 	$mech->field( 'cluster_on',     'MDS' );
 	$mech->field( 'cluster_amount', 3 );
-	$mech->field( 'plotsvg', 'Yes');
+	$mech->field( 'plotsvg', '1');
 	$mech->click_button( value => 'Run Analysis' );
 	&test_analysis($type, "PCR_color_groups_Heatmap.svg",  "PCR_Heatmap.svg",
 			"facs_color_groups_Heatmap.svg", "facs_Heatmap.svg");
@@ -235,6 +235,7 @@ if ( $check->{'exclude genes'} ) {
 	$mech->field( 'Genes', [ 'Gapdh', 'FSC.A', 'FSC.H', 'FSC.W' ] );
 	$mech->click_button( value => 'Submit' );
 	&test_analysis($type);
+	$drop_path = 1;
 	foreach ( 'Gapdh', 'FSC.A', 'FSC.H', 'FSC.W' ) {
 		ok( !-f $path ."/" . $_ . ".png",
 			"file ' $path/$_.png' does not exist any longer!" )
