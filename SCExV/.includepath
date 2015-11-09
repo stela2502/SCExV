@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <includepath>
   <includepathentry path="${resource_loc:/HTpcrA-0.60/lib}" />
+  <includepathentry path="/home/stefan/workspace2/Stefan_Libs_Essentials/lib" />
 </includepath>
 
