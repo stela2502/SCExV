@@ -800,6 +800,9 @@ createDataObj <- function ( PCR=NULL,  FACS=NULL, max.value=40,
 		data <- filter.on.controls.no.inv(data,ref.genes,max.ct,max.control)	
 	}
 	
+	## export the unfiltered_not_modified PCR data for publication
+	write.table( data$PCR, file="../PCR_data_4_publication.xls", sep='\t' )
+	
 	data.filtered <- sd.filter( data )
 	
 	#plot.heatmap( list( data = t(data.filtered$PCR), genes=colnames(data.filtered$PCR)), 'SD_filtered_not_norm', title='SD filtered RAW data', width=12,height=6,Colv=F,hclustfun = function(c){hclust( c, method=cmethod)},distfun = function(x){ 1- cor(t(x),method='spearman')} )
@@ -808,7 +811,8 @@ createDataObj <- function ( PCR=NULL,  FACS=NULL, max.value=40,
 	
 	data.filtered$PCR <- norm.PCR(data.filtered$PCR,norm.function,max.cyc=40, ctrl=ref.genes )
 	#plot.heatmap( list( data = t(data.filtered$PCR), genes=colnames(data.filtered$PCR)), 'Contr_filtered_inverted_norm', title='SD filtered inverted data', width=12,height=6,Colv=F,hclustfun = function(c){hclust( c, method=cmethod)},distfun = function(x){ 1- cor(t(x),method='spearman')} )
-	
+	write.table( data.filtered$z$PCR, file="../PCR_data_normalized_4_publication.xls", sep='\t' )
+
 	data.filtered <- z.score.PCR.mad(data.filtered)
 	#data.filtered$z$PCR <- data.filtered$PCR
 	

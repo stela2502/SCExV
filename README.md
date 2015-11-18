@@ -31,3 +31,7 @@ To install the server files to your web path you should use the SCexV install.pl
 <p>If the installed server does not work I recommend using the t/001app.t test script:
 <ol><li>cd &#60;path to the source&#62;</li><li>perl -I lib t/001app.t </li></ol>
 The output from this script should help to pinpoint the missing parts. If this test script does work without error the problem is web server specific and I can not help you.</p>
+
+# Example installation
+
+<p>You can access our installation at <a href="http://stemsysbio.bmc.lu.se/SCexV/">stemsysbio.bmc.lu.se/SCexV/</a>. For more help on the usage please check out our instructional videos on <a href="https://www.youtube.com/channel/UC8NmNbIEkMt4sjWxgL8_aEw">our YouTube channel</a>.</p>
