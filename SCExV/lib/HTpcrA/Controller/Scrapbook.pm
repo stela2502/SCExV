@@ -59,11 +59,7 @@ sub ajaxgroups : Local {
 sub imageadd : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->path($c);
-	$c->model('Menu')->Reinit();
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
+	$self->check($c,'upload');
 
 	$c->form->field(
 		'type'     => 'textarea',

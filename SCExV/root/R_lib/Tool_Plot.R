@@ -17,7 +17,7 @@ FACS.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA,
 	if( nrow(dataObj$data) > 2 ){
 		for ( i in 1:2 ){
 			rownames( dataObj$data ) <- paste( dataObj$genes, dataObj$names)
-			if ( i == 1 ) {
+			if ( i == 1 && plotsvg == 1 ) {
 				devSVG( file=paste(ofile,'_Heatmap.svg',sep='') , width=width, height=height)
 			}
 			else {
@@ -108,27 +108,14 @@ collapsed_heatmaps <- function ( dataObj, what='PCR', functions = c('median', 'm
 }
 
 PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, ColSideColors=NA, RowSideColors=F,
-		width=6, height=6, margins = c(1,11) ,lwid = c( 1,6), lhei=c(1,5), hclustfun = function(c){hclust( c, method='ward')}, distfun = function (x) as.dist( 1- cor(t(x), method='pearson') ), Rowv=T, ... ) {
+		width=6, height=6, margins = c(1,11) ,lwid = c( 1,6), lhei=c(1,5), hclustfun = function(c){hclust( c, method='ward.D')}, distfun = function (x) as.dist( 1- cor(t(x), method='pearson') ), Rowv=T, ... ) {
 	##plot the heatmap as svg image
 	if ( nrow(dataObj$data) > nmax ) {
 		stop (paste('No plooting for file ',ofile,'- too many genes selected (',nrow(dataObj$data),')' ))
 	}
 	if( nrow(dataObj$data) > 2 ){
-		for ( i in 1:2 ){
 		brks <- as.vector(c(-20,quantile(dataObj$data[which(dataObj$data!= -20)],seq(0,1,by=0.1)),max(dataObj$data)))
 		#rownames( dataObj$data ) <- paste( dataObj$genes, dataObj$names)
-		if ( i == 1 ) {
-			devSVG( file=paste(ofile,'_Heatmap.svg',sep='') , width=width, height=height)
-		}
-		else {
-			if ( nrow(dataObj$data) > 50 ) {
-				png( file=paste(ofile,'_Heatmap.png',sep='') , width=width*150, height=height*250 )
-			}
-			else {
-				png( file=paste(ofile,'_Heatmap.png',sep='') , width=width*150, height=height*200 )
-			}
-			
-		}
 		if ( is.na(hc.row) ){
 			hc.row <- hclustfun(distfun(dataObj$data)) #hclust( as.dist( 1- cor(t(dataObj$data), method='spearman')), method='ward')
 		}
@@ -149,6 +136,32 @@ PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, 
 				dendrogram='none'
 			}
 		}
+		if (  plotsvg == 1) {
+			devSVG( file=paste(ofile,'_Heatmap.svg',sep='') , width=width, height=height)
+			if ( ! is.na(ColSideColors) ) {
+				if ( RowSideColors != F) {
+					heatmap.2(as.matrix(ma), breaks=brks,col=c("darkgrey",bluered(length(brks)-2)), key=F, symkey=FALSE,trace='none', 
+							cexRow=0.7,cexCol=0.7, main=title,margins = margins, ColSideColors=ColSideColors, RowSideColors=RowSideColors, Rowv=F,dendrogram=dendrogram,lwid = lwid, lhei=lhei, ... )
+				}
+				else {
+					heatmap.2(as.matrix(ma), breaks=brks,col=c("darkgrey",bluered(length(brks)-2)), key=F, symkey=FALSE,
+							trace='none', cexRow=0.7,cexCol=0.7, main=title,margins = margins, 
+							ColSideColors=ColSideColors, hclustfun = hclustfun, distfun = distfun, Rowv=T,dendrogram=dendrogram,lwid = lwid, lhei=lhei, ...)
+				}
+			}
+			else {
+				heatmap.2(as.matrix(ma), breaks=brks,col=c("darkgrey",bluered(length(brks)-2)), Rowv=F,  key=F, symkey=FALSE,
+						trace='none', cexRow=0.7,cexCol=0.7, main=title,margins = margins,
+						hclustfun = hclustfun, distfun = distfun, dendrogram=dendrogram,lwid = lwid, lhei=lhei )
+			}
+			dev.off()
+		}
+		if ( nrow(dataObj$data) > 50 ) {
+			png( file=paste(ofile,'_Heatmap.png',sep='') , width=width*150, height=height*250 )
+		}
+		else {
+			png( file=paste(ofile,'_Heatmap.png',sep='') , width=width*150, height=height*200 )
+		}
 		if ( ! is.na(ColSideColors) ) {
 			if ( RowSideColors != F) {
 				heatmap.2(as.matrix(ma), breaks=brks,col=c("darkgrey",bluered(length(brks)-2)), key=F, symkey=FALSE,trace='none', 
@@ -166,7 +179,6 @@ PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, 
 					hclustfun = hclustfun, distfun = distfun, dendrogram=dendrogram,lwid = lwid, lhei=lhei )
 		}
 		dev.off()
-		}
 		write.table( cbind ( 'GeneSymbol' = rownames(ma), 'groupsID' = hc.row$order[hc.row$order], ma),file= paste(ofile,'_data4Genesis.xls', sep=''),sep='\t' )
 		write ( rownames(ma),file= paste(ofile,'_Genes_in_order.txt',sep='') ,ncolumns = 1 )
 	}
@@ -176,10 +188,12 @@ PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, 
 	hc.row
 }
 
+
+
 vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL, 
 		horizontal = FALSE, col = 'magenta', border = 'black', lty = 1, 
 		lwd = 1, rectCol = 'black', colMed = 'white', pchMed = 19, 
-		at, add = FALSE, wex = 1, drawRect = TRUE, main=NULL) 
+		at, add = FALSE, wex = 1, drawRect = TRUE, main=NULL, cex.axis=1, neg=NULL) 
 {
 	datas <- list(x, ...)
 	n <- length(datas)
@@ -199,7 +213,11 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 	names.2 <- NULL
 	for (i in 1:n) {
 		data <- datas[[i]][ is.na(datas[[i]]) ==F ]
-		names.2 <- c ( names.2, paste( length(data),"/",length(datas[[i]]),sep='') )
+		if ( ! is.null(neg)) {
+			names.2 <- c ( names.2, paste( length(data),"/",length(which( datas[[i]] != neg )),sep='') )
+		}else {
+			names.2 <- c ( names.2, paste( length(data),"/",length(datas[[i]]),sep='') )
+		}
 		if ( length(data) == 0) {
 			data <- c(0)
 		}
@@ -256,8 +274,8 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 	if (!horizontal) {
 		if (!add) {
 			plot.window(xlim = xlim, ylim = ylim)
-			axis(2)
-			axis(1, at = at, label = label)
+			axis(2, cex.axis=cex.axis)
+			axis(1, at = at, label = label, cex.axis=cex.axis)
 		}
 		box()
 		for (i in 1:n) {
@@ -271,14 +289,23 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 						q3[i], col = rectCol)
 				points(at[i], med[i], pch = pchMed, col = colMed)
 			}
+			else{
+				lines(at[c(i, i)], c(lower[i], upper[i]), lwd = lwd, 
+						lty = lty)
+				lines(c(at[i]- boxwidth/2, at[i] + boxwidth/2), c(lower[i], lower[i]), lwd = lwd, 
+						lty = lty)
+				lines( c(at[i]- boxwidth/2, at[i] + boxwidth/2), c(upper[i], upper[i]), lwd = lwd, 
+						lty = lty)
+				points(at[i], med[i], pch = pchMed, col = colMed, cex=2)
+			}
 		}
 		
 	}
 	else {
 		if (!add) {
 			plot.window(xlim = ylim, ylim = xlim)
-			axis(1)
-			axis(2, at = at, label = label)
+			axis(1,cex.axis =cex.axis)
+			axis(2, at = at, label = label, cex.axis=cex.axis)
 		}
 		box()
 		for (i in 1:n) {
@@ -314,8 +341,14 @@ get.GOI <- function ( ma, group, exclude = NULL ) {
 	ret <- d[which(d< 0.05 )]
 	ret
 }
-mds.and.clus <-function(tab,clusterby="raw",mds.type="PCA", groups.n, LLEK=2, cmethod='ward.D', ctype='hierarchical clust',... ) {
-	
+mds.and.clus <-function(dataObj,clusterby="raw",mds.type="PCA", groups.n, LLEK=2, cmethod='ward.D', ctype='hierarchical clust',onwhat="Expression",... ) {
+	if(onwhat=="Expression"){
+		tab <- dataObj$z$PCR
+	} 
+	else {
+		print ( paste ( "I work on the FACS data!" ) )
+		tab <- dataObj$FACS
+	}
 	mds.proj <- NULL
 	pr <- NULL
 	system ( 'rm  loadings.png' )
@@ -343,19 +376,26 @@ mds.and.clus <-function(tab,clusterby="raw",mds.type="PCA", groups.n, LLEK=2, cm
 	if ( exists('geneGroups') ) {
 		geneC <- geneGroups$groupID
 	}
-	ret <- clusters ( tab=tab, clusterby=clusterby, mds.proj =  mds.proj, groups.n = groups.n, ctype = ctype, cmethod=cmethod )
+	dataObj$mds.coord <- mds.proj
+	dataObj$geneC <- geneC
+	dataObj <- clusters ( dataObj, onwhat=onwhat, clusterby=clusterby, mds.proj =  mds.proj, groups.n = groups.n, ctype = ctype, cmethod=cmethod )
 	
-	lst <- list(mds.coord=mds.proj,clusters=ret$clusters, hc = ret$hc, geneC= geneC )
-	lst
-	
+	dataObj
 }
 
 ## cclusters calculates all possible clusters on the dataset
 ## supported are hclust cclust and tclust with there respective options
-clusters <- function(tab,clusterby="raw", mds.proj=NULL,groups.n = 3, ctype='hierarchical clust', cmethod='ward.D', tc_restr="eigen", tc_alpha=0.05, tc_nstart=50, tc_iter.max=20, tc_restr.fact=20 ){
+clusters <- function(dataObj,clusterby="raw", mds.proj=NULL,groups.n = 3, ctype='hierarchical clust',onwhat="Expression", cmethod='ward.D', tc_restr="eigen", tc_alpha=0.05, tc_nstart=50, tc_iter.max=20, tc_restr.fact=20 ){
 		## custering	
 	clusters <- NULL
 	hc <- NULL
+	if(onwhat=="Expression"){
+		tab <- dataObj$z$PCR
+	} 
+	else {
+		print ( paste ( "I work on the FACS data!" ) )
+		tab <- dataObj$FACS
+	}
 	if ( exists('userGroups') ) {
 		clusters <- userGroups$groupID
 	}else if(clusterby=="MDS"){
@@ -381,7 +421,11 @@ clusters <- function(tab,clusterby="raw", mds.proj=NULL,groups.n = 3, ctype='hie
 		plot ( hc);
 		dev.off()
 	}
-	list( clusters= clusters, hc=hc )
+	dataObj$clusters <- clusters
+	dataObj$hc <- hc
+#	dataObj <- reorder_on_correlation ( dataObj )
+#	print (cbind ( old= as.vector(dataObj$oldclusters), new=as.vector(dataObj$clusters)))
+	dataObj
 }
 
 difference <- function ( x, obj ) {
@@ -412,7 +456,7 @@ quality_of_fit <- function ( obj ) {
 }
 
 
-plot.violines <- function ( ma, groups.n, clus, boot = 1000) {
+plot.violines <- function ( ma, groups.n, clus, boot = 1000, neg=NULL) {
 	ma <- t(ma)
 	n <- rownames(ma)
 	cols = rainbow( groups.n )
@@ -428,57 +472,67 @@ plot.violines <- function ( ma, groups.n, clus, boot = 1000) {
 		names(lila)[1]= 'x'
 		lila$col= cols
 		lila$main=n[i]
+		lila$neg = neg
+		lila$h = 0.3
+		if ( ! is.null(neg) ){
+			lila$drawRect = FALSE
+		}
 		try(do.call(vioplot,lila), silent=F )
 		dev.off()
+		if ( plotsvg == 1 ) {
+			devSVG( file=paste(n[i],'.svg',sep=''), width=6,height=6)
+			lila$cex.axis=0.5
+			try(do.call(vioplot,lila), silent=F )
+			dev.off()
+		}
 	}
 }
 
 analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='MDS', ctype='hierarchical clust', ...){
 	
+	if ( exists( 'userGroups' )) {
+		userGroups <- checkGrouping(userGroups, obj)
+	}
 	cols = rainbow( groups.n )
-	outt <- NULL
 	
 	if ( is.null(obj$FACS)) {
 		onwhat="Expression"
+	} else if ( ncol(obj$FACS)< 4 ) {
+		onwhat="Expression"
 	}
-	
-	if(onwhat=="Expression"){
-		outt <- mds.and.clus(obj$z$PCR,groups.n = groups.n, cmethod, clusterby=clusterby,ctype=ctype, ...)
-	} 
-	else {
-		print ( paste ( "I work on the FACS data!" ) )
-		outt <- mds.and.clus(obj$FACS,groups.n = groups.n, cmethod, clusterby=clusterby,ctype=ctype, ...)
+	obj <- mds.and.clus(obj,onwhat= onwhat,groups.n = groups.n, cmethod, clusterby=clusterby,ctype=ctype, ...)
+
+	plotcoma(obj)
+	if ( length(which(obj$clusters == 0)) > 0 ){
+		obj$clusters <- obj$clusters + 1
 	}
-	
-	obj$mds.coord <- outt$mds.coord
-	if ( length(which(outt$clusters == 0)) > 0 ){
-		outt$clusters <- outt$clusters + 1
-	}
-	obj$clusters <- outt$clusters
-	obj$colors <- apply( t(col2rgb( cols ) ), 1, paste,collapse=' ')[outt$clusters]
-	obj$hc <- outt$hc
-	obj$geneC <- outt$geneC
-	
+	obj$colors <- apply( t(col2rgb( cols ) ), 1, paste,collapse=' ')[obj$clusters]
+		
 	## plot the mds data
-	try(plotDR( outt$mds.coord[order(outt$clusters),], col=cols, labels=outt$clusters[order(outt$clusters)], cex=par3d('cex'=0.01)),silent=F)
+	try(plotDR( obj$mds.coord[order(obj$clusters),], col=cols, labels=obj$clusters[order(obj$clusters)], cex=par3d('cex'=0.01)),silent=F)
 	try(writeWebGL( width=470, height=470 ),silent=F)
 	png(file='./webGL/MDS_2D.png', width=800,height=800)
-	plotDR( outt$mds.coord[order(outt$clusters),1:2], col=cols, labels=outt$clusters[order(outt$clusters)], cex=par3d('cex'=0.01))
+	plotDR( obj$mds.coord[order(obj$clusters),1:2], col=cols, labels=obj$clusters[order(obj$clusters)], cex=par3d('cex'=0.01))
 	dev.off()
-	save( outt, file='clusters.RData' )
-	
-	write.table (outt$mds.coord[order(outt$clusters),1:2], file = './2D_data.xls' )
-	sample.cols.rgb <-t(col2rgb( cols[outt$clusters[order(outt$clusters)]]))
-	sample.cols.rgb <- cbind(sample.cols.rgb,  colorname = cols[outt$clusters[order(outt$clusters)]] )
-	rownames(sample.cols.rgb) <- rownames(obj$PCR)[order(outt$clusters)]
+	save( obj, file='clusters.RData')
+	write.table (obj$mds.coord[order(obj$clusters),1:2], file = './2D_data.xls' )
+	sample.cols.rgb <-t(col2rgb( cols[obj$clusters[order(obj$clusters)]]))
+	sample.cols.rgb <- cbind(sample.cols.rgb,  colorname = cols[obj$clusters[order(obj$clusters)]] )
+	rownames(sample.cols.rgb) <- rownames(obj$PCR)[order(obj$clusters)]
 	write.table ( sample.cols.rgb , file = './2D_data_color.xls' )
 	write.table (cbind( names = cols, t(col2rgb( cols))), file='./webGL/MDS_2D.png.cols', sep='\\t',  row.names=F,quote=F )
 	
 	## plot the violoines
 	if ( ! is.null(obj$FACS)){
-		plot.violines( obj$FACS, groups.n, clus =  outt$clusters, boot = 1000 )
+		plot.violines( obj$FACS, groups.n, clus =  obj$clusters, boot = 1000 )
 	}
-	plot.violines( obj$z$PCR, groups.n, clus =  outt$clusters, boot = 1000  )
+	if ( zscoredVioplot == 1 ){
+		plot.violines( obj$z$PCR, groups.n, clus =  obj$clusters, boot = 1000  )
+	}
+	else {
+		plot.violines( obj$PCR, groups.n, clus =  obj$clusters, boot = 1000, neg=0  )
+	}
+	
 	obj$quality_of_fit = quality_of_fit(obj)
 #	browser()
 	RowV = TRUE
@@ -509,8 +563,8 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 			hclustfun = function(c){hclust( c, method=cmethod)}
 	), silent=T)
 	
-	try( collapsed_heatmaps (obj, what='PCR', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
-	try( collapsed_heatmaps (obj, what='FACS', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
+#	try( collapsed_heatmaps (obj, what='PCR', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
+#	try( collapsed_heatmaps (obj, what='FACS', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
 	try( PCR.heatmap ( list( data= t(obj$z$PCR), genes = colnames(obj$z$PCR)), 
 				'./PCR', 
 				title='PCR data', 
@@ -527,7 +581,7 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 					ColSideColors=cols[obj$clusters],
 					width=12,
 					height=6, 
-					hc.col= outt$hc,
+					hc.col= obj$hc,
 					margins = c(1,11), 
 					lwid = c( 1,6), lhei=c(1,5),
 					hclustfun = function(c){hclust( c, method=cmethod)}
@@ -539,7 +593,7 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 				ColSideColors=cols[obj$clusters][order(obj$clusters)],
 				width=12,
 				height=6, 
-				hc.col= outt$hc,
+				hc.col= obj$hc,
 				margins = c(1,11), 
 				lwid = c( 1,6), lhei=c(1,5),
 				Colv=F,

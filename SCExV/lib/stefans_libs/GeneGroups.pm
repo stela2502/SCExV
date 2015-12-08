@@ -133,14 +133,13 @@ sub export_R_exclude_samples {
 
 sub export_R {
 	my ( $self, $rObj ) = @_;
-	
 	my $script = "DaTaSeT <- $rObj\$PCR\nif (! is.null( $rObj\$FACS ) ) {  DaTaSeT<- cbind( $rObj\$PCR, $rObj\$FACS )}\n";
 	$rObj = 'DaTaSeT';    
 	$script .=  "userGroups <- data.frame( cellName = rownames($rObj), userInput = rep.int(1, nrow($rObj)), groupID = rep.int(1, nrow($rObj)) )\n";
 	foreach ( $self->__Sets_in_order() ) {
 		$script .= $_->export_R( $self, $rObj, 2 );
 	}
-	$script .= "rm(DaTaSeT)\n";
+	$script .= "userGroups <- checkGrouping( userGroups )\n"."rm(DaTaSeT)\n";
 	return $script;
 }
 

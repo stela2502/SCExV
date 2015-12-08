@@ -27,7 +27,6 @@
 
 [% FOREACH error IN ERROR %]
 <tr><td> [% error  %] </td><tr>
-
 [% END %]
 
 </table>

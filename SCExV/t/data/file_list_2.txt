@@ -8,7 +8,6 @@ Fos.png
 Ccnd1.png
 Ikzf1.png
 PCR Array3.csv
-PCR_color_groups_Heatmap.svg
 Index sort Array2.csv
 Fgd5.png
 Pbx1.png
@@ -38,7 +37,6 @@ analysis.RData
 Index_sort_Array3.csv
 PCR Array1.csv
 pbx3.png
-PCR_Heatmap.svg
 Myc.png
 Mllt3.png
 Trib2.png
@@ -63,7 +61,6 @@ Cdt1.png
 Dntt.png
 trib3.png
 Sfpi.png
-facs_Heatmap.svg
 Cebpa.png
 PCR_color_groups_data4Genesis.xls
 Etv6.png
@@ -126,7 +123,6 @@ Itga2b.png
 clusters.RData
 Lineage.PE.Cy5.A.png
 facs_color_groups_Heatmap.png
-facs_color_groups_Heatmap.svg
 CDK2.png
 CDK6.png
 FSC.H.png

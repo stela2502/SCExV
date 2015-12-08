@@ -14,7 +14,7 @@ use Catalyst::Runtime 5.80;
 #         -Debug: activates the debug mode for very useful log messages
 #   ConfigLoader: will load the configuration from a Config::General file in the
 #                 application's home directory
-# Static::Simple: will serve static files from the application's root
+#  Static::Simple: will serve static files from the application's root
 #                 directory
 
 #	+CatalystX::Profile_SL
@@ -27,11 +27,13 @@ use Catalyst qw/
   Session::State::Cookie
   Session::Store::FastMmap
   FormBuilder
+  StackTrace
+  ErrorCatcher
   /;
 
 extends 'Catalyst';
 
-our $VERSION = '0.60';
+our $VERSION = '0.80';
 
 # Configure the application.
 #
@@ -47,6 +49,10 @@ __PACKAGE__->config(
 	# Disable deprecated behavior needed by old applications
 	#disable_component_resolution_regex_fallback => 1,
 	calcserver => {'ip' => '130.235.249.196', 'subpage' => '/NGS_pipeline/fluidigm/index/', 'ncore' => 32 },
+	'Plugin::ErrorCatcher' => {
+		enable => 1,
+		emit_module => 'HTpcrA::Controller::Error',
+	},
 	randomForest => 0,
 	ncore => 4,
 	enable_catalyst_header => 1,                        # Send X-Catalyst header

@@ -22,16 +22,9 @@ Catalyst Controller.
 
 sub index : Path : Form {
 	my ( $self, $c ) = @_;
-	$c->model('Menu')->Reinit();
 	my $path = $c->session->{'path'};
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
-	unless ( -d $path . 'webGL' ) {
-		$c->res->redirect( $c->uri_for("/analyse/") );
-		$c->detach();
-	}
+	$self->check($c);
+	
 	$self->{'form_array'} = [];
 	my $hash = $self->config_file( $c, 'Pvalues.Configs.txt' );
 	$hash = $self->defined_or_set_to_default( $hash, $self->init_dataset() );
@@ -73,7 +66,9 @@ sub index : Path : Form {
 		$c->model('PValues')->create_script( $c, $hash );
 		
 		$c->model('scrapbook')->init( $path."/Scrapbook/Scrapbook.html" )
-	  ->Add_Table("<h3>P values calculation</h3>\n<p>You can <a href='TABLE_FILE'>download the stat results</a>.</p>\n", $self->path($c)."Summary_Stat_Outfile.xls" );
+	  ->Add_Table("<h3>P values calculation</h3>\n<i>options:"
+		  . $self->options_to_HTML_table($hash)
+		  . "</i>\n<p>You can <a href='TABLE_FILE'>download the stat results</a>.</p>\n", $self->path($c)."Summary_Stat_Outfile.xls" );
 	}
 	if ( -f $path . "Summary_Stat_Outfile.xls" ) {
 		my $data_table = stefans_libs::GeneGroups::R_table->new(

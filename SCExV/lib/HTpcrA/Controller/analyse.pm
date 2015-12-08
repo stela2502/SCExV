@@ -31,6 +31,17 @@ sub update_form {
 	$c->form->name('master');
 	$self->{'form_array'} = [];
 	$hash = $self->defined_or_set_to_default( $hash, $self->init_dataset() );
+	
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment'  => 'Automatic Re-Order',
+			'name'     => 'automaticReorder',
+			'options'  =>  { '0' => 'No', '1' => 'Yes' },
+			'value'    => $hash->{'automaticReorder'} || 1,
+			'required' => 1,
+		}
+	);		
 	push(
 		@{ $self->{'form_array'} },
 		{
@@ -38,6 +49,26 @@ sub update_form {
 			'name'     => 'cluster_on',
 			'options'  => [ 'Data values', 'MDS' ],
 			'value'    => $hash->{'cluster_on'},
+			'required' => 1,
+		}
+	);
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment' => 'Create svg figures',
+			'name'    => 'plotsvg',
+			'options' => { '0' => 'No', '1' => 'Yes' },
+			'value' => $hash->{'plotsvg'} ||= 0,
+			'required' => 1,
+		}
+	);
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment' => 'Vioplots only expressing cells',
+			'name'    => 'zscoredVioplot',
+			'options' => { '0' => 'No', '1' => 'Yes' },
+			'value' => $hash->{'zscoredVioplot'} ||= 1,
 			'required' => 1,
 		}
 	);
@@ -79,8 +110,9 @@ sub update_form {
 	push(
 		@{ $self->{'form_array'} },
 		{
-			'comment'  => 'randomForest gene groups',
-			'name'     => 'randomForest',
+			'comment' => 'randomForest gene groups',
+			'name'    => 'randomForest',
+			'value'   => $hash->{'randomForest'} ||= 10,
 		}
 	);
 	push(
@@ -128,7 +160,8 @@ sub update_form {
 			,    ## you will break the R_script changing this text!
 			'value'    => $hash->{'UG'},
 			'required' => 0,
-			'jsclick'  => "form_fun_match( 'master', 'UG', 'randomForest', 'randomForest')",
+			'jsclick' =>
+			  "form_fun_match( 'master', 'UG', 'randomForest', 'randomForest')",
 		}
 	);
 	closedir(DIR);
@@ -173,10 +206,6 @@ sub update_form {
 
 #$c->stash->{'formNames'} = [map { $_->{'name'} } @{$self->{'form_array'}}[2..(@{$self->{'form_array'}}-1)] ];
 	$c->form->method('post');
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
 	foreach ( @{ $self->{'form_array'} } ) {
 		$c->form->field( %{$_} );
 	}
@@ -218,13 +247,27 @@ sub fileok : Local : Form {
 	$c->stash->{'template'} = 'message.tt2';
 }
 
+
+sub init_dataset {
+	return {
+		'cluster_amount' => 3,
+		'cluster_alg'    => 'ward.D',
+		'K'              => 2,
+		'cluster_by'     => 'Expression',
+		'mds_alg'        => 'PCA',
+		'cluster_on'     => 'MDS',
+		'UG'             => 'none',
+		'randomForest'   => 10,
+		'plotsvg'        => 0,
+		'zscoredVioplot' => 1,
+		'cluster_type'   => 'hierarchical clust',
+	};
+}
+
 sub run_first : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->path($c);
-	unless ( -f $path . "/norm_data.RData" ) {
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
+	$self->check($c,'upload');
 	## I need to write the first config file? NO!
 	my $dataset =
 	  $self->defined_or_set_to_default( { 'UG' => 'Group by plateID' },
@@ -248,33 +291,11 @@ sub run_first : Local : Form {
 	$c->detach();
 }
 
-sub init_dataset {
-	return {
-		'cluster_amount' => 3,
-		'cluster_alg'    => 'ward.D',
-		'K'              => 2,
-		'cluster_by'     => 'Expression',
-		'mds_alg'        => 'PCA',
-		'cluster_on'     => 'MDS',
-		'UG'             => 'none',
-		'cluster_type'   => 'hierarchical clust',
-	};
-}
-
 sub re_run : Local {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->path($c);
-	unless ( -f $path . "/norm_data.RData" ) {
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
-	my $dataset;
-	if ( -f "$path/rscript.Configs.txt" ) {
-		$dataset = $self->config_file( $c, 'rscript.Configs.txt' );
-	}
-	else {
-		$dataset = $self->init_dataset();
-	}
+	$self->check($c,'upload');
+	my $dataset = $self->defined_or_set_to_default( $self->config_file( $c, 'rscript.Configs.txt' ), $self->init_dataset() );
 	$args[0] ||= '';
 	if ( -f $path . "/" . $args[0] ) {
 		$dataset->{'UG'} = $args[0];
@@ -291,6 +312,8 @@ sub re_run : Local {
 		@{ $data->{'Header'} }[ 1, 2 ],
 		$data->new( { 'filename' => $path . '2D_data_color.xls' } )
 	);
+	$self->colors_Hex( $c, $path );
+	$c->session->{'first_run'} = 1;
 	$c->res->redirect( $c->uri_for("/analyse/index/") );
 	$c->detach();
 }
@@ -298,17 +321,13 @@ sub re_run : Local {
 sub index : Path : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->path($c);
-	unless ( -f $path . "/norm_data.RData" ) {
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
+	$self->check($c,'upload');
 	if ( -f $path . "RandomForest_create_groupings.R" ) {
 		chdir($path);
 		system(
 '/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- RandomForest_create_groupings.R > R.run.log "'
 		);
 	}
-	$c->model('Menu')->Reinit();
 	$c->stash->{'figure_2d'} =
 "<h1> The analysis section</h1>\n<p>Here you can analyse your uploaded data using the options on the left side.</p>";
 	$self->update_form($c);
@@ -349,7 +368,7 @@ sub index : Path : Form {
 
 #my $tmp = root::get_hashEntries_as_string( $dataset , 3, "why not remove some samples?? before conversion");
 				my ( $xaxis, $yaxis ) =
-				  $data->axies( @{ $data->{'header'} }[ 1, 2 ] );
+				  $data->axies( @{ $data->{'header'} }[ 1, 2 ] , GD::Image->new( 10,10) );
 				foreach ( 'x1', 'x2' ) {
 					$dataset->{$_} =
 					  $xaxis->pix2value( $dataset->{$_} * 2 );   ## html scaling
@@ -407,8 +426,7 @@ sub index : Path : Form {
 			$c->detach();
 		}
 	}
-
-	if ( -d $path.'webGL' ) {
+	if ( -d $path . 'webGL' ) {
 		my $path = $c->session_path();
 		if ( -f $path . "R.error" ) {
 			open( IN, "<$path" . "R.error" );
@@ -432,15 +450,13 @@ sub index : Path : Form {
 		  "<h3>Show expression for </h3>" . $c->stash->{'figure_2d'};
 	}
 	$c->form->type('TT2');
-
-#$c->form->template({ type => 'TT2', 'template' => 'root/src/form/analysis.tt2', variable => 'form' });
 	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/analysis.tt2' );
 	$c->stash->{'template'} = 'analyse.tt2';
 }
 
 sub R_script {
 	my ( $self, $c, $dataset ) = @_;    #the dataset created from the input form
-	$dataset->{'K'} |= 2;
+	$dataset->{'K'} ||= 2;
 	$dataset->{'rad'} =~ s/,/./g if ( defined $dataset->{'rad'} );
 
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {
@@ -459,10 +475,14 @@ sub R_script {
 	## init script
 	my $script =
 	    "source ('libs/Tool_Plot.R')\n"
+	  .  "source ('libs/Tool_Coexpression.R')\n"
 	  . "load( 'norm_data.RData')\n"
 	  . "source ('libs/Tool_grouping.R')\n";
 	if ( -f $path . "Gene_grouping.randomForest.txt" ) {
-		$script .= "source ('Gene_grouping.randomForest.txt')\n";
+		$script .= "source ('libs/Tool_RandomForest.R')\n"
+		  . "load('RandomForestdistRFobject_genes.RData')\n"
+		  . "createGeneGroups_randomForest (data.filtered, $dataset->{'randomForest'})\n"
+		  . "source ('Gene_grouping.randomForest.txt')\n";
 	}
 	if ( -f $path . 'userDefGrouping.data'
 		&& $dataset->{'UG'} eq "Use my grouping" )
@@ -473,7 +493,7 @@ sub R_script {
 	}
 	elsif ( $dataset->{'UG'} eq "Group by plateID" ) {
 		$script .=
-		    "userGroups <- list(groupID = data.filtered\$ArrayID ) \n "
+		    "userGroups <- data.frame(cellName = rownames(data.filtered\$PCR), groupID = data.filtered\$ArrayID ) \n "
 		  . "groups.n <-length (levels(as.factor(userGroups\$groupID) ))\n ";
 	}
 	elsif ( -f $path . $dataset->{'UG'} ) {    ## an expression based grouping!
@@ -485,10 +505,12 @@ sub R_script {
 	}
 
 	$script .=
-"onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
+	    "plotsvg = $dataset->{'plotsvg'}\n"
+	  . "zscoredVioplot = $dataset->{'zscoredVioplot'}\n"
+	  . "onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
 	  . " onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
 	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "
-	  . " ctype= '$dataset->{'cluster_type'}' )\n"
+	  . " ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot)\n"
 	  . "\nsave( data, file='analysis.RData' )\n\n";
 
 	## now lets identify the most interesting genes:
@@ -528,11 +550,11 @@ sub R_script {
 	print RS2 "options(rgl.useNULL=TRUE)\n"
 	  . "library(ks)\n"
 	  . "load( 'clusters.RData' )\n"
-	  . "usable <- is.na(match( outt\$clusters, which(table(as.factor(outt\$clusters)) < 4 ) )) == T\n"
-	  . "use <- outt\n"
-	  . "use\$clusters <- outt\$clusters[usable]\n"
-	  . "use\$mds.coord <- outt\$mds.coord[usable,]\n"
-	  . "cols <- rainbow(max(as.numeric(outt\$clusters)))\n"
+	  . "usable <- is.na(match( obj\$clusters, which(table(as.factor(obj\$clusters)) < 4 ) )) == T\n"
+	  . "use <- obj\n"
+	  . "use\$clusters <- obj\$clusters[usable]\n"
+	  . "use\$mds.coord <- obj\$mds.coord[usable,]\n"
+	  . "cols <- rainbow(max(as.numeric(obj\$clusters)))\n"
 	  . "H <- Hkda( use\$mds.coord, use\$clusters, bw='plugin')\n"
 	  . "kda.fhat <- kda( use\$mds.coord, use\$clusters,Hs=H, compute.cont=TRUE)\n"
 	  . "try(plot(kda.fhat, cex=par3d('cex'=0.01), colors = cols[as.numeric(names(table(use\$clusters)))] ),silent=F)\n"
@@ -543,7 +565,7 @@ sub R_script {
 '/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- densityWebGL.R >> R.run.log"'
 	);
 	$self->{'webGL'} = "$path/webGL/index.html";
-
+	$self->Coexpression_R_script( $path );
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {
 		## color the arrays by group color!
 		$c->session->{'groupbyplate'} = 1;
@@ -558,6 +580,25 @@ sub R_script {
 		  . "</i>\n" );
 	return "$path/webGL/index.html";
 
+}
+
+sub Coexpression_R_script {
+	my ( $self, $path ) =@_;
+	## create the corexpression analysis script and start that - do not wait for it to finish!
+	## The file should only be available in the downloaded zip file. Hence I probably should wait for it in the download section....
+	## first rm the old outfile!!!
+	unlink( $path.'Coexpression_4_Cytoscape.txt' ) if ( -f  $path.'Coexpression_4_Cytoscape.txt' );
+	## read in the analzed data!
+	## call function coexpressGenes( dataObj ) and write the returned table into the previousely deleted file using R
+	open ( OUT, ">".$path."Coexpression.R") or Carp::confess( $! );
+	print OUT "source('libs/Tool_Coexpression.R')\nload('analysis.RData')\n"
+	."t <- coexpressGenes(data)\n"
+	."write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')";
+	close ( OUT);
+	system(
+'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- Coexpression.R >> R.run.log" &'
+	);
+	return 1;
 }
 
 sub md5_table {
@@ -584,24 +625,24 @@ sub md5_table {
 
 sub Javascript {
 	my ( $self, $c ) = @_;
-	return $self->Script( $c, 
-	    '<link rel="stylesheet" type="text/css" href="'
-	  . $c->uri_for('/css/imgareaselect-default.css') . '" />' . "\n"
-	  . '<script type="text/javascript" src="'
-	  . $c->uri_for('/scripts/jquery.min.js')
-	  . '"></script>' . "\n"
-	  . '<script type="text/javascript" src="'
-	  . $c->uri_for('/scripts/jquery.imgareaselect.pack.js')
-	  . '"></script>' . "\n"
-	  . '<script type="text/javascript" src="'
-	  . $c->uri_for('/scripts/jquery.bridget.js') . '"'
-	  . "></script>\n"
-	  . '<script type="text/javascript" src="'
-	  . $c->uri_for('/scripts/figures.js')
-	  . '"></script>'."\n"
-	  . '<script type="text/javascript" src="'
-	  . $c->uri_for('/scripts/analysis_index.js') . '"'
-	  . "></script>\n" );
+	return $self->Script( $c,
+		    '<link rel="stylesheet" type="text/css" href="'
+		  . $c->uri_for('/css/imgareaselect-default.css') . '" />' . "\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/jquery.min.js')
+		  . '"></script>' . "\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/jquery.imgareaselect.pack.js')
+		  . '"></script>' . "\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/jquery.bridget.js') . '"'
+		  . "></script>\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/figures.js')
+		  . '"></script>' . "\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/analysis_index.js') . '"'
+		  . "></script>\n" );
 }
 
 sub R_process_data_part {

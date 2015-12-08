@@ -22,13 +22,13 @@
 
 </td><td id='tab4050'>
 
-<h1> Welcome to the Single Cell expression Visualiser.</h1>
+<h1> Welcome to the Single Cell Expression Visualiser.</h1>
 
 <h3>Supported browsers: </br>
-SCexV uses WebGL which is supported by Firefox and Chrome, less so by Internet Explorer,
-and not at all by Safari. We therefore recommend that you use Firefox or Chrome to get the full visualisaton capabilities of SCexV.
+SCExV uses WebGL which is supported by Firefox and Chrome, less so by Internet Explorer,
+and not at all by Safari. We therefore recommend that you use Firefox or Chrome to get the full visualisaton capabilities of SCExV.
 </h3>
-<p>SCexV is separated into two modules:
+<p>SCExV is separated into two modules:
 <ol type="A">
 <li><a href="[% c.uri_for( '/files/upload/' ) %]">File upload</a> or 
 <a href="[% c.uri_for( '/files/start_from_zip_file/' ) %]">upload a (recently) saved zip file</a>
@@ -88,6 +88,10 @@ expression data via index sorting. You can either:<p>
 <ul><li><a href="[% c.uri_for( '/files/use_example_data/' ) %]">start a new session using this data</a></li>
 <li>or <a href="[% c.uri_for( '/files/download_example_data/' ) %]">download this data and use it as yours</a></li>
 </ul>
+
+<h1>Source</h1>
+
+<p>This software is open source. You can get a copy at <a href="https://github.com/StemSysBio/SCExV/">GitHub</a>.</p>
 
 <h1>Instructional videos</h1>
 

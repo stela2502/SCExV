@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <includepath>
-  <includepathentry path="${resource_loc:/HTpcrA-0.60/lib}" />
+  <includepathentry path="${resource_loc:/SCExV/lib}" />
+  <includepathentry path="/home/slang/git_Projects/Stefans_Libs_Essentials/Stefans_Libs_Essentials/lib" />
 </includepath>
 

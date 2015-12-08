@@ -84,7 +84,7 @@ sub helpString {
    -server_user   :the system user that needs to have access to all files
    -web_root      :the root of the web server - css and jscript files are installed there
                    default to '/var/www/html/'
-   -options       :additional option for the SCexV server like
+   -options       :additional option for the SCExV server like
                    randomForest 1 ncore 4 
    -help   :print this help
    -debug  :verbose output

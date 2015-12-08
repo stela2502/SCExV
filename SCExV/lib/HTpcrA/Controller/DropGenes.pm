@@ -30,15 +30,7 @@ sub index : Path : Form {
 	my ( $self, $c, @args ) = @_;
 	#my $hash = $self->config_file( $c, 'dropping_samples.txt' );
 	my $path = $c->session_path();
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
-	unless ( -f $path . 'merged_data_Table.xls' ) {
-		$c->res->redirect( $c->uri_for("/analyse/") );
-		$c->detach();
-	}
-	$c->model('Menu')->Reinit();
+	$self->check($c);
 	
 	$self->slurp_Heatmaps( $c, $path );
 	

@@ -84,13 +84,13 @@ sub renew_rlib : Local {
 sub download_example_data : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path     = $self->path($c);
-	my $filename = "$path../../../example_data/SCexV_example_data.zip";
+	my $filename = "$path../../../example_data/SCExV_example_data.zip";
 	open( OUT, "<$filename" )
 	  or Carp::confess(
 "Sorry, but I could not access the file '$filename' on the server!\n$!\n"
 	  );
 	$c->res->header( 'Content-Disposition',
-		qq[attachment; filename="SCexV_example_data.zip"] );
+		qq[attachment; filename="SCExV_example_data.zip"] );
 	while ( defined( my $line = <OUT> ) ) {
 		$c->res->write($line);
 	}
@@ -239,7 +239,8 @@ sub update_form {
 			'options'  => $self->{'select_options'},
 			'required' => 0,
 			'multiple' => 1,
-			'jsclick' => 'if ( userInformedOnNegControls===0) {alert("WARNING   All cells expressing a neg control gene will be dropped!   WARNING");userInformedOnNegControls=1;}',
+			'jsclick' =>
+'if ( userInformedOnNegControls===0) {alert("WARNING: All cells expressing a negative control gene will be dropped.");userInformedOnNegControls=1;}',
 		}
 	);
 
@@ -334,7 +335,10 @@ sub control_page : Local : Form {
 		)
 	);
 
-	$self->Script( $c, '<script type="text/javascript" src="'.$c->uri_for('/scripts/figures.js').'"></script>');
+	$self->Script( $c,
+		    '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/figures.js')
+		  . '"></script>' );
 
 	$c->stash->{'template'} = 'control_page.tt2';
 }
@@ -387,18 +391,54 @@ sub upload : Local : Form {
 			$self->config_file( $c, 'Preprocess.Configs.txt', $dataset );
 			$self->file_upload( $c, $dataset );
 			$self->R_script( $c, $dataset );
-
-			if ( -f $path . "/R_file_read_error.txt" ) {
-				open( IN, "<" . $path . "/R_file_read_error.txt" );
-				$c->stash->{ERROR} = [<IN>];
-				while (<IN>) {
-					if ( $_ =~ m/file ..\/(.+) not readable / ) {
-						$c->stash->{'message'} .= $_;
-						$self->remove_file_from_cockie( $c, $1 );
-					}
-					$c->stash->{'message'} .= $_;
+			unless ( -f $path . "../norm_data.RData" ) {
+				if ( defined @{ $dataset->{'negControllGenes'} }[0] && length(@{ $dataset->{'negControllGenes'} }[0]) > 0 ) {
+					my $spath = $c->session_path();
+					open( OUT, ">" . $spath . "Error_system_message.txt" );
+					print OUT
+"<h3>The file upload did not produce a usable dataset</h3> 
+You have selected at least one negative control gene which is likely have lead to the dropping of all cells.  
+Please re-upload your files without selecting negative controle gene(s).";
+					close OUT;
+					open( OUT, ">" . $spath . "back_to.txt" );
+					print OUT
+					  '/files/upload/';    ## uri_for call on the error page
+					close(OUT);
+					$c->res->redirect( $c->uri_for("/error/error/") );
+					$c->detach();
 				}
-				close(IN);
+				elsif ( -f $path . "/R_file_read_error.txt" ) {
+					open( IN, "<" . $path . "/R_file_read_error.txt" );
+					$c->stash->{ERROR} = [<IN>];
+					while (<IN>) {
+						if ( $_ =~ m/file ..\/(.+) not readable / ) {
+							$c->stash->{'message'} .= $_;
+							$self->remove_file_from_cockie( $c, $1 );
+						}
+						$c->stash->{'message'} .= $_;
+					}
+					close(IN);
+				}
+				else {
+					## this does mean, that no file could be uploaded
+					$c->stash->{'ERROR'} =
+					    "Sorry, an error in the file upload occured. "
+					  . "Please check if your files are supported, or try loading each one individually "
+					  . "to identify the problematic file "
+					  . "<a href='#' onclick=\"MyWindow=window.open('"
+					  . $c->uri_for('/help/index/files/upload/PCRTable/')
+					  . "','MyWindow', 'width=500,heig‌​ht=500'); return false;\" >"
+					  . "<img style='border:0px;' src='/static/images/Questions.gif' width='20px'></a>"
+					  . ". <a href='"
+					  . $c->uri_for("/error/error")
+					  . "'>Full error message...</a>";
+					$self->init_file_cookie( $c, 1 );
+					$self->file_upload($c);
+					my $spath = $c->session_path();
+					system( "cp $path/Preprocess.Rout "
+						  . $spath
+						  . "Error_system_message.txt" );
+				}
 			}
 			$self->update_form($c);
 		}
@@ -410,7 +450,13 @@ sub upload : Local : Form {
 
 	$self->update_form($c);
 
-	$self->Script( $c, '<script type="text/javascript" src="'.$c->uri_for('/scripts/figures.js').'"></script>'."\n".'<script type="text/javascript" src="'.$c->uri_for('/scripts/upload.js').'"></script>');
+	$self->Script( $c,
+		    '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/figures.js')
+		  . '"></script>' . "\n"
+		  . '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/upload.js')
+		  . '"></script>' );
 
 	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/upload.tt2' );
 
@@ -425,10 +471,6 @@ sub remove_file_from_cockie {
 			@{ $session_hash->{$filetype} }[$_]->{'filename'} eq $filename
 		} 0 .. @{ $session_hash->{$filetype} } - 1;
 		my $kicked = splice( @{ $session_hash->{$filetype} }, $index, 1 );
-
-#		Carp::confess ( "my $kicked = splice( @{$session_hash->{$filetype}}, $index,1 ) ;" );
-#		$c->session()->{$filetype} = $session_hash->{$filetype};
-#		Carp::confess( "I tried to remove the file '$filename' at position $index in this data structure:\n". root->print_perl_var_def($c->session()). "I tried to pus this data structure into the sesion hash: ".root->print_perl_var_def( $session_hash->{$filetype}). " and that is what the splice removed from the array:".root->print_perl_var_def( $kicked)  );
 	}
 	return 1;
 }
@@ -461,9 +503,6 @@ sub R_script {
 			}
 		}
 	}
-	$dataset->{'negContr'} = []
-	  unless ( ref( $dataset->{'negContr'} ) eq "ARRAY" );
-	$dataset->{'negControllGenes'} = [];
 	$dataset->{'negControllGenes'} =
 	  [ map { $_ =~ m/preprocess\/(.+).png/; $1; }
 		  @{ $dataset->{'negContr'} } ];
@@ -611,10 +650,13 @@ sub message_form {
 	$c->form->medthod('post');
 	$c->form->jsfunc('submitForm();');
 
-	$self->Script( $c, '<script language="JavaScript" type="text/javascript" src="'
-	  . $c->uri_for("/rte/") . 'html2xhtml.min.js"></script>
+	$self->Script(
+		$c,
+		'<script language="JavaScript" type="text/javascript" src="'
+		  . $c->uri_for("/rte/")
+		  . 'html2xhtml.min.js"></script>
     <script language="JavaScript" type="text/javascript" src="'
-	  . $c->uri_for("/rte/") . 'richtext_compressed.js"></script>
+		  . $c->uri_for("/rte/") . 'richtext_compressed.js"></script>
 	
 	<script language="JavaScript" type="text/javascript">
 <!--
@@ -629,9 +671,9 @@ function submitForm() {
 
 //Usage: initRTE(imagesPath, includesPath, cssFile, genXHTML, encHTML)
 initRTE("'
-	  . $c->uri_for("/rte/images/") . '", "'
-	  . $c->uri_for("/rte/")
-	  . '", "", true);
+		  . $c->uri_for("/rte/images/") . '", "'
+		  . $c->uri_for("/rte/")
+		  . '", "", true);
 
 function buildForm() {
 	
@@ -651,9 +693,10 @@ text.build();
 </script>
 <noscript><div id="content"><p><b><span style="color:red">Javascript must be enabled to use this form.</span></b></p></div></noscript>
 	'
-	  . "<SCRIPT LANGUAGE=\"JavaScript\"><!--\n"
-	  . "setTimeout('document.test.submit()',5000);\n"
-	  . "//--></SCRIPT>\n");
+		  . "<SCRIPT LANGUAGE=\"JavaScript\"><!--\n"
+		  . "setTimeout('document.test.submit()',5000);\n"
+		  . "//--></SCRIPT>\n"
+	);
 
 	foreach ( @{ $self->{'form_array'} } ) {
 		$c->form->field( %{$_} );
@@ -666,10 +709,24 @@ sub report_error : Local : Form {
 	$self->message_form($c);
 	$c->model('Menu')->Reinit();
 	$c->cookie_check();
+	$self->{'form_array'} = [];
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'name'  => 'text',
+			'type'  => 'textarea',
+			'cols'  => 80,
+			'rows'  => 20,
+			'value' => '',
+		}
+	);
+	foreach ( @{ $self->{'form_array'} } ) {
+		$c->form->field( %{$_} );
+	}
 	if ( $c->form->submitted && $c->form->validate ) {
 		my $dataset = $self->__process_returned_form($c);
 		if ( $dataset->{'text'} =~ m/\w/ ) {
-			open( OUT, ">", $c->session_path() . "ErrorLog.html" );
+			open( OUT, ">", $c->session_path() . "ErrorLog.txt" );
 			print OUT $dataset->{'text'};
 			close(OUT);
 		}
@@ -681,11 +738,17 @@ sub report_error : Local : Form {
 			  . "$filename "
 			  . $c->session_path()
 			  . "../" );
+		if ( -f '/usr/local/bin/report_SCExV_error.pl' ) {
+			system( '/usr/local/bin/report_SCExV_error.pl -error_file '
+				  . $c->session_path()
+				  . "../$filename" );
+		}
 		$c->res->redirect( $c->uri_for("/files/upload/") );
 		$c->detach();
 	}
-	$c->form->template(
-		$c->path_to( 'root', 'src' ) . '/form/MakeLabBookEntry.tt2' );
+
+	#$c->form->template(
+	#	$c->path_to( 'root', 'src' ) . '/form/MakeLabBookEntry.tt2' );
 	$c->stash->{'template'} = 'report_error.tt2';
 }
 
@@ -711,6 +774,7 @@ sub as_zip_file : Local : Form {
 		$self->session_file( $c, 'save' );
 		$dataset->{'filename'} .= ".zip"
 		  unless ( $dataset->{'filename'} =~ m/\.zip$/ );
+		$dataset->{'filename'} =~ s/\s+/_/g;
 		my $filename = $dataset->{'filename'};
 		system(
 			"cd " . $path . "\nrm *.zip\nzip -9 -r '$filename' * .internals" );

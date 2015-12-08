@@ -129,3 +129,12 @@ make
 semodule -i httpd_allow_xserver_port.pp
 
 
+Further configuration:
+
+The server contains an inbuilt error reporting function. Whenever a user identifies an error he/she should use the Menu->'Go To'->'Error Report' page to report this error.
+The page will ask the user about the last step taken and produce a snapshot error report.
+
+The server has no inbuilt reporting system, but checks for a executable in /usr/local/bin named 'report_SCexV_error.pl'.
+The server will call this script with the -error_file option giving the absolute location on the server.
+Implement your own error reporting functionality for your server installation if you want to get the error report.
+Otherwise you can periodically check the <server path>/tmp/ path for new Error_report_*.zip files.

@@ -1,0 +1,26 @@
+
+<tmpl_var form-start>
+
+<span id="formName"><tmpl_var comment-boot></span>
+<a href="#" onClick="MyWindow=window.open( '/help/index/pvalues/index/boot/' ,'MyWindow',
+ 'width=500,heig<200c><200b>ht=500'); return false;" id="analyse" name="analyse">
+        <img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a>
+</BR>
+<span id="formField"><tmpl_var field-boot></span></BR>
+
+<!--<span id="formName"><tmpl_var comment-lin_lang_file></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/pvalues/index/lin_lang_file/','MyWindow',
+ 'width=500,heig<200c><200b>ht=500'); return false;" id="analyse" name="analyse">
+        <img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a>
+</BR>-->
+<span id="formField"><tmpl_var field-lin_lang_file></span></BR>
+
+<!--<span id="formName"><tmpl_var comment-sca_ofile></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/pvalues/index/sca_ofile/','MyWindow',
+ 'width=500,heig<200c><200b>ht=500'); return false;" id="analyse" name="analyse">
+        <img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a>
+</BR>-->
+<span id="formField"><tmpl_var field-sca_ofile></span></BR>
+
+<tmpl_var form-submit>
+<tmpl_var form-end>

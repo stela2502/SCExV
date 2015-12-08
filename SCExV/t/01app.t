@@ -47,7 +47,6 @@ $mech->content() =~
   m!http://localhost/files/index([/\w\-\.\d]+)/preprocess/Cdkn1a.png!;
 my $path = $1;
 ok( -d $path, "the data path has been created" );
-die;
 
 my $drop_path = 1;
 my ( $md5, $type );
@@ -193,17 +192,16 @@ if ( $check->{'analysis'} ) {    ## in depth check of the analysis functions
 	&test_analysis($type);
 
 	#############################
-	$type = 'default values';
+	$type = 'default values +svg';
 	#############################
 	$mech->field( 'cluster_type',   'hierarchical clust' );
 	$mech->field( 'cluster_by',     'Expression' );
 	$mech->field( 'cluster_on',     'MDS' );
 	$mech->field( 'cluster_amount', 3 );
+	$mech->field( 'plotsvg', '1');
 	$mech->click_button( value => 'Run Analysis' );
-	&test_analysis($type);
-
-	##todo I need to test the 2D sample removal tool!
-	warn "I need to test the actually broken 2D sample removal tool!\n";
+	&test_analysis($type, "PCR_color_groups_Heatmap.svg",  "PCR_Heatmap.svg",
+			"facs_color_groups_Heatmap.svg", "facs_Heatmap.svg");
 }
 
 if ( $check->{'exclude cells'} ) {
@@ -237,9 +235,10 @@ if ( $check->{'exclude genes'} ) {
 	$mech->field( 'Genes', [ 'Gapdh', 'FSC.A', 'FSC.H', 'FSC.W' ] );
 	$mech->click_button( value => 'Submit' );
 	&test_analysis($type);
+	$drop_path = 1;
 	foreach ( 'Gapdh', 'FSC.A', 'FSC.H', 'FSC.W' ) {
-		ok( !-f $path . $_ . ".png",
-			"file ' $path$_.png' does not exist any longer!" )
+		ok( !-f $path ."/" . $_ . ".png",
+			"file ' $path/$_.png' does not exist any longer!" )
 		  or $drop_path = 0;
 	}
 	&print_last_page("some genes were not removed from the analysis!")
@@ -365,7 +364,7 @@ sub test_analysis {
 		, ## FACS data in 6 samples is random and therefore a problem in reproducability!
 		'cluster_on Expression 2 groups kmeans' =>
 		  'no check',    ## kmeans is not 100% reproducable either!
-		'default values'           => 'no check',
+		'default values +svg'           => 'no check',
 		'cluster_on FACS 3 groups' => [
 			'kU+JSZCyFtObwYgZdY8tEg', '7zpNExkKG4viKAb2RpP5sQ',
 			'CAFJ/8CFMc6Wz3VzD92TJw'
@@ -401,8 +400,8 @@ sub test_analysis {
 		$tmp_fail = 0;
 		foreach (
 			"Lineage.PE.Cy5.A.png",          'Ebf1.png',
-			"PCR_color_groups_Heatmap.svg",  "PCR_Heatmap.svg",
-			"facs_color_groups_Heatmap.svg", "facs_Heatmap.svg"
+			"PCR_color_groups_Heatmap.png",  "PCR_Heatmap.png",
+			"facs_color_groups_Heatmap.png", "facs_Heatmap.png"
 		  )
 		{
 			unless ( ok( -f $path . "/" . $_, "$str: file ' $path/$_' exists" ) ){
