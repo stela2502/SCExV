@@ -79,7 +79,7 @@ read.PCR <- function(fname,use_pass_fail=T){
 	if ( ncol(test) == 0 ){
 		options(show.error.messages = FALSE)
 		test <- matrix(ncol=0,nrow=0)
-		try (test <- read.delim(fname,header=T,sep=,','))
+		try (test <- read.delim(fname,header=T,sep=','))
 		options(show.error.messages = TRUE)
 	}
 	if ( ncol(test) > 1 ){
@@ -91,7 +91,7 @@ read.PCR <- function(fname,use_pass_fail=T){
 	else if(length(av)>0 && length(line.start)!= 0 ){
 		
 		
-		tab <- read.delim(fname,skip=(line.start),header=F,sep=",")#,col.names=c('ID','Name','Type','rConc','Name.1','Type.1','Value','Quality','Call','Threshold','Comments', 'somethingelse','a','b'))
+		tab <- read.delim(fname,skip=(line.start),header=F,sep=",")
 		colnames(tab) <- make.names(paste( unlist(strsplit(top20[line.start-1],',')), unlist(strsplit(top20[line.start],',') ), sep='_' ),unique=T)
 		#
 		#browser()

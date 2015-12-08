@@ -193,7 +193,7 @@ PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, 
 vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL, 
 		horizontal = FALSE, col = 'magenta', border = 'black', lty = 1, 
 		lwd = 1, rectCol = 'black', colMed = 'white', pchMed = 19, 
-		at, add = FALSE, wex = 1, drawRect = TRUE, main=NULL, cex.axis=1) 
+		at, add = FALSE, wex = 1, drawRect = TRUE, main=NULL, cex.axis=1, neg=NULL) 
 {
 	datas <- list(x, ...)
 	n <- length(datas)
@@ -213,7 +213,11 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 	names.2 <- NULL
 	for (i in 1:n) {
 		data <- datas[[i]][ is.na(datas[[i]]) ==F ]
-		names.2 <- c ( names.2, paste( length(data),"/",length(datas[[i]]),sep='') )
+		if ( ! is.null(neg)) {
+			names.2 <- c ( names.2, paste( length(data),"/",length(which( datas[[i]] != neg )),sep='') )
+		}else {
+			names.2 <- c ( names.2, paste( length(data),"/",length(datas[[i]]),sep='') )
+		}
 		if ( length(data) == 0) {
 			data <- c(0)
 		}
@@ -284,6 +288,15 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 				rect(at[i] - boxwidth/2, q1[i], at[i] + boxwidth/2, 
 						q3[i], col = rectCol)
 				points(at[i], med[i], pch = pchMed, col = colMed)
+			}
+			else{
+				lines(at[c(i, i)], c(lower[i], upper[i]), lwd = lwd, 
+						lty = lty)
+				lines(c(at[i]- boxwidth/2, at[i] + boxwidth/2), c(lower[i], lower[i]), lwd = lwd, 
+						lty = lty)
+				lines( c(at[i]- boxwidth/2, at[i] + boxwidth/2), c(upper[i], upper[i]), lwd = lwd, 
+						lty = lty)
+				points(at[i], med[i], pch = pchMed, col = colMed, cex=2)
 			}
 		}
 		
@@ -443,7 +456,7 @@ quality_of_fit <- function ( obj ) {
 }
 
 
-plot.violines <- function ( ma, groups.n, clus, boot = 1000) {
+plot.violines <- function ( ma, groups.n, clus, boot = 1000, neg=NULL) {
 	ma <- t(ma)
 	n <- rownames(ma)
 	cols = rainbow( groups.n )
@@ -459,6 +472,11 @@ plot.violines <- function ( ma, groups.n, clus, boot = 1000) {
 		names(lila)[1]= 'x'
 		lila$col= cols
 		lila$main=n[i]
+		lila$neg = neg
+		lila$h = 0.3
+		if ( ! is.null(neg) ){
+			lila$drawRect = FALSE
+		}
 		try(do.call(vioplot,lila), silent=F )
 		dev.off()
 		if ( plotsvg == 1 ) {
@@ -508,7 +526,13 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 	if ( ! is.null(obj$FACS)){
 		plot.violines( obj$FACS, groups.n, clus =  obj$clusters, boot = 1000 )
 	}
-	plot.violines( obj$z$PCR, groups.n, clus =  obj$clusters, boot = 1000  )
+	if ( zscoredVioplot == 1 ){
+		plot.violines( obj$z$PCR, groups.n, clus =  obj$clusters, boot = 1000  )
+	}
+	else {
+		plot.violines( obj$PCR, groups.n, clus =  obj$clusters, boot = 1000, neg=0  )
+	}
+	
 	obj$quality_of_fit = quality_of_fit(obj)
 #	browser()
 	RowV = TRUE

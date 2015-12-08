@@ -1,6 +1,47 @@
 #   source ('~/git_Projects/SCexV/SCExV/root/R_lib/Tool_Coexpression.R')
 
 library(corrplot)
+library(reshape2)
+
+coexpressGenes <- function ( dataObj ) {
+	
+	cor.funct <- function ( ma ){
+		ma <- ma[, which( apply( ma, 2, function ( x) { length(which( x != 0)) }) > 9 )]
+		if ( ncol(ma) < 2 ) {
+			NULL
+		}
+		else {
+			cor.t <- cor( ma , method='spearman')
+			cor.p <- cor.t
+			diag(cor.p) <- 1
+			for ( i in 1:(ncol(ma)-1) ) {
+				for (a in (i+1):ncol(ma) ) {
+					if ( length( as.vector(ma[,i]) ) != length(as.vector(ma[,a]))){
+						browser()
+					}
+					cor.p [i,a] <- cor.p[a,i] <- cor.test( as.vector(ma[,i]), as.vector(ma[,a]),method='spearman')$p.value
+				}
+			}
+			cor.t.m <- melt(cor.t)
+			cor.p.m <- melt(cor.p)
+			cor.t.m <- cbind(cor.t.m, cor.p.m[,3])
+			cor.t.m <- cor.t.m[which(cor.t.m[,4] < 0.05), ]
+			cor.t.m
+		}
+	}
+	ret <- NULL
+	for (i in 1:max(dataObj$clusters)){
+		t <- cor.funct ( dataObj$PCR[which(dataObj$clusters == i),] )
+		if ( ! is.null(t)){
+				if ( nrow(t) > 0  ){
+					t[,5] <- i
+					ret <- rbind(ret, t)
+				}
+		}
+	}
+	colnames(ret) <- c('Source.Node','Target.Node', 'rho', 'p.value','Group' )
+	ret
+}
 
 coexpressionMatrix <- function ( dataObj ){
 	if ( ! exists ( 'PCR', where =dataObj$z ) ) {

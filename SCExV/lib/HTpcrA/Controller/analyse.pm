@@ -65,6 +65,16 @@ sub update_form {
 	push(
 		@{ $self->{'form_array'} },
 		{
+			'comment' => 'Vioplots only expressing cells',
+			'name'    => 'zscoredVioplot',
+			'options' => { '0' => 'No', '1' => 'Yes' },
+			'value' => $hash->{'zscoredVioplot'} ||= 1,
+			'required' => 1,
+		}
+	);
+	push(
+		@{ $self->{'form_array'} },
+		{
 			'comment'  => 'Cluster on:',
 			'name'     => 'cluster_by',
 			'options'  => [ 'Expression', 'FACS' ],
@@ -249,6 +259,7 @@ sub init_dataset {
 		'UG'             => 'none',
 		'randomForest'   => 10,
 		'plotsvg'        => 0,
+		'zscoredVioplot' => 1,
 		'cluster_type'   => 'hierarchical clust',
 	};
 }
@@ -495,10 +506,11 @@ sub R_script {
 
 	$script .=
 	    "plotsvg = $dataset->{'plotsvg'}\n"
+	  . "zscoredVioplot = $dataset->{'zscoredVioplot'}\n"
 	  . "onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
 	  . " onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
 	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "
-	  . " ctype= '$dataset->{'cluster_type'}' )\n"
+	  . " ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot)\n"
 	  . "\nsave( data, file='analysis.RData' )\n\n";
 
 	## now lets identify the most interesting genes:
@@ -553,7 +565,7 @@ sub R_script {
 '/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- densityWebGL.R >> R.run.log"'
 	);
 	$self->{'webGL'} = "$path/webGL/index.html";
-
+	$self->Coexpression_R_script( $path );
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {
 		## color the arrays by group color!
 		$c->session->{'groupbyplate'} = 1;
@@ -568,6 +580,25 @@ sub R_script {
 		  . "</i>\n" );
 	return "$path/webGL/index.html";
 
+}
+
+sub Coexpression_R_script {
+	my ( $self, $path ) =@_;
+	## create the corexpression analysis script and start that - do not wait for it to finish!
+	## The file should only be available in the downloaded zip file. Hence I probably should wait for it in the download section....
+	## first rm the old outfile!!!
+	unlink( $path.'Coexpression_4_Cytoscape.txt' ) if ( -f  $path.'Coexpression_4_Cytoscape.txt' );
+	## read in the analzed data!
+	## call function coexpressGenes( dataObj ) and write the returned table into the previousely deleted file using R
+	open ( OUT, ">".$path."Coexpression.R") or Carp::confess( $! );
+	print OUT "source('libs/Tool_Coexpression.R')\nload('analysis.RData')\n"
+	."t <- coexpressGenes(data)\n"
+	."write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')";
+	close ( OUT);
+	system(
+'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- Coexpression.R >> R.run.log" &'
+	);
+	return 1;
 }
 
 sub md5_table {
