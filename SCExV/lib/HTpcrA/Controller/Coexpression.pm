@@ -26,8 +26,7 @@ Catalyst Controller.
 
 sub index :Path :Form {
     my ( $self, $c ) = @_;
-	my $path = $self->path($c);
-	$self->check($c,'analysis');
+	my $path = $self->check($c,'analysis');
 	my $hash = $self->config_file( $c, 'Correlation.Configs.txt' );
 	$self->{'form_array'} = [];
 	opendir( DIR, $path."/preprocess/" );
@@ -60,7 +59,6 @@ sub index :Path :Form {
 	  . $c->uri_for("/css/table_sorter.css")
 	  . '" rel="stylesheet" />' . "\n");
 	#$c->form->template( $c->config->{'root'}.'src'. '/form/Coexpression_form.tt2' );
-	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'coexpression.tt2';
   #  $c->response->body('This is a future feature - not implemented in this version of SCExV!');
 }

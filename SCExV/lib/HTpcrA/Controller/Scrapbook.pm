@@ -29,10 +29,8 @@ Catalyst Controller.
 
 sub index : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->path($c);
-	$c->cookie_check();
-	$c->model('Menu')->Reinit();
-	$self->file_upload($c);
+	my $path = $self->check($c,'upload');
+	
 	$c->stash->{'scrapbook'} = $c->model('scrapbook')->init( $c->scrapbook() )
 	  ->AsString( $c->uri_for( '/files/index/' . $path ) );
 	$self->file_upload( $c, {});
@@ -59,8 +57,7 @@ sub ajaxgroups : Local {
 
 sub imageadd : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->path($c);
-	$self->check($c,'upload');
+	my $path = $self->check($c,'upload');
 
 	$c->form->field(
 		'type'     => 'textarea',
@@ -130,9 +127,8 @@ sub screenshotadd : Local {
 
 sub textadd : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->path($c);
-	$c->cookie_check();
-	$c->model('Menu')->Reinit();
+	my $path = $self->check($c, 'nothing');
+
 	$c->form->field(
 		'type'     => 'textarea',
 		'cols'     => 60,
@@ -149,7 +145,6 @@ sub textadd : Local : Form {
 		$c->res->redirect( $c->uri_for("/scrapbook/index/") );
 		$c->detach();
 	}
-	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'imageadd.tt2';
 }
 
