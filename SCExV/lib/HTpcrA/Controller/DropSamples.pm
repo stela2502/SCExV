@@ -73,7 +73,8 @@ sub index : Path : Form {
 		$self->R_remove_samples( $c, $self->__process_returned_form($c) );
 	}
 
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/dropsamples.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/dropsamples.tt2' );
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'DropSamples.tt2';
 }
 

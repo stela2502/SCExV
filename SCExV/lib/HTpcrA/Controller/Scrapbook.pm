@@ -35,6 +35,7 @@ sub index : Local : Form {
 	$self->file_upload($c);
 	$c->stash->{'scrapbook'} = $c->model('scrapbook')->init( $c->scrapbook() )
 	  ->AsString( $c->uri_for( '/files/index/' . $path ) );
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'ScrapBook.tt2';
 }
 
@@ -103,7 +104,8 @@ sub imageadd : Local : Form {
 		$c->detach();
 	}
 
-  #$c->form->template( $c->path_to( 'root', 'src' ) . '/form/dropsamples.tt2' );
+  #$c->form->template( $c->config->{'root'}.'src'. '/form/dropsamples.tt2' );
+    $self->file_upload( $c, {});
 	$c->stash->{'template'} = 'imageadd.tt2';
 }
 
@@ -147,7 +149,7 @@ sub textadd : Local : Form {
 		$c->res->redirect( $c->uri_for("/scrapbook/index/") );
 		$c->detach();
 	}
-
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'imageadd.tt2';
 }
 

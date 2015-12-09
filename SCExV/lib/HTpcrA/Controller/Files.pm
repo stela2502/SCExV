@@ -339,7 +339,6 @@ sub control_page : Local : Form {
 		    '<script type="text/javascript" src="'
 		  . $c->uri_for('/scripts/figures.js')
 		  . '"></script>' );
-
 	$c->stash->{'template'} = 'control_page.tt2';
 }
 
@@ -458,7 +457,7 @@ Please re-upload your files without selecting negative controle gene(s).";
 		  . $c->uri_for('/scripts/upload.js')
 		  . '"></script>' );
 
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/upload.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/upload.tt2' );
 
 	$c->stash->{'template'} = 'file_upload.tt2';
 }
@@ -748,7 +747,8 @@ sub report_error : Local : Form {
 	}
 
 	#$c->form->template(
-	#	$c->path_to( 'root', 'src' ) . '/form/MakeLabBookEntry.tt2' );
+	#	$c->config->{'root'}.'src'. '/form/MakeLabBookEntry.tt2' );
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'report_error.tt2';
 }
 
@@ -792,7 +792,7 @@ sub as_zip_file : Local : Form {
 		$c->detach();
 	}
 	$c->form->template(
-		$c->path_to( 'root', 'src' ) . '/form/MakeLabBookEntry.tt2' );
+		$c->config->{'root'}.'src'. '/form/MakeLabBookEntry.tt2' );
 	$c->stash->{'template'} = 'download_all.tt2';
 }
 

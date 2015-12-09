@@ -214,7 +214,7 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 	for (i in 1:n) {
 		data <- datas[[i]][ is.na(datas[[i]]) ==F ]
 		if ( ! is.null(neg)) {
-			names.2 <- c ( names.2, paste( length(data),"/",length(which( datas[[i]] != neg )),sep='') )
+			names.2 <- c ( names.2, paste( length(which( datas[[i]] != neg )),"/",length(data),sep='') )
 		}else {
 			names.2 <- c ( names.2, paste( length(data),"/",length(datas[[i]]),sep='') )
 		}

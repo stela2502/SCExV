@@ -90,8 +90,13 @@ regroup <- function ( dataObj, group2sample = list ( '1' = c( 'Sample1', 'Sample
 		if ( sum(is.na(match(group2sample[[i]], userGroups$cellName))==F) == 0 ){
 			minor = minor +1
 		}
-		else {
-			userGroups[ match(group2sample[[i]], userGroups$cellName),3] = i - minor
+		else if (  sum(is.na(match(group2sample[[i]], userGroups$cellName))==F) < length( group2sample[[i]] ) ) {
+			rows <- match(group2sample[[i]], userGroups$cellName)
+			rows <- rows[-which(is.na(rows))]
+			userGroups[ rows ,3] <- i
+		}
+		else { ## the whole group has failed??
+			userGroups[ match(group2sample[[i]], userGroups$cellName) ,3] = i - minor
 		}
 	}
 	if ( length(which(userGroups[,3] == 0)) > 0 ){

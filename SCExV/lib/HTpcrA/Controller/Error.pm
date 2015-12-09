@@ -97,6 +97,7 @@ sub index : Local : Form {
 	my @err = <IN>;
 	$c->stash->{'error'} = join( "", @err[ 0 .. 3 ] );
 	close(IN);
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'report_error.tt2';
 }
 

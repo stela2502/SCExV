@@ -214,7 +214,8 @@ sub index : Path : Form {
 
 #$c->form->template({ type => 'TT2', 'template' => 'root/src/form/grouping_2d.tt2', variable => 'form' });
 	$c->form->template(
-		$c->path_to( 'root', 'src' ) . '/form/grouping_2d.tt2' );
+		$c->config->{'root'}.'src'. '/form/grouping_2d.tt2' );
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'grouping_2d.tt2';
 
 }

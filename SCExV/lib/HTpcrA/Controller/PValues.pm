@@ -107,7 +107,8 @@ sub index : Path : Form {
 	  . '<link type="text/css" href="'
 	  . $c->uri_for("/css/table_sorter.css")
 	  . '" rel="stylesheet" />' . "\n");
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/Pvalues_form.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/Pvalues_form.tt2' );
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'pvalues.tt2';
 }
 

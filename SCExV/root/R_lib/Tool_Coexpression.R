@@ -19,7 +19,7 @@ coexpressGenes <- function ( dataObj ) {
 					if ( length( as.vector(ma[,i]) ) != length(as.vector(ma[,a]))){
 						browser()
 					}
-					cor.p [i,a] <- cor.p[a,i] <- cor.test( as.vector(ma[,i]), as.vector(ma[,a]),method='spearman')$p.value
+					cor.p[a,i] <- cor.test( as.vector(ma[,i]), as.vector(ma[,a]),method='spearman')$p.value
 				}
 			}
 			cor.t.m <- melt(cor.t)
@@ -58,7 +58,11 @@ coexpressionMatrix <- function ( dataObj ){
 	mm <-  matrix ( rep(0,m * ncol(dataObj$z$PCR)), nrow=m)
 	for ( i in 1:m ){
 		## calculate the mean expression for each gene over all cells of the group
-		mm[i,] <- apply( dataObj$z$PCR[which(dataObj$clusters == i ),],2,mean)
+		if ( length(which(dataObj$clusters == i )) == 1 ) {
+			mm[i,] <- dataObj$z$PCR[which(dataObj$clusters == i ),]
+		}else{
+			mm[i,] <- apply( dataObj$z$PCR[which(dataObj$clusters == i ),],2,mean)
+		}
 	}
 	rownames(mm) <- paste('Group',1:m)
 	coma <- cor(t(mm))

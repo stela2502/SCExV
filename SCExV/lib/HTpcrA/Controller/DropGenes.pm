@@ -65,7 +65,8 @@ sub index : Path : Form {
 		$self->R_remove_genes( $c, $self->__process_returned_form($c) );
 	}
 
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/dropgenes.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/dropgenes.tt2' );
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'DropGenes.tt2';
 }
 

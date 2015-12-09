@@ -76,7 +76,7 @@ sub index : Local : Form {
 		$self->index_form( $c, $path );
 
 	}
-
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'CustomGroupingsDoc.tt2';
 }
 
@@ -113,7 +113,7 @@ sub samplenames : Local : Form {
 			$c->detach();
 		}
 	}
-
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'SampleNameGroups.tt2';
 }
 
@@ -177,6 +177,7 @@ sub reorder : Local : Form {
 			)
 		);
 	}
+	$self->file_upload( $c, {});
 	$self->JavaScript($c);
 	$c->stash->{'template'} = 'Regroup.tt2';
 }

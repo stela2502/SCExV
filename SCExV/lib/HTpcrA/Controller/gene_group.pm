@@ -113,7 +113,8 @@ sub index : Path : Args(0) : Form {
 		  . '"></script>' );
 	$c->form->type('TT2');
 
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/gene_group.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/gene_group.tt2' );
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'gene_group.tt2';
 }
 

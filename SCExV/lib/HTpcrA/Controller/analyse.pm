@@ -244,6 +244,7 @@ sub fileok : Local : Form {
 			$c->detach();
 		}
 	}
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'message.tt2';
 }
 
@@ -449,8 +450,9 @@ sub index : Path : Form {
 		$c->stash->{'figure_2d'} =
 		  "<h3>Show expression for </h3>" . $c->stash->{'figure_2d'};
 	}
+	$self->file_upload( $c, {});
 	$c->form->type('TT2');
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/analysis.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/analysis.tt2' );
 	$c->stash->{'template'} = 'analyse.tt2';
 }
 

@@ -87,7 +87,8 @@ sub index : Path : Form {
 			$c->detach();
 		}
 	}
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/mergefiles.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/mergefiles.tt2' );
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'MergeFiles.tt2';
 }
 
