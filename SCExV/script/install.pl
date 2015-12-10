@@ -175,7 +175,7 @@ for ( my $i = 0; $i < @options; $i += 2 ){
 unless ( $options =~ m/ncore/ ) {
 	$options .= "\tncore => 1,\n";
 }
-my $OK2 = $patcher2 -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,", "root => '$install_path',\n$options" );
+my $OK2 = $patcher2 -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,", "$options" );
 $patcher2 -> write_file();
 
 my $replace = $install_path;
