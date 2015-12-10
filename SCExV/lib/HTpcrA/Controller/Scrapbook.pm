@@ -29,8 +29,8 @@ Catalyst Controller.
 
 sub index : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->check($c,'upload');
-	
+	$self->check($c,'upload');
+	my $path = $self->path($c);
 	$c->stash->{'scrapbook'} = $c->model('scrapbook')->init( $c->scrapbook() )
 	  ->AsString( $c->uri_for( '/files/index/' . $path ) );
 	$self->file_upload( $c, {});
@@ -57,8 +57,8 @@ sub ajaxgroups : Local {
 
 sub imageadd : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->check($c,'upload');
-
+	$self->check($c,'upload');
+	my $path = $self->path($c);
 	$c->form->field(
 		'type'     => 'textarea',
 		'cols'     => 60,
