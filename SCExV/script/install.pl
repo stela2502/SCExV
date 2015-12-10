@@ -144,7 +144,7 @@ sub copy_files {
 
 ## this is a horrible hack, but I have not found where the config would be loaded from!
 my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
-my $OK = $patcher -> replace_string( "\sroot => '[\\/\\w]*'," , " root => '$install_path',\nhome => '$install_path'," );
+my $OK = $patcher -> replace_string( "\\sroot =\\> '[\\/\\w]*'," , " root => '$install_path',\nhome => '$install_path'," );
 $patcher -> write_file();
 
 #$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
