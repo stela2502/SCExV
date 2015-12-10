@@ -30,10 +30,8 @@ Catalyst Controller.
 
 sub index : Path : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->path($c);
+	my $path = $self->check($c, 'nothing');
 	$c->form->method('post');
-	$c->cookie_check();
-	$c->model('Menu')->Reinit();
 	$c->form->field(
 		'comment'  => 'PCR or FACS data?',
 		'name'     => 'datatype',
@@ -87,7 +85,7 @@ sub index : Path : Form {
 			$c->detach();
 		}
 	}
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/mergefiles.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/mergefiles.tt2' );
 	$c->stash->{'template'} = 'MergeFiles.tt2';
 }
 

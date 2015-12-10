@@ -141,7 +141,13 @@ sub copy_files {
 
 
 ## patch the main function to include the new root path
-my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
+
+## this is a horrible hack, but I have not found where the config would be loaded from!
+my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
+my $OK = $patcher -> replace_string( "root => '[\\/\\w]*'," , "root => '$install_path',\nhome => '$install_path'," );
+$patcher -> write_file();
+
+$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
 print "Before:".$patcher->print();
 my ($save, $save_home);
 $patcher -> {'str_rep'} =~ m/root (.*)/;
@@ -150,7 +156,7 @@ $patcher -> {'str_rep'} =~ m/Home (.*)/;
 $save_home = $1;
 #Carp::confess ($patcher->{'filename'}. "  root_save = $save; Home save = $save_home\n" );
 
-my $OK = $patcher -> replace_string( "root .*", "root $install_path" );
+$OK = $patcher -> replace_string( "root .*", "root $install_path" );
 $OK += $patcher -> replace_string( "Home .*", "Home $install_path" );
 $OK += $patcher -> replace_string( "\tform_path .*", "\tform_path $install_path"."src/form/");
 

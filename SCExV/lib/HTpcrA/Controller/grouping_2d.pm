@@ -24,8 +24,7 @@ Catalyst Controller.
 
 sub index : Path : Form {
 	my ( $self, $c, $geneA, $geneB ) = @_;
-	my $path = $c->session_path();
-	$self->check($c);
+	my $path = $self->check($c);
 	
 	my $hash = $self->config_file( $c, 'grouping2D.txt' );
 	$c->stash->{'script'} = $self->Javascript($c);
@@ -100,7 +99,6 @@ sub index : Path : Form {
 	foreach ( @{ $self->{'form_array'} } ) {
 		$c->form->field( %{$_} );
 	}
-	$self->file_upload($c);    ## relink the cookie information to the stash!
 	my $gg = $c->model('GeneGroups');
 
 	my $data = $gg->read_data( $c->session_path() . 'merged_data_Table.xls',
@@ -118,7 +116,7 @@ sub index : Path : Form {
 			$c->detach();
 		}
 		( $geneA, $geneB ) =
-		  $self->check( $c, $geneA, $geneB, $dataset->{'gx'},
+		  $self->check_local( $c, $geneA, $geneB, $dataset->{'gx'},
 			$dataset->{'gy'} );
 
 		$gg = $c->model('GeneGroups');
@@ -214,12 +212,12 @@ sub index : Path : Form {
 
 #$c->form->template({ type => 'TT2', 'template' => 'root/src/form/grouping_2d.tt2', variable => 'form' });
 	$c->form->template(
-		$c->path_to( 'root', 'src' ) . '/form/grouping_2d.tt2' );
+		$c->config->{'root'}.'src'. '/form/grouping_2d.tt2' );
 	$c->stash->{'template'} = 'grouping_2d.tt2';
 
 }
 
-sub check {
+sub check_local {
 	my ( $self, $c, $OgA, $OgB, $NgA, $NgB ) = @_;
 	$c->stash->{'message'} .= "Check $OgA, $OgB, $NgA, $NgB\n";
 	unless ( defined $OgB ) {

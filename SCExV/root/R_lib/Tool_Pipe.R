@@ -79,7 +79,7 @@ read.PCR <- function(fname,use_pass_fail=T){
 	if ( ncol(test) == 0 ){
 		options(show.error.messages = FALSE)
 		test <- matrix(ncol=0,nrow=0)
-		try (test <- read.delim(fname,header=T,sep=,','))
+		try (test <- read.delim(fname,header=T,sep=','))
 		options(show.error.messages = TRUE)
 	}
 	if ( ncol(test) > 1 ){
@@ -91,7 +91,7 @@ read.PCR <- function(fname,use_pass_fail=T){
 	else if(length(av)>0 && length(line.start)!= 0 ){
 		
 		
-		tab <- read.delim(fname,skip=(line.start),header=F,sep=",")#,col.names=c('ID','Name','Type','rConc','Name.1','Type.1','Value','Quality','Call','Threshold','Comments', 'somethingelse','a','b'))
+		tab <- read.delim(fname,skip=(line.start),header=F,sep=",")
 		colnames(tab) <- make.names(paste( unlist(strsplit(top20[line.start-1],',')), unlist(strsplit(top20[line.start],',') ), sep='_' ),unique=T)
 		#
 		#browser()
@@ -211,7 +211,9 @@ read.FACS.set  <- function(fnames){
 			
 			ttab <- read.FACS(fnames[i])
 			ttab <- ttab[,order(colnames(ttab))]
-			rownames(ttab) <- paste(rownames(ttab),".P",i-1,sep="")
+			if ( length( grep( "P\\d+$", rownames(ttab))) == 0 ) {
+				rownames(ttab) <- paste(rownames(ttab),".P",i-1,sep="")
+			}
 			## check whether the gene names are axactly the same
 			if ( is.null(etab)){
 				etab <-ttab
@@ -269,7 +271,9 @@ read.PCR.set <- function(fnames, use_pass_fail){
 			if ( ! fnames[i] == '../---' ){
 				ttab <- read.PCR(fnames[i], use_pass_fail)
 				ttab <- ttab[,order(colnames(ttab))]
-				rownames(ttab) <- paste(rownames(ttab),".P",i-1,sep="")
+				if ( length( grep( "P\\d+$", rownames(ttab))) == 0 ) {
+					rownames(ttab) <- paste(rownames(ttab),".P",i-1,sep="")
+				}
 				## check whether the gene names are axactly the same
 				if ( is.null(etab)){
 					etab <-ttab

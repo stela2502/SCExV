@@ -303,7 +303,7 @@ sub report_last {
 sub control_page : Local : Form {
 	my ( $self, $c, @args ) = @_;
 
-	my $path = $self->path($c);
+	my $path = $self->check($c,'nothing');
 
 	opendir( DIR, $path );
 	my @files = sort grep ( /\.png$/, readdir(DIR) );
@@ -339,7 +339,6 @@ sub control_page : Local : Form {
 		    '<script type="text/javascript" src="'
 		  . $c->uri_for('/scripts/figures.js')
 		  . '"></script>' );
-
 	$c->stash->{'template'} = 'control_page.tt2';
 }
 
@@ -375,6 +374,8 @@ sub upload : Local : Form {
 	$self->file_upload($c);
 	$c->model('Menu')->Reinit();
 	$c->cookie_check();
+
+
 	if ( $c->form->submitted ) {
 		if (   $c->form->submitted() eq "Apply"
 			|| $c->form->submitted() eq "Upload Data" )
@@ -458,7 +459,7 @@ Please re-upload your files without selecting negative controle gene(s).";
 		  . $c->uri_for('/scripts/upload.js')
 		  . '"></script>' );
 
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/upload.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/upload.tt2' );
 
 	$c->stash->{'template'} = 'file_upload.tt2';
 }
@@ -707,8 +708,8 @@ sub report_error : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	$c->session_path();
 	$self->message_form($c);
-	$c->model('Menu')->Reinit();
-	$c->cookie_check();
+	$self->check($c, 'nothing');
+	
 	$self->{'form_array'} = [];
 	push(
 		@{ $self->{'form_array'} },
@@ -748,15 +749,14 @@ sub report_error : Local : Form {
 	}
 
 	#$c->form->template(
-	#	$c->path_to( 'root', 'src' ) . '/form/MakeLabBookEntry.tt2' );
+	#	$c->config->{'root'}.'src'. '/form/MakeLabBookEntry.tt2' );
 	$c->stash->{'template'} = 'report_error.tt2';
 }
 
 sub as_zip_file : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	$self->message_form($c);
-	$c->cookie_check();
-	$c->model('Menu')->Reinit();
+	$self->check($c, 'upload');
 
 	if ( $c->form->submitted && $c->form->validate ) {
 		my $dataset = $self->__process_returned_form($c);
@@ -792,7 +792,7 @@ sub as_zip_file : Local : Form {
 		$c->detach();
 	}
 	$c->form->template(
-		$c->path_to( 'root', 'src' ) . '/form/MakeLabBookEntry.tt2' );
+		$c->config->{'root'}.'src'. '/form/MakeLabBookEntry.tt2' );
 	$c->stash->{'template'} = 'download_all.tt2';
 }
 
