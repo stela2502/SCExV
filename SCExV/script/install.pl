@@ -149,7 +149,7 @@ $patcher -> write_file();
 
 #$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
 #print "Before:".$patcher->print();
-#my ($save, $save_home);
+my ($save, $save_home);
 #$patcher -> {'str_rep'} =~ m/root (.*)/;
 #$save = $1;
 #$patcher -> {'str_rep'} =~ m/Home (.*)/;
