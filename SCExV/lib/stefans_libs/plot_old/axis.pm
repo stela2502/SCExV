@@ -19,10 +19,11 @@ use stefans_libs::plot::Font;
 use strict;
 
 sub new {
-	my ( $class, $which, $min_pixels, $max_pixels, $title, $resolution ) = @_;
+	my ( $class, $which, $min_pixels, $max_pixels, $title, $resolution, $type ) = @_;
 
 	my ( $self, $temp );
 	#Carp::confess ( "I need to know #3 and #4 which might not be defined") unless ( defined $min_pixels && defined $max_pixels);
+	$type ||= "GD";
 	$self = {
 		tics       => 6,             #12
 		tic_length => 20,            #20
@@ -30,7 +31,8 @@ sub new {
 		max_pixel  => $max_pixels,
 		min_pixel  => $min_pixels,
 		max        => -1e+6,
-		min        => +1e+6
+		min        => +1e+6,
+		type => $type,
 	};
 
 	$resolution = "large" if ( $resolution eq "max" );
@@ -40,25 +42,22 @@ sub new {
 	if ( $resolution eq "large" ) {
 		$self->{tics}              = 6;
 		$self->{tic_length}        = 20;
-		$self->{font}              = Font->new($resolution);
 		$self->{tokenX_correction} = 8;
 		$self->{tokenY_correction} = -6;
 	}
 	elsif ( $resolution eq "small" ) {
 		$self->{tics}       = 8;
 		$self->{tic_length} = 17;
-		$self->{font}       = Font->new($resolution);
 	}
 	elsif ( $resolution eq "tiny" ) {
 		$self->{tics}       = 6;
 		$self->{tic_length} = 7;
-		$self->{font}       = Font->new($resolution);
 	}
 	elsif ( $resolution eq "gbfeature" ) {
 		$self->{tics}       = 6;
 		$self->{tic_length} = 7;
-		$self->{font}       = Font->new($resolution);
 	}
+	$self->{font}       = Font->new($resolution, $type);
 	unless ( defined $self->{font} ) {
 		warn root::identifyCaller( $class, "new" );
 	}

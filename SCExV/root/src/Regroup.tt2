@@ -33,6 +33,11 @@
 [% form.render %]
 
 </td></tr>
+<tr> <td colspan="2" >
+
+[% HeatmapStatic %]
+
+</td></tr>
 </table>
 
 

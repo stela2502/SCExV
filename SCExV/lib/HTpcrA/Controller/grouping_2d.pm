@@ -24,13 +24,10 @@ Catalyst Controller.
 
 sub index : Path : Form {
 	my ( $self, $c, $geneA, $geneB ) = @_;
-	my $hash = $self->config_file( $c, 'grouping2D.txt' );
 	my $path = $c->session_path();
-	unless ( -f $path . 'merged_data_Table.xls' ) {
-		$c->res->redirect( $c->uri_for("/analyse/") );
-		$c->detach();
-	}
-	$c->model('Menu')->Reinit();
+	$self->check($c);
+	
+	my $hash = $self->config_file( $c, 'grouping2D.txt' );
 	$c->stash->{'script'} = $self->Javascript($c);
 	$self->{'form_array'} = [];
 	opendir( DIR, $path . "preprocess/" );
@@ -146,7 +143,7 @@ sub index : Path : Form {
 			}
 			else {
 				my ( $xaxis, $yaxis ) =
-				  $data->axies( $geneA, $geneB );
+				  $data->axies( $geneA, $geneB , GD::Image->new(10,10) );
 				if ( $dataset->{'x1'} =~ m/\d+/ ) {
 					foreach ( 'x1', 'x2' ) {
 						$dataset->{$_} = $xaxis->pix2value( $dataset->{$_} );

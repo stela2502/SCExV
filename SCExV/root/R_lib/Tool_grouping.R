@@ -44,8 +44,9 @@ group_1D_worker <- function (ma, gene, ranges ) {
 }
 
 checkGrouping <- function ( userGroups,  data=NULL ){
+	userGroups$groupID <- as.vector( as.numeric( userGroups$groupID ))
 	if ( !is.null(data) ){
-		if ( length(rownames(data$PCR)) != nrow(userGroups) ) {
+		if ( nrow(data$PCR) != nrow(userGroups) ) {
 			### CRAP - rebuilt the grouping information - the data files have been re-created!
 			rn <- rownames(data$PCR)
 			for ( i in 1:length(rn) ){
@@ -62,7 +63,6 @@ checkGrouping <- function ( userGroups,  data=NULL ){
 			} 
 		}
 	}else {
-		userGroups$groupID <- as.vector( as.numeric( userGroups$groupID ))
 		if ( length(which(userGroups$groupID == 0)) > 0 ){
 			userGroups$groupID = userGroups$groupID + 1
 		}
@@ -74,6 +74,9 @@ checkGrouping <- function ( userGroups,  data=NULL ){
 			userGroups$groupID[which(userGroups$groupID > miss[i] )] = userGroups$groupID[which(userGroups$groupID > miss[i] )] -1 
 			
 		}
+	}
+	if ( min(userGroups$groupID) > 1 ){
+		userGroups$groupID <- userGroups$groupID - ( min(userGroups$groupID) -1 )
 	}
 	userGroups
 }
@@ -87,8 +90,13 @@ regroup <- function ( dataObj, group2sample = list ( '1' = c( 'Sample1', 'Sample
 		if ( sum(is.na(match(group2sample[[i]], userGroups$cellName))==F) == 0 ){
 			minor = minor +1
 		}
-		else {
-			userGroups[ match(group2sample[[i]], userGroups$cellName),3] = i - minor
+		else if (  sum(is.na(match(group2sample[[i]], userGroups$cellName))==F) < length( group2sample[[i]] ) ) {
+			rows <- match(group2sample[[i]], userGroups$cellName)
+			rows <- rows[-which(is.na(rows))]
+			userGroups[ rows ,3] <- i
+		}
+		else { ## the whole group has failed??
+			userGroups[ match(group2sample[[i]], userGroups$cellName) ,3] = i - minor
 		}
 	}
 	if ( length(which(userGroups[,3] == 0)) > 0 ){

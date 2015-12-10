@@ -138,28 +138,27 @@ RFdist <- function(Rf.data, datRF, imp=T, no.tree, proxConver=F) {
 	RFimportance1 <- matrix(0, nrow=ncol1, ncol=4)
 	RFerrrate1 <- 0
 	rep1 <- rep(666,2*nrow1) 
-	
-	for (i in 1:length(Rf.data) )  { 
-			i = i -1
-			index1 <-  Rf.data[[i+1]]$index1
-			yy <- Rf.data[[i+1]]$yy
-			importance <- Rf.data[[i+1]]$importance
-			err.rate <- Rf.data[[i+1]]$err.rate
-			RF1prox <- Rf.data[[i+1]]$RF1prox
-			if (i > 0) { 
-				if (i > 1){
-					xx <- ((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i) - (RFproxAddcl1/(i-1))
-					yy <- mean( c(as.dist((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i))) 
-					RFprox1Conver[i,2] <- max(abs(c(as.dist(xx))))
-					RFprox1Conver[i,3] <- mean((c(as.dist(xx)))^2)
-					RFprox1Conver[i,4] <- yy
-				}
-				RFproxAddcl1 <- RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]) 
-				if(imp) { RFimportance1 <- RFimportance1+ 1/no.rep*(importance) }
-				RFerrrate1 <- RFerrrate1+ 1/no.rep*(err.rate[no.tree])
+	i = 0;
+	while( length(Rf.data) > 0 ) {
+		yy <- Rf.data[[1]]$yy
+		importance <- Rf.data[[1]]$importance
+		err.rate <- Rf.data[[1]]$err.rate
+		RF1prox <- Rf.data[[1]]$RF1prox
+		if (i > 0) { 
+			if (i > 1){
+				xx <- ((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i) - (RFproxAddcl1/(i-1))
+				yy <- mean( c(as.dist((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i))) 
+				RFprox1Conver[i,2] <- max(abs(c(as.dist(xx))))
+				RFprox1Conver[i,3] <- mean((c(as.dist(xx)))^2)
+				RFprox1Conver[i,4] <- yy
 			}
+			RFproxAddcl1 <- RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]) 
+			if(imp) { RFimportance1 <- RFimportance1+ 1/no.rep*(importance) }
+			RFerrrate1 <- RFerrrate1+ 1/no.rep*(err.rate[no.tree])
+		}
+		Rf.data[[1]] <- NULL
+		i = i +1
 	}
-	
 	
 	distRFAddcl1 <- cleandist(sqrt(1-RFproxAddcl1/no.rep))
 	

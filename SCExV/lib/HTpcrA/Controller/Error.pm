@@ -35,8 +35,7 @@ sub emit {
 sub index : Local : Form {
 	my ( $self, $c ) = @_;
 	my $path = $c->session_path();
-	$c->model('Menu')->Reinit();
-	$c->cookie_check();
+	
 	my $form_array = [];
 	push(
 		@{$form_array},
@@ -97,14 +96,13 @@ sub index : Local : Form {
 	my @err = <IN>;
 	$c->stash->{'error'} = join( "", @err[ 0 .. 3 ] );
 	close(IN);
+	$c->model('Menu')->Reinit();
 	$c->stash->{'template'} = 'report_error.tt2';
 }
 
 sub error : Local {
 	my ( $self, $c ) = @_;
 	my $path = $c->session_path();
-	$c->model('Menu')->Reinit();
-	$c->cookie_check();
 	if ( -f "$path/Error_system_message.txt" ) {
 		open( IN, "<$path/Error_system_message.txt" );
 		$c->stash->{'error'} = join( "</br>", <IN> );
@@ -120,6 +118,7 @@ sub error : Local {
 		chomp($to[0]);
 		$c->stash->{'back'} = $c->uri_for($to[0]);
 	}
+	$c->model('Menu')->Reinit();
 	$c->stash->{'template'} = 'error.tt2';
 }
 

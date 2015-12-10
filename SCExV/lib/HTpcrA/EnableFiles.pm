@@ -2,7 +2,6 @@ package HTpcrA::EnableFiles;
 
 use Moose::Role;
 
-
 sub rgbToHex {
 	my ( $self, $red, $green, $blue ) = @_;
 	my $string = sprintf( "#%2.2X%2.2X%2.2X", $red, $green, $blue );
@@ -45,6 +44,24 @@ sub colors_rgb {
 	return @colors;
 }
 
+sub check {
+	my ( $self, $c, $what ) = @_;
+	$what ||= 'analysis';
+	my $path = $c->session_path();
+	unless ( -f $path . "/norm_data.RData" ) {
+		$c->res->redirect( $c->uri_for("/files/upload/") );
+		$c->detach();
+	}
+	if ( $what eq 'analysis' ) {
+		unless ( -d $path . 'webGL' ) {
+			$c->res->redirect( $c->uri_for("/analyse/") );
+			$c->detach();
+		}
+	}
+	$c->model('Menu')->Reinit();
+	return 1;
+}
+
 sub colors_Hex {
 	my ( $self, $c, $path ) = @_;
 	my @colors;
@@ -66,11 +83,11 @@ sub colors_Hex {
 		my $session_hash = $c->session();
 		foreach my $filetype ( 'PCRTable', 'PCRTable2', 'facsTable' ) {
 			if ( defined $session_hash->{$filetype} ) {
-				for ( my $i = 0 ; $i < @colors ; $i++ ) {
-					@{ $session_hash->{$filetype} }[$i]->{'color'} = $colors[$i]
+				map {
+					@{ $session_hash->{$filetype} }[$_]->{'color'} = $colors[$_]
 					  if (
-						ref( @{ $session_hash->{$filetype} }[$i] ) eq "HASH" );
-				}
+						ref( @{ $session_hash->{$filetype} }[$_] ) eq "HASH" );
+				} 0 .. (@colors-1);
 			}
 		}
 	}
@@ -83,16 +100,19 @@ sub colors_Hex {
 
 sub init_file_cookie {
 	my ( $self, $c, $force ) = @_;
-	$force ||=0;
+	$force ||= 0;
 	my $session_hash = $c->session();
 	unless ( defined $session_hash ) {
 		return 0;
 	}
-	if ( $force ){
-		map { $session_hash->{$_} = [] }  'PCRTable', 'PCRTable2', 'facsTable' ;
+	if ($force) {
+		map { $session_hash->{$_} = [] } 'PCRTable', 'PCRTable2', 'facsTable';
 	}
 	else {
-		map { $session_hash->{$_} = [] unless ( ref( $session_hash->{$_} ) eq "ARRAY" ) }  'PCRTable', 'PCRTable2', 'facsTable' ;
+		map {
+			$session_hash->{$_} = []
+			  unless ( ref( $session_hash->{$_} ) eq "ARRAY" )
+		} 'PCRTable', 'PCRTable2', 'facsTable';
 	}
 	return $session_hash;
 }
@@ -100,7 +120,7 @@ sub init_file_cookie {
 sub file_upload {
 	my ( $self, $c, $processed_form ) = @_;
 	my $session_hash = $self->init_file_cookie($c);
-	unless ( $session_hash ) {
+	unless ($session_hash) {
 		return 0;
 	}
 	my $files = 0;
@@ -316,10 +336,17 @@ sub config_file {
 		return 1;
 	}
 	unless ( -f $filename ) {
-		return {};    # tried to read without the file being present
+		return $self->init_dataset()
+		  ;    # tried to read without the file being present
 	}
 	Carp::confess( "Did not know what to do with  $filename, $hash !\nkeys:",
 		join( "\n", keys %$hash ) . "\n" );
+}
+
+sub init_dataset {
+	return {
+
+	};
 }
 
 sub __check_uploaded_files {
@@ -617,7 +644,8 @@ sub slurp_webGL {
 	}
 	my ( $script, $use );
 	$use = 0;
-	open( IN, "<$self->{'webGL'}" );
+	return 0 unless ( -f "$path/webGL/index.html" );
+	open( IN, "<$path/webGL/index.html" );
 	$script =
 	    "<form action=''>\n"
 	  . "<table border='0'>"
@@ -631,14 +659,14 @@ sub slurp_webGL {
 	  . "<input type='radio' name='plotSelector' value='kernel' \n"
 	  . "onClick=\"showElementByVisible('kernel');hideElementByDisplay('twoD');hideElementByDisplay('threeD');hideElementByDisplay('loadings')\">3 components (density)\n</td></tr></table>"
 	  . "</form>\n"
-	  . "<span id='threeD' style='display:inline;'>\n<button onclick='capture3D(\"canvas\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $self->{'webGL'}-->\n";
+	  . "<span id='threeD' style='display:inline;'>\n<button onclick='capture3D(\"canvas\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/webGL/index.html -->\n";
 	while (<IN>) {
 		$use = 1 if ( $_ =~ m/div align="center"/ );
 		$use = 0 if ( $_ =~ m/<hr>/ );
 		$script .= $_ if ($use);
 	}
 	close(IN);
-	$script .= "<!-- END READ FROM FILE $self->{'webGL'}-->\n";
+	$script .= "<!-- END READ FROM FILE $path/webGL/index.html -->\n";
 	if ( -f "$path/densityWebGL/index.html" ) {
 		open( IN, "<$path/densityWebGL/index.html" );
 		$use = 0;
@@ -659,6 +687,11 @@ sub slurp_webGL {
 		foreach ( $tmp =~ m/function (\w+)\(/g ) {
 			$tmp =~ s/$_/K$_/g;
 		}
+		## and in the new version
+		# var rgl = new rglClass();
+		# rgl.start = function() {
+		$tmp =~ s/var rgl = new rglClass/var Krgl = new rglClass/g;
+		$tmp =~ s/rgl\./Krgl./g;
 		$script .= $tmp;
 	}
 	my $uri =
@@ -692,6 +725,15 @@ s/ canvas.getContext\("experimental-webgl"\)/ canvas.getContext("experimental-we
 		  . $c->uri_for( '/files/index' . $path . 'loadings.png' )
 		  . "' alt='2D gene loadings' width='400px'>\n";
 	}
+	if ( !( $script =~ m/webGLStart/ ) ) {
+		## new version
+		$script .= '<script type="text/javascript">'
+		  . "\nwebGLStart = function(){rgl.start();}\n";
+		if ( -f "$path/densityWebGL/index.html" ) {
+			$script .= "KwebGLStart = function(){Krgl.start();}\n";
+		}
+		$script .= "</script>\n";
+	}
 	$c->stash->{'webGL'}           = $script;
 	$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();"';
 
@@ -715,8 +757,8 @@ sub slurp_Heatmaps {
 			$self->create_selector_table_4_figures(
 				$c,                 'heatmaps_s',
 				'heatpic_s',        'picture_s',
-				  'PCR_Heatmap.png','PCR_color_groups_Heatmap.png',
-				 'facs_Heatmap.png','facs_color_groups_Heatmap.png',
+				'PCR_Heatmap.png',  'PCR_color_groups_Heatmap.png',
+				'facs_Heatmap.png', 'facs_color_groups_Heatmap.png',
 			)
 		);
 	}
@@ -725,8 +767,8 @@ sub slurp_Heatmaps {
 			"",
 			$self->create_multi_image_scalable_canvas(
 				$c, 'heatmaps', 'heatpic', 'picture',
-				'PCR_color_groups_Heatmap.png','PCR_Heatmap.png',
-				
+				'PCR_color_groups_Heatmap.png', 'PCR_Heatmap.png',
+
 			)
 		);
 		$c->stash->{'HeatmapStatic'} = join(
@@ -751,8 +793,7 @@ sub slurp_Heatmaps {
 		  . "></script>\n" . "\n"
 		  . "<script type='text/javascript'>\n \$(window).load ( function () {"
 		  . "img_reset( 'picture_1' );"
-		  . "register_mousewheelzoom('ScalableCanvas');} );</script>\n" )
-	  ;
+		  . "register_mousewheelzoom('ScalableCanvas');} );</script>\n" );
 
 }
 
@@ -801,14 +842,17 @@ sub create_multi_image_scalable_canvas {
 		  . $c->uri_for( '/files/index' . $path . "$_" )
 		  . "' id='$boxname"
 		  . "_$id' style='display:none'>\n";
-		unless ( $self->{'select_box'} =~ m/option selected value/ ){
+		unless ( $self->{'select_box'} =~ m/option selected value/ ) {
 			$self->{'select_box'} .=
-		  "<option selected value='$boxname" . "_" . $id . "'>$key</option>\n" ;
-		}else {
-			$self->{'select_box'} .=
-		  "<option value='$boxname" . "_" . $id . "'>$key</option>\n" ;
+			    "<option selected value='$boxname" . "_"
+			  . $id
+			  . "'>$key</option>\n";
 		}
-		
+		else {
+			$self->{'select_box'} .=
+			  "<option value='$boxname" . "_" . $id . "'>$key</option>\n";
+		}
+
 		$id++;
 	}
 	$default .= "</td>";
@@ -853,19 +897,21 @@ sub create_selector_table_4_figures {
 			@{ $self->{'select_options'} },
 			{ $c->uri_for( '/files/index' . $path . "$_" ) => $key }
 		);
-		unless ( $self->{'select_box'} =~ m/option selected value/ ){
+		unless ( $self->{'select_box'} =~ m/option selected value/ ) {
 			$default =
-		    "<td width='100%'><p align='center'><img src='"
-		  . $c->uri_for( '/files/index' . $path . "$_" )
-		  . "' width='100%' id='$view_name'></p></td>\n";
+			    "<td width='100%'><p align='center'><img src='"
+			  . $c->uri_for( '/files/index' . $path . "$_" )
+			  . "' width='100%' id='$view_name'></p></td>\n";
 			$self->{'select_box'} .=
-		  "<option selected value='"
-		  . $c->uri_for( '/files/index' . $path . "$_" )
-		  . "'>$key</option>\n" ;
-		}else {
+			    "<option selected value='"
+			  . $c->uri_for( '/files/index' . $path . "$_" )
+			  . "'>$key</option>\n";
+		}
+		else {
 			$self->{'select_box'} .=
-		  "<option value='" . $c->uri_for( '/files/index' . $path . "$_" )
-		  . "'>$key</option>\n" ;
+			    "<option value='"
+			  . $c->uri_for( '/files/index' . $path . "$_" )
+			  . "'>$key</option>\n";
 		}
 	}
 	my $d = $self->__process_returned_form($c);

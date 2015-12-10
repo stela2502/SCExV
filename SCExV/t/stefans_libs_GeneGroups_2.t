@@ -1,7 +1,7 @@
 #! /usr/bin/perl
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More tests => 5;
 BEGIN { use_ok 'stefans_libs::GeneGroups' }
 
 use FindBin;
@@ -319,6 +319,7 @@ is_deeply( $data->GetAsHash( 'PC1', 'PC2' ), $exp, "Read the correct information
 
 #print "\$exp = ".root->print_perl_var_def( $data->GetAsHash( 'PC1', 'PC2' ) ) . ";\n";
 
+unlink ( $plugin_path . '/data/Output/problematic_MDS_2D.png' ) if ( -f  $plugin_path . '/data/Output/problematic_MDS_2D.png');
 $data->plotXY_fixed_Colors(
 	$plugin_path . '/data/Output/problematic_MDS_2D.png',
 	@{ $data->{'header'} }[ 1, 2 ],
@@ -327,6 +328,6 @@ $data->plotXY_fixed_Colors(
 	)
 );
 
-
+ok ( -f $plugin_path . '/data/Output/problematic_MDS_2D.png', "Fixed color plot" );
 #print "\$exp = ".root->print_perl_var_def(\@values ).";\n";
 

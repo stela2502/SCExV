@@ -1,3 +1,5 @@
+lib/stefans_libs/plot_old/
+t/data/Outpath/
 tmp.css
 root/tmp/
 .svn

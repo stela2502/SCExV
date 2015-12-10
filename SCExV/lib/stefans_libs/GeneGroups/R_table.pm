@@ -157,9 +157,9 @@ sub __split_line {
 }
 
 sub axies {
-	my ( $self, $geneX, $geneY ) = @_;
+	my ( $self, $geneX, $geneY, $img ) = @_;
 	unless ( defined $self->{'xa'}->{$geneX} ) {
-		$self->{'xa'}->{$geneX} = axis->new( 'x', 0, 800, '', 'min' );
+		$self->{'xa'}->{$geneX} = axis->new( 'x', 0, 800, '', 'min', $img );
 		map {
 			$self->{'xa'}->{$geneX}->Max($_);
 			$self->{'xa'}->{$geneX}->Min($_)
@@ -169,7 +169,7 @@ sub axies {
 		$self->{'xa'}->{$geneX}->resolveValue( $self->{'xa'}->{$geneX}->Min() );
 	}
 	unless ( defined $self->{'ya'}->{$geneY} ) {
-		$self->{'ya'}->{$geneY} = axis->new( 'y', 0, 800, '', 'min' );
+		$self->{'ya'}->{$geneY} = axis->new( 'y', 0, 800, '', 'min',$img );
 		map {
 			$self->{'ya'}->{$geneY}->Max($_);
 			$self->{'ya'}->{$geneY}->Min($_)
@@ -185,7 +185,7 @@ sub plotXY_fixed_Colors {
 	my ( $self, $filename, $geneX, $geneY, $colors ) = @_;
 	Carp::confess(
 		"I need an R_table object contining the color information at start up")
-	  unless ( ref($colors) eq ref($self) );
+	  unless ( ref($colors) eq ref($self) || ref($colors) eq "data_table" );
 	## the two tables have the same order of samples.
 	$geneX ||= '';
 	$geneY ||= '';
@@ -196,7 +196,7 @@ sub plotXY_fixed_Colors {
 		$geneY = @{ $self->{'header'} }[2];
 	}
 	my $im = new GD::Image( 800, 800 );
-	my ( $xaxis, $yaxis ) = $self->axies( $geneX, $geneY );
+	my ( $xaxis, $yaxis ) = $self->axies( $geneX, $geneY, $im );
 	my ( $xpos, $ypos, @colors, $id );
 	($xpos) = $self->Header_Position($geneX);
 	($ypos) = $self->Header_Position($geneY);
@@ -225,19 +225,19 @@ sub plotXY_fixed_Colors {
 			);
 		}
 	}
-	$xaxis->plot(
+	$xaxis->plot_without_digits(
 		$im,
 		$yaxis->resolveValue(
 			( $yaxis->min_value() + $yaxis->max_value() ) / 2
 		),
-		$color->{'black'}
+		$color->{'black'}, '',2
 	);
-	$yaxis->plot(
+	$yaxis->plot_without_digits(
 		$im,
 		$xaxis->resolveValue(
 			( $xaxis->min_value() + $xaxis->max_value() ) / 2
 		),
-		$color->{'black'}
+		$color->{'black'}, '',2
 	);
 	$self->writePicture( $im, $filename );
 	open( OUT, ">" . $filename . ".info" );
@@ -259,6 +259,8 @@ It returns a plot color object that is initialized with this color set.
 
 sub rainbow_colors {
 	my ( $self, $path, $im, $n ) = @_;
+	$n = 2 if ( $n == 1);
+	#Carp::confess ("rainbow_colors($self, $path, $im, $n)");
 	Carp::confess("Path problems? $path\n") unless ( -d $path );
 	return color->new( $im, 'white', "$path/rainbow_$n.cols" )
 	  if ( -f "$path/rainbow_$n.cols" );
@@ -275,7 +277,7 @@ sub rainbow_colors {
 sub plotXY {
 	my ( $self, $filename, $geneX, $geneY, $GeneGroups ) = @_;
 	my $im = new GD::Image( 800, 800 );
-	my ( $xaxis, $yaxis ) = $self->axies( $geneX, $geneY );
+	my ( $xaxis, $yaxis ) = $self->axies( $geneX, $geneY, $im );
 	my ( $xpos, $ypos, @colors, $id );
 	($xpos) = $self->Header_Position($geneX);
 	($ypos) = $self->Header_Position($geneY);
@@ -285,9 +287,11 @@ sub plotXY {
 	$cols++ if ( $cols == 0 );
 	my $map = root->filemap($filename);
 	my $color = $self->rainbow_colors( $map->{'path'}, $im, $cols );
-
+	my @data = $GeneGroups->splice_expression_table($self);
+	Carp::confess ( "I do not have data to plot" ) if ( scalar(@data) == 0 ); 
 	foreach my $group_table ( $GeneGroups->splice_expression_table($self) ) {
 		$colors[$id] = $color->getNextColor() unless ( defined $colors[$id] );
+		Carp::confess ( "Color is not defined!".root->print_perl_var_def( { ref( $color) => {%$color},  } ) ) unless ( defined $colors[$id] );
 		if ( defined $group_table->{'group_area'} )
 		{    ## the not grouped do not have this value
 			$im->rectangle(
@@ -318,19 +322,19 @@ sub plotXY {
 		$id++;
 	}
 
-	$xaxis->plot(
+	$xaxis->plot_without_digits(
 		$im,
 		$yaxis->resolveValue(
 			( $yaxis->min_value() + $yaxis->max_value() ) / 2
 		),
-		$color->{'black'}
+		$color->{'black'}, '',2
 	);
-	$yaxis->plot(
+	$yaxis->plot_without_digits(
 		$im,
 		$xaxis->resolveValue(
 			( $xaxis->min_value() + $xaxis->max_value() ) / 2
 		),
-		$color->{'black'}
+		$color->{'black'}, '',2
 	);
 	$self->writePicture( $im, $filename );
 	open( OUT, ">" . $filename . ".info" );

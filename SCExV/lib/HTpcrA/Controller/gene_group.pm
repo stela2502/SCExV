@@ -65,11 +65,8 @@ sub update_form {
 
 sub index : Path : Args(0) : Form {
 	my ( $self, $c ) = @_;
+	$self->check($c,'upload');
 	$c->model('Menu')->Reinit();
-	unless ( $self->file_upload($c) ) {    ## there are no uploaded files!
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
-	}
 	unless ( $c->form->submitted ) {
 		unlink( $self->path($c) . "R.error" )
 		  if ( -f $self->path($c) . "R.error" );
@@ -116,7 +113,7 @@ sub index : Path : Args(0) : Form {
 		  . '"></script>' );
 	$c->form->type('TT2');
 
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/gene_group.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/gene_group.tt2' );
 	$c->stash->{'template'} = 'gene_group.tt2';
 }
 

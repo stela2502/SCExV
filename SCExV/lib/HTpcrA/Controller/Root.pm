@@ -111,7 +111,7 @@ Standard 404 error page
 
 sub default : Path {
 	my ( $self, $c ) = @_;
-	$c->response->body('Page not found');
+	$c->response->body('Page not found'. '</br>'. $c->path_to('.') ."</br>". $c->path_to( 'root', 'src' ) );
 	$c->response->status(404);
 }
 
