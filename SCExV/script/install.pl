@@ -161,7 +161,8 @@ $OK += $patcher -> replace_string( "Home .*", "Home $install_path" );
 $OK += $patcher -> replace_string( "\tform_path .*", "\tform_path $install_path"."src/form/");
 
 #Carp::confess ( $patcher->{'str_rep'}. "written to file ".$patcher ->{'filename'}  );
-Carp::confess ( "I could not patch the config file!\n" ) unless ( $OK==3);
+## Carp::confess ( "I could not patch the config file!\n" ) unless ( $OK==3);
+## not important any longer as the HTpcrA.pm file is patched directly!
 print $patcher;
 
 $patcher -> write_file();
