@@ -29,7 +29,7 @@ Catalyst Controller.
 sub index : Path : Form {
 	my ( $self, $c, @args ) = @_;
 	#my $hash = $self->config_file( $c, 'dropping_samples.txt' );
-	my $path = $c->session_path();
+	my $path = $self->check($c);
 	
 	$self->slurp_Heatmaps( $c, $path );
 	
@@ -73,7 +73,7 @@ sub index : Path : Form {
 		$self->R_remove_samples( $c, $self->__process_returned_form($c) );
 	}
 
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/dropsamples.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/dropsamples.tt2' );
 	$c->stash->{'template'} = 'DropSamples.tt2';
 }
 

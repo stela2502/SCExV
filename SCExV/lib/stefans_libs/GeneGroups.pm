@@ -266,6 +266,12 @@ sub group4 {
 
 sub plot{
 	my ( $self, $outfile, $geneA, $geneB ) = @_;
+	if ( defined $self->{'old_grouping'} ){ ## should definitely be true in version 0.81
+		my $i = 0;
+		my $right_order = { map { $_ => $i ++} @{$self->{'old_grouping'}->GetAsArray('Samples')} };
+		my @reorder = map{ $right_order->{$_} } @{$self->{'data'}->GetAsArray('Samples')};
+		$self->{'old_grouping'}->{'data'} = [ @{$self->{'old_grouping'}->{'data'}}[@reorder]];
+	}
 	if ( defined $self->{'old_grouping'} && $self->nGroup() == 0 ){
 		return $self->{'data'}->plotXY_fixed_Colors( $outfile,$geneA, $geneB, $self->{'old_grouping'} );
 	}

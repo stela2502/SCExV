@@ -293,8 +293,7 @@ sub run_first : Local : Form {
 
 sub re_run : Local {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->path($c);
-	$self->check($c,'upload');
+	my $path = $self->check($c,'upload');
 	my $dataset = $self->defined_or_set_to_default( $self->config_file( $c, 'rscript.Configs.txt' ), $self->init_dataset() );
 	$args[0] ||= '';
 	if ( -f $path . "/" . $args[0] ) {
@@ -320,8 +319,7 @@ sub re_run : Local {
 
 sub index : Path : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->path($c);
-	$self->check($c,'upload');
+	my $path = $self->check($c,'upload');
 	if ( -f $path . "RandomForest_create_groupings.R" ) {
 		chdir($path);
 		system(
@@ -450,7 +448,7 @@ sub index : Path : Form {
 		  "<h3>Show expression for </h3>" . $c->stash->{'figure_2d'};
 	}
 	$c->form->type('TT2');
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/analysis.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/analysis.tt2' );
 	$c->stash->{'template'} = 'analyse.tt2';
 }
 

@@ -48,9 +48,11 @@ sub check {
 	my ( $self, $c, $what ) = @_;
 	$what ||= 'analysis';
 	my $path = $c->session_path();
-	unless ( -f $path . "/norm_data.RData" ) {
-		$c->res->redirect( $c->uri_for("/files/upload/") );
-		$c->detach();
+	unless ( $what eq 'nothing' ){
+		unless ( -f $path . "/norm_data.RData" ) {
+			$c->res->redirect( $c->uri_for("/files/upload/") );
+			$c->detach();
+		}
 	}
 	if ( $what eq 'analysis' ) {
 		unless ( -d $path . 'webGL' ) {
@@ -59,7 +61,9 @@ sub check {
 		}
 	}
 	$c->model('Menu')->Reinit();
-	return 1;
+	$self->file_upload( $c, {});
+	$c->cookie_check();
+	return $path;
 }
 
 sub colors_Hex {

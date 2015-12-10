@@ -53,8 +53,7 @@ sub index_form {
 
 sub index : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $c->session_path();
-	$self->check($c);
+	my $path = $self->check($c);
 	
 	my @files = $self->index_form( $c, $path );
 
@@ -76,14 +75,12 @@ sub index : Local : Form {
 		$self->index_form( $c, $path );
 
 	}
-
 	$c->stash->{'template'} = 'CustomGroupingsDoc.tt2';
 }
 
 sub samplenames : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $c->session_path();
-	$self->check($c);
+	my $path = $self->check($c);
 
 	$c->form->field(
 		'type'     => 'textarea',
@@ -113,14 +110,12 @@ sub samplenames : Local : Form {
 			$c->detach();
 		}
 	}
-
 	$c->stash->{'template'} = 'SampleNameGroups.tt2';
 }
 
 sub reorder : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $c->session_path();
-	$self->check($c);
+	my $path = $self->check($c);
 	
 	$self->source_groups($c);
 	$self->JavaScript($c);

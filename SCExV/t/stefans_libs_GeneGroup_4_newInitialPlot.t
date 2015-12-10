@@ -31,3 +31,9 @@ $gg->read_old_grouping( $plugin_path ."/data/ggplot4/2D_data_color.xls" );
 unlink( $plugin_path ."/data/ggplot4/Output/CD45.2.PE.Texas.Red.A.CD55.PE.A.oldG.png" ) if ( -f $plugin_path ."/data/ggplot4/Output/CD45.2.PE.Texas.Red.A.CD55.PE.A.oldG.png" );
 $gg->plot($plugin_path ."/data/ggplot4/Output/CD45.2.PE.Texas.Red.A.CD55.PE.A.oldG.png", "CD45.2.PE.Texas.Red.A", "CD55.PE.A" );
 
+unlink( $plugin_path ."/data/ggplot4/Output/Texas.Red.A.CD55.PE.A.CD45.2.PE.Texas.Red.A.png" ) if ( -f $plugin_path ."/data/ggplot4/Output/Texas.Red.A.CD55.PE.A.CD45.2.PE.Texas.Red.A.png" );
+$gg->plot($plugin_path ."/data/ggplot4/Output/Texas.Red.A.CD55.PE.A.CD45.2.PE.Texas.Red.A.png", "CD55.PE.A" , "CD45.2.PE.Texas.Red.A");
+
+system( 'display '. $plugin_path ."/data/ggplot4/Output/Texas.Red.A.CD55.PE.A.CD45.2.PE.Texas.Red.A.png");
+
+#print "\$exp = ".root->print_perl_var_def( $test_object -> {'data_table'}->GetAsArray('Sample-Name') ).";\n";
