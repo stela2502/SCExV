@@ -196,8 +196,13 @@ sub index : Path : Form {
 	if ( defined $geneB ) {
 		$gg->read_grouping( $self->path($c) . "Grouping.$geneA.$geneB" )
 		  if ( -f $self->path($c) . "Grouping.$geneA.$geneB" );
-		$data->plotXY( $self->path($c) . "Grouping.$geneA.$geneB.png",
-			$geneA, $geneB, $gg );
+		$gg->read_old_grouping( $self->path($c)."../2D_data_color.xls" );
+		$gg->{'data'} = $data;
+		$gg->plot( $self->path($c) . "Grouping.$geneA.$geneB.png",
+			$geneA, $geneB);
+		if ( $gg->nGroup() == 0 ){
+			$c->stash->{'warning'} = "The sample colors are taken from the last active grouping.";
+		}
 		$c->stash->{'data'} =
 		  $c->uri_for(
 			'/files/index/' . $self->path($c) . "Grouping.$geneA.$geneB.png" );

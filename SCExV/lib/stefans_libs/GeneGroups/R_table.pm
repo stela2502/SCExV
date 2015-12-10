@@ -185,7 +185,7 @@ sub plotXY_fixed_Colors {
 	my ( $self, $filename, $geneX, $geneY, $colors ) = @_;
 	Carp::confess(
 		"I need an R_table object contining the color information at start up")
-	  unless ( ref($colors) eq ref($self) );
+	  unless ( ref($colors) eq ref($self) || ref($colors) eq "data_table" );
 	## the two tables have the same order of samples.
 	$geneX ||= '';
 	$geneY ||= '';
