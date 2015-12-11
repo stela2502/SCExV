@@ -287,7 +287,7 @@ sub rainbow_colors {
 	print OUT "cols <- rainbow($n)\n"
 	  . "write.table (cbind( names = cols, t(col2rgb( cols ) )), file='$path/rainbow_$n.cols', sep='\\t',  row.names=F,quote=F )\n";
 	close(OUT);
-	system("R CMD BATCH $path/rainbow_$n.R");
+	system('/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- '."$path/rainbow_$n.R". '"' );
 	Carp::confess ( "The expected color definitiopn file was not created!\n$!") unless ( -f "$path/rainbow_$n.cols" );
 	unlink("$path/rainbow_$n.R");
 	unlink("$path/rainbow_$n.Rout");
