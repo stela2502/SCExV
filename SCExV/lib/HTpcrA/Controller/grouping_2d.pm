@@ -197,6 +197,7 @@ sub index : Path : Form {
 		$gg->read_grouping( $self->path($c) . "Grouping.$geneA.$geneB" )
 		  if ( -f $self->path($c) . "Grouping.$geneA.$geneB" );
 		$gg->read_old_grouping( $self->path($c)."../2D_data_color.xls" );
+		Carp::confess ( "file not found: ".$self->path($c)."../2D_data_color.xls" ) unless ( -f $self->path($c)."../2D_data_color.xls" );
 		$gg->{'data'} = $data;
 		$gg->plot( $self->path($c) . "Grouping.$geneA.$geneB.png",
 			$geneA, $geneB);

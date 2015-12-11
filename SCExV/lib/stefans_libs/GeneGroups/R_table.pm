@@ -217,9 +217,10 @@ sub plotXY_fixed_Colors {
 	my $map = root->filemap($filename);
 	my $color =
 	  $self->rainbow_colors( $map->{'path'}, $im, scalar( keys %$order ) );
-	  
+	#warn  $colors->AsString(). root->print_perl_var_def( {map { $_ => $color->{$_} } keys %$color} ) ."\n";  
 	while ( my ( $col, $lines ) = each %$order ) {
 		my $this_color = $color->{$col};
+		#warn "$this_color\n";
 		foreach my $i (@$lines) {
 
  #print "on line $i: xpos $xpos value ".@{ @{ $self->{'data'} }[$i] }[$xpos]." and ypos $ypos value ".@{ @{ $self->{'data'} }[$i] }[$ypos] ." together with the color $this_color\n";
@@ -278,6 +279,7 @@ sub rainbow_colors {
 	my ( $self, $path, $im, $n ) = @_;
 	$n = 2 if ( $n == 1);
 	#Carp::confess ("rainbow_colors($self, $path, $im, $n)");
+	#warn  "rainbow_colors($self, $path, $im, $n)". "  $path/rainbow_$n.cols";
 	Carp::confess("Path problems? $path\n") unless ( -d $path );
 	return color->new( $im, 'white', "$path/rainbow_$n.cols" )
 	  if ( -f "$path/rainbow_$n.cols" );
@@ -286,6 +288,7 @@ sub rainbow_colors {
 	  . "write.table (cbind( names = cols, t(col2rgb( cols ) )), file='$path/rainbow_$n.cols', sep='\\t',  row.names=F,quote=F )\n";
 	close(OUT);
 	system("R CMD BATCH $path/rainbow_$n.R");
+	Carp::confess ( "The expected color definitiopn file was not created!\n$!") unless ( -f "$path/rainbow_$n.cols" );
 	unlink("$path/rainbow_$n.R");
 	unlink("$path/rainbow_$n.Rout");
 	return color->new( $im, 'white', "$path/rainbow_$n.cols" );
