@@ -22,8 +22,7 @@ Catalyst Controller.
 
 sub index : Path : Form {
 	my ( $self, $c ) = @_;
-	my $path = $c->session->{'path'};
-	$self->check($c);
+	my $path = $self->check($c);
 	
 	$self->{'form_array'} = [];
 	my $hash = $self->config_file( $c, 'Pvalues.Configs.txt' );
@@ -107,7 +106,7 @@ sub index : Path : Form {
 	  . '<link type="text/css" href="'
 	  . $c->uri_for("/css/table_sorter.css")
 	  . '" rel="stylesheet" />' . "\n");
-	$c->form->template( $c->path_to( 'root', 'src' ) . '/form/Pvalues_form.tt2' );
+	$c->form->template( $c->config->{'root'}.'src'. '/form/Pvalues_form.tt2' );
 	$c->stash->{'template'} = 'pvalues.tt2';
 }
 

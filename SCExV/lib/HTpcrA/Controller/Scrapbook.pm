@@ -29,12 +29,11 @@ Catalyst Controller.
 
 sub index : Local : Form {
 	my ( $self, $c, @args ) = @_;
+	$self->check($c,'upload');
 	my $path = $self->path($c);
-	$c->cookie_check();
-	$c->model('Menu')->Reinit();
-	$self->file_upload($c);
 	$c->stash->{'scrapbook'} = $c->model('scrapbook')->init( $c->scrapbook() )
 	  ->AsString( $c->uri_for( '/files/index/' . $path ) );
+	$self->file_upload( $c, {});
 	$c->stash->{'template'} = 'ScrapBook.tt2';
 }
 
@@ -58,9 +57,8 @@ sub ajaxgroups : Local {
 
 sub imageadd : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->path($c);
 	$self->check($c,'upload');
-
+	my $path = $self->path($c);
 	$c->form->field(
 		'type'     => 'textarea',
 		'cols'     => 60,
@@ -103,7 +101,8 @@ sub imageadd : Local : Form {
 		$c->detach();
 	}
 
-  #$c->form->template( $c->path_to( 'root', 'src' ) . '/form/dropsamples.tt2' );
+  #$c->form->template( $c->config->{'root'}.'src'. '/form/dropsamples.tt2' );
+    $self->file_upload( $c, {});
 	$c->stash->{'template'} = 'imageadd.tt2';
 }
 
@@ -128,9 +127,8 @@ sub screenshotadd : Local {
 
 sub textadd : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->path($c);
-	$c->cookie_check();
-	$c->model('Menu')->Reinit();
+	my $path = $self->check($c, 'nothing');
+
 	$c->form->field(
 		'type'     => 'textarea',
 		'cols'     => 60,
@@ -147,7 +145,6 @@ sub textadd : Local : Form {
 		$c->res->redirect( $c->uri_for("/scrapbook/index/") );
 		$c->detach();
 	}
-
 	$c->stash->{'template'} = 'imageadd.tt2';
 }
 

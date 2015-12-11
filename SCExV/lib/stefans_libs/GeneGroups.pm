@@ -60,7 +60,7 @@ sub new {
 		'group_file' => undef,
 		'GS'         => {},
 		'order'      => [],
-		'data_file'  => '',
+		'data_file'  => ' ',
 		'data'       => undef,
 	};
 
@@ -96,7 +96,7 @@ sub nGroup {
 
 sub read_data {
 	my ( $self, $filename, $use_data_table ) = @_;
-	return $self->{'data'} if ( $self->{'data_file'} eq $filename );
+	return $self->{'data'} if ( $self->{'data_file'} eq $filename && defined  $self->{'data_file'});
 	if ( -f $filename ) {
 		$self->{'data_file'} = $filename;
 		if ($use_data_table) {
@@ -117,6 +117,14 @@ sub read_data {
 	  if (
 		ref( return $self->{'data'} ) eq 'stefans_libs::GeneGroups::R_table' );
 	Carp::confess("I can not open the file '$filename'!\n$!\n");
+}
+
+sub read_old_grouping{
+	my ( $self, $filename ) = @_;
+	$self->{'old_grouping'} = stefans_libs::GeneGroups::R_table->new({'filename'=>$filename});
+	my $e = "Samples, red, green, blue, colorname";
+	Carp::confess ( "I need a file containing the columns $e; NOT ".join(", ",@{$self->{'old_grouping'}->{'header'}})) unless (  join(", ",@{$self->{'old_grouping'}->{'header'}}) eq $e );
+	return $self->{'old_grouping'};
 }
 
 sub export_R_exclude_samples {
@@ -254,6 +262,22 @@ sub group4 {
 		push( @{ $self->{'order'} }, $key );
 	}
 	return $self->{'GS'}->{$key};
+}
+
+sub plot{
+	my ( $self, $outfile, $geneA, $geneB ) = @_;
+	if ( defined $self->{'old_grouping'} ){ ## should definitely be true in version 0.81
+		my $i = 0;
+		my $right_order = { map { $_ => $i ++} @{$self->{'old_grouping'}->GetAsArray('Samples')} };
+		my @reorder = map{ $right_order->{$_} } @{$self->{'data'}->GetAsArray('Samples')};
+		$self->{'old_grouping'}->{'data'} = [ @{$self->{'old_grouping'}->{'data'}}[@reorder]];
+	}
+	if ( defined $self->{'old_grouping'} && $self->nGroup() == 0 ){
+		return $self->{'data'}->plotXY_fixed_Colors( $outfile,$geneA, $geneB, $self->{'old_grouping'} );
+	}
+	else {
+		return $self->{'data'}->plotXY($outfile,$geneA, $geneB, $self );
+	}
 }
 
 sub read_grouping {

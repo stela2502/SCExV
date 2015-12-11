@@ -132,7 +132,7 @@ text.build();
 	$c->form->medthod('post');
 	$c->form->jsfunc('submitForm();');
 	$c->form->template(
-		$c->path_to( 'root', 'src' ) . '/form/MakeLabBookEntry.tt2' );
+		$c->config->{'root'}.'src'. '/form/MakeLabBookEntry.tt2' );
 	$BODY .= $c->form->render() . "\n</body>\n</html>\n";
 
 	if ( $c->form->submitted && $c->form->validate ) {

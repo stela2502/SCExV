@@ -158,25 +158,34 @@ sub __split_line {
 
 sub axies {
 	my ( $self, $geneX, $geneY, $img ) = @_;
+	my $asc = 0.01;
 	unless ( defined $self->{'xa'}->{$geneX} ) {
 		$self->{'xa'}->{$geneX} = axis->new( 'x', 0, 800, '', 'min', $img );
+		$self->{'xa'}->{$geneX}->{'no_rescale'} = 1;
 		map {
 			$self->{'xa'}->{$geneX}->Max($_);
 			$self->{'xa'}->{$geneX}->Min($_)
 		} @{ $self->GetAsArray($geneX) };
+	#	my $t = ($self->{'xa'}->{$geneX}->Max() - $self->{'xa'}->{$geneX}->Min($_)) * $asc;
+	#	$self->{'xa'}->{$geneX}->Max( $self->{'xa'}->{$geneX}->Max() + $t );
+	#	$self->{'xa'}->{$geneX}->Min($self->{'xa'}->{$geneX}->Min() - $t );
 		$self->{'xa'}->{$geneX}->max_value( $self->{'xa'}->{$geneX}->Max() );
 		$self->{'xa'}->{$geneX}->min_value( $self->{'xa'}->{$geneX}->Min() );
-		$self->{'xa'}->{$geneX}->resolveValue( $self->{'xa'}->{$geneX}->Min() );
+		$self->{'xa'}->{$geneX}->getMinimumPoint();
 	}
 	unless ( defined $self->{'ya'}->{$geneY} ) {
 		$self->{'ya'}->{$geneY} = axis->new( 'y', 0, 800, '', 'min',$img );
+		$self->{'ya'}->{$geneY}->{'no_rescale'} = 1;
 		map {
 			$self->{'ya'}->{$geneY}->Max($_);
 			$self->{'ya'}->{$geneY}->Min($_)
 		} @{ $self->GetAsArray($geneY) };
+	#	my $t = ($self->{'ya'}->{$geneY}->Max() - $self->{'ya'}->{$geneY}->Min($_)) * $asc;
+	#	$self->{'ya'}->{$geneY}->Max($self->{'ya'}->{$geneY}->Max() + $t );
+	#	$self->{'ya'}->{$geneY}->Min( $self->{'ya'}->{$geneY}->Min()- $t );
 		$self->{'ya'}->{$geneY}->max_value( $self->{'ya'}->{$geneY}->Max() );
 		$self->{'ya'}->{$geneY}->min_value( $self->{'ya'}->{$geneY}->Min() );
-		$self->{'ya'}->{$geneY}->resolveValue( $self->{'ya'}->{$geneY}->Min() );
+		$self->{'ya'}->{$geneY}->getMinimumPoint();
 	}
 	return ( $self->{'xa'}->{$geneX}, $self->{'ya'}->{$geneY} );
 }
@@ -185,7 +194,9 @@ sub plotXY_fixed_Colors {
 	my ( $self, $filename, $geneX, $geneY, $colors ) = @_;
 	Carp::confess(
 		"I need an R_table object contining the color information at start up")
-	  unless ( ref($colors) eq ref($self) );
+	  unless ( ref($colors) eq ref($self) || ref($colors) eq "data_table" );
+	
+	#Carp::confess ( "mine:\n".join("; ",@{$self->{'header'}}[0],@{$self->GetAsArray('Samples')}) ."\nColors:\n".join("; ",@{$colors->{'header'}}[0],@{$colors->GetAsArray('Samples')}) );
 	## the two tables have the same order of samples.
 	$geneX ||= '';
 	$geneY ||= '';
@@ -213,13 +224,13 @@ sub plotXY_fixed_Colors {
 
  #print "on line $i: xpos $xpos value ".@{ @{ $self->{'data'} }[$i] }[$xpos]." and ypos $ypos value ".@{ @{ $self->{'data'} }[$i] }[$ypos] ." together with the color $this_color\n";
 			$im->filledRectangle(
-				$xaxis->resolveValue( @{ @{ $self->{'data'} }[$i] }[$xpos] ) -
+				$self->min2($xaxis->resolveValue( @{ @{ $self->{'data'} }[$i] }[$xpos] )) -
 				  2,
-				$yaxis->resolveValue( @{ @{ $self->{'data'} }[$i] }[$ypos] ) -
+				$self->min2($yaxis->resolveValue( @{ @{ $self->{'data'} }[$i] }[$ypos] )) -
 				  2,
-				$xaxis->resolveValue( @{ @{ $self->{'data'} }[$i] }[$xpos] ) +
+				$self->min2($xaxis->resolveValue( @{ @{ $self->{'data'} }[$i] }[$xpos] )) +
 				  2,
-				$yaxis->resolveValue( @{ @{ $self->{'data'} }[$i] }[$ypos] ) +
+				$self->min2($yaxis->resolveValue( @{ @{ $self->{'data'} }[$i] }[$ypos] )) +
 				  2,
 				$this_color
 			);
@@ -250,6 +261,12 @@ sub plotXY_fixed_Colors {
 	return ( $xaxis, $yaxis );
 }
 
+sub min2{
+	my ($self, $d) =@_;
+	$d = 2 if ( $d < 2);
+	$d = 798 if ( $d > 798);
+	$d
+}
 =head2 rainbow_colors ($im, $n)
 
 This function uses R to create a rainbow color set.

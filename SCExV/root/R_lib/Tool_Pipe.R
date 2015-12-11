@@ -211,7 +211,9 @@ read.FACS.set  <- function(fnames){
 			
 			ttab <- read.FACS(fnames[i])
 			ttab <- ttab[,order(colnames(ttab))]
-			rownames(ttab) <- paste(rownames(ttab),".P",i-1,sep="")
+			if ( length( grep( "P\\d+$", rownames(ttab))) == 0 ) {
+				rownames(ttab) <- paste(rownames(ttab),".P",i-1,sep="")
+			}
 			## check whether the gene names are axactly the same
 			if ( is.null(etab)){
 				etab <-ttab
@@ -269,7 +271,9 @@ read.PCR.set <- function(fnames, use_pass_fail){
 			if ( ! fnames[i] == '../---' ){
 				ttab <- read.PCR(fnames[i], use_pass_fail)
 				ttab <- ttab[,order(colnames(ttab))]
-				rownames(ttab) <- paste(rownames(ttab),".P",i-1,sep="")
+				if ( length( grep( "P\\d+$", rownames(ttab))) == 0 ) {
+					rownames(ttab) <- paste(rownames(ttab),".P",i-1,sep="")
+				}
 				## check whether the gene names are axactly the same
 				if ( is.null(etab)){
 					etab <-ttab

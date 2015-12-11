@@ -13,7 +13,9 @@
 <p>Here you are able to create XY scatter plot based groupings. Select a gene for the x axis and one for the y axis. Submit the form and you will see the requested scatterplot.</p>
 <p>Please select a are using the mouse and submit the form again. The figure will be updated to show the selected area and highlight the selected samples.</p>
 
-<span id='warning'><ul><li>Groups without a single sample in will break the analysis R script</li><li>You must not select all samples as this will also break the analysis R script</li></ul></span>
+[% IF warning %]
+<span id='warning'><p>[% warning %]</p></span>
+[% END %]
 <div id="horizontalLine"></div>
 
 [% form.render %]

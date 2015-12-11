@@ -141,24 +141,31 @@ sub copy_files {
 
 
 ## patch the main function to include the new root path
-my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
-print "Before:".$patcher->print();
-my ($save, $save_home);
-$patcher -> {'str_rep'} =~ m/root (.*)/;
-$save = $1;
-$patcher -> {'str_rep'} =~ m/Home (.*)/;
-$save_home = $1;
-#Carp::confess ($patcher->{'filename'}. "  root_save = $save; Home save = $save_home\n" );
 
-my $OK = $patcher -> replace_string( "root .*", "root $install_path" );
-$OK += $patcher -> replace_string( "Home .*", "Home $install_path" );
-$OK += $patcher -> replace_string( "\tform_path .*", "\tform_path $install_path"."src/form/");
-
-#Carp::confess ( $patcher->{'str_rep'}. "written to file ".$patcher ->{'filename'}  );
-Carp::confess ( "I could not patch the config file!\n" ) unless ( $OK==3);
-print $patcher;
-
+## this is a horrible hack, but I have not found where the config would be loaded from!
+my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
+my $OK = $patcher -> replace_string( "\\sroot =\\> '[\\/\\w]*'," , " root => '$install_path',\nhome => '$install_path'," );
 $patcher -> write_file();
+
+#$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
+#print "Before:".$patcher->print();
+my ($save, $save_home);
+#$patcher -> {'str_rep'} =~ m/root (.*)/;
+#$save = $1;
+#$patcher -> {'str_rep'} =~ m/Home (.*)/;
+#$save_home = $1;
+##Carp::confess ($patcher->{'filename'}. "  root_save = $save; Home save = $save_home\n" );
+#
+#$OK = $patcher -> replace_string( "root .*", "root $install_path" );
+#$OK += $patcher -> replace_string( "Home .*", "Home $install_path" );
+#$OK += $patcher -> replace_string( "\tform_path .*", "\tform_path $install_path"."src/form/");
+#
+##Carp::confess ( $patcher->{'str_rep'}. "written to file ".$patcher ->{'filename'}  );
+### Carp::confess ( "I could not patch the config file!\n" ) unless ( $OK==3);
+### not important any longer as the HTpcrA.pm file is patched directly!
+#print $patcher;
+#
+#$patcher -> write_file();
 
 my $patcher2 = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
 my $options ='';
@@ -168,7 +175,7 @@ for ( my $i = 0; $i < @options; $i += 2 ){
 unless ( $options =~ m/ncore/ ) {
 	$options .= "\tncore => 1,\n";
 }
-my $OK2 = $patcher2 -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,", "root => '$install_path',\n$options" );
+my $OK2 = $patcher2 -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,", "$options" );
 $patcher2 -> write_file();
 
 my $replace = $install_path;
