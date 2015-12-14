@@ -4,6 +4,7 @@ options(rgl.useNULL=TRUE)
 library(rgl)
 library(RDRToolbox)
 library(vioplot)
+library(beanplot)
 
 library(RSvgDevice)
 
@@ -455,26 +456,77 @@ quality_of_fit <- function ( obj ) {
 	ret
 }
 
+col4bean <- function(x, tic='black'){
+	ret <- list()
+	for ( i in 1:length(x) ){
+		ret[[i]] <- c(x[i], tic )
+	}
+	ret
+}
 
-plot.violines <- function ( ma, groups.n, clus, boot = 1000, neg=NULL) {
+
+## plot.violines or plot.beans ( ma, groups.n, clus, boot, plot.neg, mv )
+## the min value (mv) has to be set to the mv in the data otherwise the factions in the plots will not work
+## the plot.neg value determines whether neg values should be included in the plot or not
+plot.beans <- function ( ma, groups.n, clus, boot = 1000, plot.neg=TRUE, mv=-20 ) {
+	ma <- t(ma)
+	n <- rownames(ma)
+	cols = col4bean(rainbow( groups.n ))
+	for ( i in 1:nrow( ma ) ) {
+		print (paste( 'plot.beans working on gene', n[i] ) )
+		png( file=paste(n[i],'.png',sep=''), width=800,height=800)
+		lila <- vector('list', groups.n)
+		lila$names <- NULL
+		for( a in 1:groups.n){
+			lila[[a]]=ma[i,which(clus == a)]
+			lila$names <- c( lila$names, paste(length(which(lila[[a]] != mv)), length(lila[[a]]) ,sep='/' ) )
+			if ( ! plot.neg ){
+				lila[[a]][which(lila[[a]] == mv)] <- NA
+			}
+		}
+		lila$main <- n[i]
+		lila$what <- c(1,1,0,1) ## not plot medain line
+		lila$col <- cols
+		try(do.call(beanplot,lila), silent=F )
+		dev.off()
+		if ( plotsvg == 1 ) {
+			devSVG( file=paste(n[i],'.svg',sep=''), width=6,height=6)
+			lila$cex.axis=0.5
+			try(do.call(beanplot,lila), silent=F )
+			dev.off()
+		}
+	}
+}
+
+
+plot.violines <- function ( ma, groups.n, clus, boot = 1000, plot.neg=FALSE, mv=-20) {
 	ma <- t(ma)
 	n <- rownames(ma)
 	cols = rainbow( groups.n )
-	ma[which( ma == -20)] <- NA
 	for ( i in 1:nrow( ma ) ) {
 		print (paste( 'plot.violines working on gene', n[i] ) )
 		png( file=paste(n[i],'.png',sep=''), width=800,height=800)
 		#create color info
 		lila <- vector('list', groups.n)
+		lila$names <- NULL
 		for( a in 1:groups.n){
 			lila[[a]]=ma[i,which(clus == a)]
+			lila$names <- c( lila$names, paste(length(which(lila[[a]] != mv)), length(lila[[a]]) ,sep='/' ) )
+			if ( ! plot.neg ){
+				lila[[a]][which(lila[[a]] == mv)] <- NA
+			}
 		}
 		names(lila)[1]= 'x'
 		lila$col= cols
 		lila$main=n[i]
-		lila$neg = neg
+		if ( ! plot.neg ) {
+			lila$neg = mv
+		}else{
+			lila$neg = NULL
+		}
+		
 		lila$h = 0.3
-		if ( ! is.null(neg) ){
+		if ( ! is.null(plot.neg) ){
 			lila$drawRect = FALSE
 		}
 		try(do.call(vioplot,lila), silent=F )
@@ -488,7 +540,8 @@ plot.violines <- function ( ma, groups.n, clus, boot = 1000, neg=NULL) {
 	}
 }
 
-analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='MDS', ctype='hierarchical clust', ...){
+analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='MDS', 
+		ctype='hierarchical clust', beanplots=TRUE, move.neg = FALSE, plot.neg=TRUE, ...){
 	
 	if ( exists( 'userGroups' )) {
 		userGroups <- checkGrouping(userGroups, obj)
@@ -501,13 +554,13 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 		onwhat="Expression"
 	}
 	obj <- mds.and.clus(obj,onwhat= onwhat,groups.n = groups.n, cmethod, clusterby=clusterby,ctype=ctype, ...)
-
+	
 	plotcoma(obj)
 	if ( length(which(obj$clusters == 0)) > 0 ){
 		obj$clusters <- obj$clusters + 1
 	}
 	obj$colors <- apply( t(col2rgb( cols ) ), 1, paste,collapse=' ')[obj$clusters]
-		
+	
 	## plot the mds data
 	try(plotDR( obj$mds.coord[order(obj$clusters),], col=cols, labels=obj$clusters[order(obj$clusters)], cex=par3d('cex'=0.01)),silent=F)
 	try(writeWebGL( width=470, height=470 ),silent=F)
@@ -521,17 +574,6 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 	rownames(sample.cols.rgb) <- rownames(obj$PCR)[order(obj$clusters)]
 	write.table ( sample.cols.rgb , file = './2D_data_color.xls' )
 	write.table (cbind( names = cols, t(col2rgb( cols))), file='./webGL/MDS_2D.png.cols', sep='\\t',  row.names=F,quote=F )
-	
-	## plot the violoines
-	if ( ! is.null(obj$FACS)){
-		plot.violines( obj$FACS, groups.n, clus =  obj$clusters, boot = 1000 )
-	}
-	if ( zscoredVioplot == 1 ){
-		plot.violines( obj$z$PCR, groups.n, clus =  obj$clusters, boot = 1000  )
-	}
-	else {
-		plot.violines( obj$PCR, groups.n, clus =  obj$clusters, boot = 1000, neg=0  )
-	}
 	
 	obj$quality_of_fit = quality_of_fit(obj)
 #	browser()
@@ -550,31 +592,31 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 	## plot the heatmaps
 	
 	try( PCR.heatmap ( list( data= t(obj$z$PCR)[,order(obj$clusters)], genes = colnames(obj$z$PCR)), 
-			'./PCR_color_groups', 
-			title='PCR data', 
-			ColSideColors=cols[obj$clusters][order(obj$clusters)],
-			RowSideColors=RowSideColors,
-			width=12,
-			height=6, 
-			margins = c(1,11), 
-			lwid = c( 1,6), lhei=c(1,5),
-			Rowv=RowV,
-			Colv=F,
-			hclustfun = function(c){hclust( c, method=cmethod)}
-	), silent=T)
+					'./PCR_color_groups', 
+					title='PCR data', 
+					ColSideColors=cols[obj$clusters][order(obj$clusters)],
+					RowSideColors=RowSideColors,
+					width=12,
+					height=6, 
+					margins = c(1,11), 
+					lwid = c( 1,6), lhei=c(1,5),
+					Rowv=RowV,
+					Colv=F,
+					hclustfun = function(c){hclust( c, method=cmethod)}
+			), silent=T)
 	
 #	try( collapsed_heatmaps (obj, what='PCR', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
 #	try( collapsed_heatmaps (obj, what='FACS', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
 	try( PCR.heatmap ( list( data= t(obj$z$PCR), genes = colnames(obj$z$PCR)), 
-				'./PCR', 
-				title='PCR data', 
-				ColSideColors=cols[obj$clusters],
-				width=12,
-				height=6, 
-				margins = c(1,11), 
-				lwid = c( 1,6), lhei=c(1,5),
-				hclustfun = function(c){hclust( c, method=cmethod)}
-	), silent=T)
+					'./PCR', 
+					title='PCR data', 
+					ColSideColors=cols[obj$clusters],
+					width=12,
+					height=6, 
+					margins = c(1,11), 
+					lwid = c( 1,6), lhei=c(1,5),
+					hclustfun = function(c){hclust( c, method=cmethod)}
+			), silent=T)
 	try( FACS.heatmap ( list( data= t(obj$FACS), genes = colnames(obj$FACS)), 
 					'./facs', 
 					title='FACS data', 
@@ -585,20 +627,50 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 					margins = c(1,11), 
 					lwid = c( 1,6), lhei=c(1,5),
 					hclustfun = function(c){hclust( c, method=cmethod)}
-	), silent=T)
-
+			), silent=T)
+	
 	try( FACS.heatmap ( list( data= t(obj$FACS)[,order(obj$clusters)], genes = colnames(obj$FACS)), 
-				'./facs_color_groups', 
-				title='FACS data', 
-				ColSideColors=cols[obj$clusters][order(obj$clusters)],
-				width=12,
-				height=6, 
-				hc.col= obj$hc,
-				margins = c(1,11), 
-				lwid = c( 1,6), lhei=c(1,5),
-				Colv=F,
-				hclustfun = function(c){hclust( c, method=cmethod)}
-		), silent=T)
+					'./facs_color_groups', 
+					title='FACS data', 
+					ColSideColors=cols[obj$clusters][order(obj$clusters)],
+					width=12,
+					height=6, 
+					hc.col= obj$hc,
+					margins = c(1,11), 
+					lwid = c( 1,6), lhei=c(1,5),
+					Colv=F,
+					hclustfun = function(c){hclust( c, method=cmethod)}
+			), silent=T)
+	
+	ma  <- NULL
+	mv <- NULL
+	if ( zscoredVioplot == 1 ){
+		ma <- obj$z$PCR
+		mv <- -20
+	}else {
+		ma <- obj$PCR
+		mv <- 0
+	}
+	
+	if ( move.neg ){
+		neg <- which(ma == mv )
+		m <- min(ma[-neg])
+		mv <- m -1
+		ma[neg] = mv
+	}
+	if ( beanplots ) {
+		plot.funct <-  plot.beans
+	}else{
+		plot.funct <-  plot.violines
+	}
+
+	## plot the violoines
+	if ( ! is.null(obj$FACS)){
+		plot.funct( obj$FACS, groups.n, clus =  obj$clusters, boot = 1000, plot.neg=plot.neg, mv=mv )
+	}
+	print ( paste( 'plot.funct( ma , groups.n, clus =  obj$clusters, boot = 1000, plot.neg =',plot.neg,', mv =', mv))
+	plot.funct( ma , groups.n, clus =  obj$clusters, boot = 1000, plot.neg=plot.neg, mv = mv  )
+
 	obj
 }
 

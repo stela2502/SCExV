@@ -65,10 +65,40 @@ sub update_form {
 	push(
 		@{ $self->{'form_array'} },
 		{
-			'comment' => 'Vioplots only expressing cells',
+			'comment' => 'plot type',
+			'name'    => 'use_beans',
+			'options' => { '0' => 'vioplot', '1' => 'beanplot' },
+			'value' => $hash->{'use_beans'} ||= 1,
+			'required' => 1,
+		}
+	);
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment' => 'plot data',
 			'name'    => 'zscoredVioplot',
-			'options' => { '0' => 'No', '1' => 'Yes' },
+			'options' => { '0' => 'ct', '1' => 'z scored' },
 			'value' => $hash->{'zscoredVioplot'} ||= 1,
+			'required' => 1,
+		}
+	);
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment' => 'set not expressed value to min expression value -1',
+			'name'    => 'move_neg',
+			'options' => { '0' => 'No', '1' => 'Yes' },
+			'value' => $hash->{'move_neg'} ||= 1,
+			'required' => 1,
+		}
+	);
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment' => 'plot non-expressing cells',
+			'name'    => 'plot_neg',
+			'options' => { '0' => 'No', '1' => 'Yes' },
+			'value' => $hash->{'plot_neg'} ||= 1,
 			'required' => 1,
 		}
 	);
@@ -261,6 +291,9 @@ sub init_dataset {
 		'plotsvg'        => 0,
 		'zscoredVioplot' => 1,
 		'cluster_type'   => 'hierarchical clust',
+		'plot_neg' => 1,
+		'move_neg' => 1,
+		'use_beans' => 1,
 	};
 }
 
@@ -501,14 +534,30 @@ sub R_script {
 	else {
 		$script .= "groups.n <-$dataset->{'cluster_amount'}\n";
 	}
-
+	if ( $dataset->{'move_neg'} ) {
+		$script .= "move.neg <- TRUE\n" 
+	}else{
+		$script .= "move.neg <- FALSE\n" 
+	}
+	if ( $dataset->{'plot_neg'} ) {
+		$script .= "plot.neg <- TRUE\n" 
+	}else{
+		$script .= "plot.neg <- FALSE\n" 
+	}
+	if ( $dataset->{'use_beans'} ) {
+		$script .= "beanplots = TRUE\n";
+	}else{
+		$script .= "beanplots = FALSE\n";
+	}
 	$script .=
 	    "plotsvg = $dataset->{'plotsvg'}\n"
 	  . "zscoredVioplot = $dataset->{'zscoredVioplot'}\n"
 	  . "onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
 	  . " onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
 	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "
-	  . " ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot)\n"
+	  . " ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot"
+	  . ", move.neg = move.neg, plot.neg=plot.neg, beanplots=beanplots"
+	  . ")\n"
 	  . "\nsave( data, file='analysis.RData' )\n\n";
 
 	## now lets identify the most interesting genes:
