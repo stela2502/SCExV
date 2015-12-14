@@ -439,6 +439,7 @@ difference <- function ( x, obj ) {
 	ret
 }
 
+
 quality_of_fit <- function ( obj ) {
 	test <- obj$z$PCR
 	test[which(test ==  -20 ) ] = NA
@@ -482,6 +483,9 @@ plot.beans <- function ( ma, groups.n, clus, boot = 1000, plot.neg=TRUE, mv=-20 
 			lila$names <- c( lila$names, paste(length(which(lila[[a]] != mv)), length(lila[[a]]) ,sep='/' ) )
 			if ( ! plot.neg ){
 				lila[[a]][which(lila[[a]] == mv)] <- NA
+				if ( sum(is.na(lila[[a]]) ) == length( lila[[a]]) ){
+					lila[[a]] = c(0)
+				}
 			}
 		}
 		lila$main <- n[i]
@@ -491,7 +495,7 @@ plot.beans <- function ( ma, groups.n, clus, boot = 1000, plot.neg=TRUE, mv=-20 
 		dev.off()
 		if ( plotsvg == 1 ) {
 			devSVG( file=paste(n[i],'.svg',sep=''), width=6,height=6)
-			lila$cex.axis=0.5
+			#lila$cex.axis=0.5
 			try(do.call(beanplot,lila), silent=F )
 			dev.off()
 		}
