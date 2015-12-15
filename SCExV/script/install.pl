@@ -147,24 +147,24 @@ my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/H
 my $OK = $patcher -> replace_string( "root => '[\\/\\w]*'," , "root => '$install_path',\nhome => '$install_path'," );
 $patcher -> write_file();
 
-$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
-print "Before:".$patcher->print();
+#$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
+#print "Before:".$patcher->print();
 my ($save, $save_home);
-$patcher -> {'str_rep'} =~ m/root (.*)/;
-$save = $1;
-$patcher -> {'str_rep'} =~ m/Home (.*)/;
-$save_home = $1;
+#$patcher -> {'str_rep'} =~ m/root (.*)/;
+#$save = $1;
+#$patcher -> {'str_rep'} =~ m/Home (.*)/;
+#$save_home = $1;
 #Carp::confess ($patcher->{'filename'}. "  root_save = $save; Home save = $save_home\n" );
 
-$OK = $patcher -> replace_string( "root .*", "root $install_path" );
-$OK += $patcher -> replace_string( "Home .*", "Home $install_path" );
-$OK += $patcher -> replace_string( "\tform_path .*", "\tform_path $install_path"."src/form/");
+#$OK = $patcher -> replace_string( "root .*", "root $install_path" );
+#$OK += $patcher -> replace_string( "Home .*", "Home $install_path" );
+#$OK += $patcher -> replace_string( "\tform_path .*", "\tform_path $install_path"."src/form/");
+#
+##Carp::confess ( $patcher->{'str_rep'}. "written to file ".$patcher ->{'filename'}  );
+#Carp::confess ( "I could not patch the config file!\n" ) unless ( $OK==3);
+#print $patcher;
 
-#Carp::confess ( $patcher->{'str_rep'}. "written to file ".$patcher ->{'filename'}  );
-Carp::confess ( "I could not patch the config file!\n" ) unless ( $OK==3);
-print $patcher;
-
-$patcher -> write_file();
+#$patcher -> write_file();
 
 my $patcher2 = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
 my $options ='';

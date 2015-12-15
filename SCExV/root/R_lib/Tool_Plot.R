@@ -4,7 +4,7 @@ options(rgl.useNULL=TRUE)
 library(rgl)
 library(RDRToolbox)
 library(vioplot)
-library(beanplot)
+#library(beanplot)
 
 library(RSvgDevice)
 

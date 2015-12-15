@@ -48,7 +48,7 @@ sub check {
 	my ( $self, $c, $what ) = @_;
 	$what ||= 'analysis';
 	my $path = $c->session_path();
-	unless ( $what eq 'nothing' ){
+	unless ( $what eq 'nothing' ) {
 		unless ( -f $path . "/norm_data.RData" ) {
 			$c->res->redirect( $c->uri_for("/files/upload/") );
 			$c->detach();
@@ -61,7 +61,7 @@ sub check {
 		}
 	}
 	$c->model('Menu')->Reinit();
-	$self->file_upload( $c, {});
+	$self->file_upload( $c, {} );
 	$c->cookie_check();
 	return $path;
 }
@@ -91,7 +91,7 @@ sub colors_Hex {
 					@{ $session_hash->{$filetype} }[$_]->{'color'} = $colors[$_]
 					  if (
 						ref( @{ $session_hash->{$filetype} }[$_] ) eq "HASH" );
-				} 0 .. (@colors-1);
+				} 0 .. ( @colors - 1 );
 			}
 		}
 	}
@@ -185,7 +185,7 @@ sub order_files {
 			my ($A) = $a->{'filename'} =~ m/$processed_form->{'orderKey'}(\d+)/;
 			my ($B) = $b->{'filename'} =~ m/$processed_form->{'orderKey'}(\d+)/;
 			$A <=> $B;
-		} @{$files}
+		  } @{$files}
 	];
 }
 
@@ -231,7 +231,7 @@ sub __fix_file_problems {
 			foreach my $problem ( $_ =~ m/(["']-?\d+,\d+,?\d*["'])/g ) {
 				$rep = $problem;
 				$rep =~ s/["',]//g;
-				$_ =~ s/$problem/$rep/;
+				$_   =~ s/$problem/$rep/;
 			}
 			print OUT $_;
 		}
@@ -261,8 +261,7 @@ sub process_files_to_R {
 	if ( -f $c->session_path() . $object_name . '.data' )
 	{    ## the restricted data tables
 		$self->{'R_file_read'} = $path_add . $object_name . '.data';
-		$str =
-		    "$object_name <-  read.table('$self->{'R_file_read'}')\n"
+		$str = "$object_name <-  read.table('$self->{'R_file_read'}')\n"
 		  . "$object_name.d<- as.matrix($object_name)\n";
 	}
 	elsif ( -f $c->session_path() . 'merged_' . $object_name . '.xls' ) {
@@ -606,6 +605,13 @@ sub printEntry {
 	return $string;
 }
 
+sub _R_source {
+	my ( $self, @files ) = @_;
+	my $str = "";
+	map { $str .= "source('$_')\n" } @files;
+	return $str;
+}
+
 sub path {
 	my ( $self, $c ) = @_;
 	return $c->session_path();
@@ -634,7 +640,7 @@ sub check_value {
 				$value = $value->{'filename'};
 			}
 			$value;
-		} @values
+		  } @values
 	);
 }
 
@@ -678,24 +684,14 @@ sub slurp_webGL {
 "</span><span id='kernel'  style='display:none'>\n<button onclick='capture3D(\"canvas2\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/densityWebGL/index.html-->\n";
 		while (<IN>) {
 			$use = 1 if ( $_ =~ m/div align="center"/ );
-			$use = 0 if ( $_ =~ m/<p id="debug">/ );
+			$use = 0 if ( $_ =~ m/<p id="Kdebug">/ );
 			$tmp .= $_ if ($use);
 		}
 		close(IN);
 		$tmp .= "<!-- END READ FROM FILE $path/densityWebGL/index.html-->\n";
 		$tmp .=
 "\t</div>\n\t<br>Drag mouse to rotate model. Use mouse wheel or middle button to zoom it.\n";
-		$tmp =~ s/textureCanvas/textureCanvas2/g;
-		$tmp =~ s/"canvas"/"canvas2"/g;
-		$tmp =~ s/([fv])shader/K$1shader/g;
-		foreach ( $tmp =~ m/function (\w+)\(/g ) {
-			$tmp =~ s/$_/K$_/g;
-		}
-		## and in the new version
-		# var rgl = new rglClass();
-		# rgl.start = function() {
-		$tmp =~ s/var rgl = new rglClass/var Krgl = new rglClass/g;
-		$tmp =~ s/rgl\./Krgl./g;
+
 		$script .= $tmp;
 	}
 	my $uri =
@@ -821,11 +817,10 @@ sub create_multi_image_scalable_canvas {
 	my ( $self, $c, $obj_name, $view_name, $boxname, @figure_files ) = @_;
 
 	my @return =
-	  (     "<table border='0' cellspacing='0' cellpadding='0'>\n"
+	  (     "<table border='0' cellspacing='0' cellpadding='0'>\n" 
 		  . "<tr>\n"
 		  . "<td width='100%'>" );
-	$self->{'select_box'} =
-	    "<form id='$obj_name'><p><select\n"
+	$self->{'select_box'} = "<form id='$obj_name'><p><select\n"
 	  . "name='$boxname' size='1' onChange='loadimage(\"$obj_name\", \"$boxname\" )'>\n";
 	$self->{'select_options'} = [];
 	my ( $default, $key, $map, $path, $id );
@@ -848,7 +843,7 @@ sub create_multi_image_scalable_canvas {
 		  . "_$id' style='display:none'>\n";
 		unless ( $self->{'select_box'} =~ m/option selected value/ ) {
 			$self->{'select_box'} .=
-			    "<option selected value='$boxname" . "_"
+			    "<option selected value='$boxname" . "_" 
 			  . $id
 			  . "'>$key</option>\n";
 		}
@@ -871,11 +866,10 @@ sub create_selector_table_4_figures {
 	my ( $self, $c, $obj_name, $view_name, $boxname, @figure_files ) = @_;
 
 	my @return =
-	  (     "<table border='0' cellspacing='0' cellpadding='0'>\n"
+	  (     "<table border='0' cellspacing='0' cellpadding='0'>\n" 
 		  . "<tr>\n"
 		  . "<td width='100%'>" );
-	$self->{'select_box'} =
-	    "<form id='$obj_name'><p><select\n"
+	$self->{'select_box'} = "<form id='$obj_name'><p><select\n"
 	  . "name='$boxname' size='1' onChange='showimage(\"$obj_name\", \"$view_name\", \"$boxname\" )'>\n";
 	$self->{'select_options'} = [];
 	my ( $default, $key, $map, $path );
@@ -932,7 +926,7 @@ sub create_selector_table_4_figures {
 			$tmp = $d->{$boxname};
 		}
 		$default =
-		    "<td width='100%'><p align='center'><img src='"
+		    "<td width='100%'><p align='center'><img src='" 
 		  . $tmp
 		  . "' width='100%' id='$view_name'></td>\n";
 	}

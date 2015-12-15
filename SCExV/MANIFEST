@@ -51,6 +51,8 @@ inc/Module/Install/WriteAll.pm
 lib/CatalystX/Profile_SL.pm
 lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm
 lib/htpcr.conf
+lib/htpcr.conf.useless
+lib/htpcra.conf
 lib/HTpcrA.pm
 lib/HTpcrA/Controller/analyse.pm
 lib/HTpcrA/Controller/Coexpression.pm
@@ -147,6 +149,16 @@ root/lib/site/piwik
 root/lib/site/wrapper
 root/md5_hashes.xls
 root/norm_data.RData
+root/R_lib/beanplot_mod/beanplot.R
+root/R_lib/beanplot_mod/beanplotbeanlines.R
+root/R_lib/beanplot_mod/beanplotinnerborders.R
+root/R_lib/beanplot_mod/beanplotpolyshapes.R
+root/R_lib/beanplot_mod/beanplotscatters.R
+root/R_lib/beanplot_mod/fixcolorvector.R
+root/R_lib/beanplot_mod/getgroupsfromarguments.R
+root/R_lib/beanplot_mod/makecombinedname.R
+root/R_lib/beanplot_mod/seemslog.R
+root/R_lib/densityWebGL.html
 root/R_lib/R_example_read_files.R
 root/R_lib/R_examples_analyze.R
 root/R_lib/Tool_Coexpression.R
@@ -313,6 +325,10 @@ t/data/file_list_3.txt
 t/data/fluidigm_dataset.csv
 t/data/fluidigmTable.data
 t/data/GeneGroup.txt
+t/data/ggplot4/.gitignore
+t/data/ggplot4/Grouping.CD45.2.PE.Texas.Red.A.CD55.PE.A
+t/data/ggplot4/merged_data_Table.xls
+t/data/ggplot4/Sample_Colors.xls
 t/data/Grouping_Colors.xls
 t/data/help_strings.txt
 t/data/htpcra.conf
@@ -354,6 +370,7 @@ t/save.xls
 t/simpleBarGraph.t
 t/stefans_libs_Description.t
 t/stefans_libs_file_readers_Fluidigm_Raw_Tables.t
+t/stefans_libs_GeneGroup_4_newInitialPlot.t
 t/stefans_libs_GeneGroups.t
 t/stefans_libs_GeneGroups_2.t
 t/stefans_libs_GeneGroups_3.t

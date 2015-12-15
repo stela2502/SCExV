@@ -115,6 +115,9 @@ sub session_path {
 		  or Carp::confess("I could not create the session path $path\n$!\n");
 		mkdir( $path . "libs/" );
 		system( "cp $Root/R_lib/Tool* $path" . "libs/" );
+		system( "cp $Root/R_lib/densityWebGL.html $path" . "libs/" );
+		mkdir( $path . "libs/beanplot_mod/" );
+		system( "cp $Root/R_lib/beanplot_mod/*.R $path" . "libs/beanplot_mod/" );
 		Carp::confess(
 			"cp $Root/R_lib/Tool* $path" . "libs/\n did not work: $!\n" )
 		  unless ( -f $path . "libs/Tool_Pipe.R" );
