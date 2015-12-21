@@ -607,6 +607,7 @@ sub R_script {
 
 	print RS2 "options(rgl.useNULL=TRUE)\n"
 	  . "library(ks)\n"
+	#  . "library(RDRToolbox)\n"
 	  . "load( 'clusters.RData' )\n"
 	  . "usable <- is.na(match( obj\$clusters, which(table(as.factor(obj\$clusters)) < 4 ) )) == T\n"
 	  . "use <- obj\n"
@@ -615,7 +616,10 @@ sub R_script {
 	  . "cols <- rainbow(max(as.numeric(obj\$clusters)))\n"
 	  . "H <- Hkda( use\$mds.coord, use\$clusters, bw='plugin')\n"
 	  . "kda.fhat <- kda( use\$mds.coord, use\$clusters,Hs=H, compute.cont=TRUE)\n"
-	  . "try(plot(kda.fhat, cex=par3d('cex'=0.01), colors = cols[as.numeric(names(table(use\$clusters)))] ),silent=F)\n"
+	  . "try(plot(kda.fhat, size=0.001, colors = cols[as.numeric(names(table(use\$clusters)))] ),silent=F)\n"
+#	  . "try (rgl.clear('material'))\n"
+#	  . "try (rgl.clear('bbox') )\n"
+#	  . "try (axes3d(labels = FALSE, tick = FALSE))\n"
 	  . "try( writeWebGL(dir = 'densityWebGL', width=470, height=470, prefix='K', template='libs/densityWebGL.html' ) ,silent=F )\n";
 
 	close(RS2);
@@ -639,6 +643,8 @@ sub R_script {
 	return "$path/webGL/index.html";
 
 }
+
+
 
 sub Coexpression_R_script {
 	my ( $self, $path ) = @_;

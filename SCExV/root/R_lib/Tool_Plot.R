@@ -566,10 +566,14 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 	obj$colors <- apply( t(col2rgb( cols ) ), 1, paste,collapse=' ')[obj$clusters]
 	
 	## plot the mds data
-	try(plotDR( obj$mds.coord[order(obj$clusters),], col=cols, labels=obj$clusters[order(obj$clusters)], cex=par3d('cex'=0.01)),silent=F)
+	try(plotDR( obj$mds.coord[order(obj$clusters),], col=cols, labels=obj$clusters[order(obj$clusters)] ),silent=F)
+#	try (rgl.clear('material'))
+#	try ( rgl.clear('bbox') )
+#	try (axes3d(labels = FALSE, tick = FALSE))
+	
 	try(writeWebGL( width=470, height=470 ),silent=F)
 	png(file='./webGL/MDS_2D.png', width=800,height=800)
-	plotDR( obj$mds.coord[order(obj$clusters),1:2], col=cols, labels=obj$clusters[order(obj$clusters)], cex=par3d('cex'=0.01))
+	plotDR( obj$mds.coord[order(obj$clusters),1:2], col=cols, labels=obj$clusters[order(obj$clusters)] )
 	dev.off()
 	save( obj, file='clusters.RData')
 	write.table (obj$mds.coord[order(obj$clusters),1:2], file = './2D_data.xls' )

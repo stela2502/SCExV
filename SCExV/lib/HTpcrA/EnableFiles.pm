@@ -652,10 +652,9 @@ sub slurp_webGL {
 		$c->stash->{'message'} .= join( "", <IN> );
 		close(IN);
 	}
-	my ( $script, $use );
+	my ( $script, $use, @onload );
 	$use = 0;
 	return 0 unless ( -f "$path/webGL/index.html" );
-	open( IN, "<$path/webGL/index.html" );
 	$script =
 	    "<form action=''>\n"
 	  . "<table border='0'>"
@@ -669,39 +668,32 @@ sub slurp_webGL {
 	  . "<input type='radio' name='plotSelector' value='kernel' \n"
 	  . "onClick=\"showElementByVisible('kernel');hideElementByDisplay('twoD');hideElementByDisplay('threeD');hideElementByDisplay('loadings')\">3 components (density)\n</td></tr></table>"
 	  . "</form>\n"
-	  . "<span id='threeD' style='display:inline;'>\n<button onclick='capture3D(\"canvas\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/webGL/index.html -->\n";
-	while (<IN>) {
-		$use = 1 if ( $_ =~ m/div align="center"/ );
-		$use = 0 if ( $_ =~ m/<hr>/ );
-		$script .= $_ if ($use);
-	}
-	close(IN);
-	$script .= "<!-- END READ FROM FILE $path/webGL/index.html -->\n";
+	  . "<span id='threeD' style='display:inline;'>\n<button onclick='capture3D(\"div\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/webGL/index.html -->\n";
+	my ($fileA, $fileB);
+	
+	($fileA, $onload[0]) = $c->model('java_splicer')->read_webGL( "$path/webGL/index.html" );
+	$onload[0] = 'webGLStart();' unless ( defined  $onload[0]);
 	if ( -f "$path/densityWebGL/index.html" ) {
-		open( IN, "<$path/densityWebGL/index.html" );
-		$use = 0;
-		my $tmp =
-"</span><span id='kernel'  style='display:none'>\n<button onclick='capture3D(\"canvas2\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/densityWebGL/index.html-->\n";
-		while (<IN>) {
-			$use = 1 if ( $_ =~ m/div align="center"/ );
-			$use = 0 if ( $_ =~ m/<p id="Kdebug">/ );
-			$tmp .= $_ if ($use);
-		}
-		close(IN);
-		$tmp .= "<!-- END READ FROM FILE $path/densityWebGL/index.html-->\n";
-		$tmp .=
-"\t</div>\n\t<br>Drag mouse to rotate model. Use mouse wheel or middle button to zoom it.\n";
-
-		$script .= $tmp;
+		($fileB, $onload[1]) = $c->model('java_splicer')->read_webGL( "$path/densityWebGL/index.html" );
+		$onload[1] = 'KwebGLStart();' unless ( defined  $onload[1]);
+	}else {
+		Carp::confess( "Seriouse problem: density wegGL was not produced!" );
 	}
-	my $uri =
-	  $c->uri_for( '/files/index' . $path . "webGL/" . 'CanvasMatrix.js' );
-	$script =~ s/src="CanvasMatrix.js"/src="$uri" charset="utf-8"/g;
+	my ( $full, $partA, $partB, $rgl_js);
+	( $full, $partB, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileA, $fileB );
+	( $full, $partA, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileB, $fileA );
+	$rgl_js =~ 
+	#$rgl_js =~ s/this.textureCanvas = document.createElement\("canvas"\);/this.textureCanvas = document.createElement\("canvas"\);\nthis.textureCanvas.getContext("experimental-webgl", {preserveDrawingBuffer: true})/;
+#	open ( OUT , ">$path/densityWebGL/rgl.js" ) or die $!;
+	#print OUT $rgl_js;
+	#close ( OUT );
+	$self->Script( $c, '<script type="text/javascript" src="'. $c->uri_for( '/scripts/rgl.js' ).'"></script>');
+	
+	$script .= $partA
+	."<!-- END READ FROM FILE $path/webGL/index.html -->\n"
+	."</span><span id='kernel'  style='display:none'>\n<button onclick='capture3D(\"Kdiv\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/densityWebGL/index.html-->\n"
+	.$partB."<br><b>Known bug - Drag the white area above to make the plot appear</b>";
 
-	$script =~
-s/ canvas.getContext\("webgl"\)/ canvas.getContext("webgl", {preserveDrawingBuffer: true})/g;
-	$script =~
-s/ canvas.getContext\("experimental-webgl"\)/ canvas.getContext("experimental-webgl", {preserveDrawingBuffer: true})/g;
 	$script .=
 	    "</span><span id='twoD'  style='display:none'>\n"
 	  . "<button onclick='capture2D(\"data\")'>To Scrapbook</button>\n"
@@ -735,6 +727,7 @@ s/ canvas.getContext\("experimental-webgl"\)/ canvas.getContext("experimental-we
 		$script .= "</script>\n";
 	}
 	$c->stash->{'webGL'}           = $script;
+#	$c->stash->{'body_extensions'} = 'onload="'.join('', @onload).'"';
 	$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();"';
 
 }
