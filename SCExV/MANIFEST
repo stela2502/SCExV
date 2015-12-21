@@ -32,6 +32,8 @@ dsmj.log
 dsmwebcl.log
 final.B
 final.F
+HTpcrA-0.70.tar
+HTpcrA-0.80.tar
 htpcra.psgi
 inc/File/Copy/Recursive.pm
 inc/Module/AutoInstall.pm
@@ -74,6 +76,7 @@ lib/HTpcrA/htpcra.conf
 lib/HTpcrA/Model/Coexpr.pm
 lib/HTpcrA/Model/GeneGroups.pm
 lib/HTpcrA/Model/HelpFile.pm
+lib/HTpcrA/Model/java_splicer.pm
 lib/HTpcrA/Model/mech.pm
 lib/HTpcrA/Model/Menu.pm
 lib/HTpcrA/Model/MethodsSection.pm
@@ -224,6 +227,7 @@ root/scripts/jquery.imgareaselect.pack.js
 root/scripts/jquery.min.js
 root/scripts/jquery.mousewheel.min.js
 root/scripts/main.js
+root/scripts/rgl.js
 root/scripts/SCExV.js
 root/scripts/scrapbook.js
 root/scripts/table_paginate.js
@@ -333,6 +337,8 @@ t/data/Grouping_Colors.xls
 t/data/help_strings.txt
 t/data/htpcra.conf
 t/data/merged_mdsCoord.xls
+t/data/oldRGL/density.html
+t/data/oldRGL/points.html
 t/data/PCR_dataset.csv
 t/data/problematic_2D_data.xls
 t/data/problematic_2D_data_color.xls
@@ -351,6 +357,8 @@ t/data/source_data/Not_working_FACS_data.csv
 t/data/source_data/Sample_Colors.xls
 t/data/source_data/test.png
 t/data/source_data/Unreadable_modified_Heatmap.csv
+t/data/splice_java_A.html
+t/data/splice_java_B.html
 t/data/test.data.f1.xls
 t/data/test.data.f2.tab
 t/data/TestDatasetAnalyzed.zip
@@ -360,6 +368,7 @@ t/data_table_2.t
 t/Delete_me.html
 t/help_data.t
 t/model_Coexpr.t
+t/model_java_splicer.t
 t/model_mechanize.t
 t/model_PValues.t
 t/model_RandomForest_recieve.t

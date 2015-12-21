@@ -644,6 +644,112 @@ sub check_value {
 	);
 }
 
+sub slurp_webGL_old{
+	my ( $self, $c, $file, $path ) = @_;
+	$path ||= $c->session_path();
+	if ( -f $path . "R.error" ) {
+		open( IN, "<$path" . "R.error" );
+		$c->stash->{'message'} .= join( "", <IN> );
+		close(IN);
+	}
+	my ( $script, $use );
+	$use = 0;
+	return 0 unless ( -f "$path/webGL/index.html" );
+	open( IN, "<$path/webGL/index.html" );
+	$script =
+	    "<form action=''>\n"
+	  . "<table border='0'>"
+	  . "<tr><td>"
+	  . "<input type='radio' name='plotSelector' value='2D'\n"
+	  . "onClick=\"showElementByVisible('twoD');hideElementByDisplay('threeD');hideElementByDisplay('kernel');hideElementByDisplay('loadings')\">2 components\n</td><td>"
+	  . "<input type='radio' name='plotSelector' value='3D' checked\n"
+	  . "onClick=\"showElementByVisible('threeD');hideElementByDisplay('twoD');hideElementByDisplay('kernel');hideElementByDisplay('loadings')\">3 components (scatter)\n</td></tr><tr><td>"
+	  . "<input type='radio' name='plotSelector' value='2D_loadings' \n"
+	  . "onClick=\"showElementByVisible('loadings');hideElementByDisplay('threeD');hideElementByDisplay('twoD');hideElementByDisplay('kernel')\">2 components (loadings)\n</td><td>"
+	  . "<input type='radio' name='plotSelector' value='kernel' \n"
+	  . "onClick=\"showElementByVisible('kernel');hideElementByDisplay('twoD');hideElementByDisplay('threeD');hideElementByDisplay('loadings')\">3 components (density)\n</td></tr></table>"
+	  . "</form>\n"
+	  . "<span id='threeD' style='display:inline;'>\n<button onclick='capture3D(\"canvas\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/webGL/index.html -->\n";
+	while (<IN>) {
+		$use = 1 if ( $_ =~ m/div align="center"/ );
+		$use = 0 if ( $_ =~ m/<hr>/ );
+		$script .= $_ if ($use);
+	}
+	close(IN);
+	$script .= "<!-- END READ FROM FILE $path/webGL/index.html -->\n";
+	if ( -f "$path/densityWebGL/index.html" ) {
+		open( IN, "<$path/densityWebGL/index.html" );
+		$use = 0;
+		my $tmp =
+"</span><span id='kernel'  style='display:none'>\n<button onclick='capture3D(\"canvas2\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/densityWebGL/index.html-->\n";
+		while (<IN>) {
+			$use = 1 if ( $_ =~ m/div align="center"/ );
+			$use = 0 if ( $_ =~ m/<p id="debug">/ );
+			$tmp .= $_ if ($use);
+		}
+		close(IN);
+		$tmp .= "<!-- END READ FROM FILE $path/densityWebGL/index.html-->\n";
+		$tmp .=
+"\t</div>\n\t<br>Drag mouse to rotate model. Use mouse wheel or middle button to zoom it.\n";
+		$tmp =~ s/textureCanvas/textureCanvas2/g;
+		$tmp =~ s/"canvas"/"canvas2"/g;
+		$tmp =~ s/([fv])shader/K$1shader/g;
+		foreach ( $tmp =~ m/function (\w+)\(/g ) {
+			$tmp =~ s/$_/K$_/g;
+		}
+		## and in the new version
+		# var rgl = new rglClass();
+		# rgl.start = function() {
+		$tmp =~ s/var rgl = new rglClass/var Krgl = new rglClass/g;
+		$tmp =~ s/rgl\./Krgl./g;
+		$script .= $tmp;
+	}
+	my $uri =
+	  $c->uri_for( '/files/index' . $path . "webGL/" . 'CanvasMatrix.js' );
+	$script =~ s/src="CanvasMatrix.js"/src="$uri" charset="utf-8"/g;
+
+	$script =~
+s/ canvas.getContext\("webgl"\)/ canvas.getContext("webgl", {preserveDrawingBuffer: true})/g;
+	$script =~
+s/ canvas.getContext\("experimental-webgl"\)/ canvas.getContext("experimental-webgl", {preserveDrawingBuffer: true})/g;
+	$script .=
+	    "</span><span id='twoD'  style='display:none'>\n"
+	  . "<button onclick='capture2D(\"data\")'>To Scrapbook</button>\n"
+	  . "<img id='data' src='"
+	  . $c->uri_for( '/files/index' . $path . 'webGL/MDS_2D.png' )
+	  . "' alt='2D image of the MDS results' width='400px'>\n"
+	  . '<button type="submit" value="RemoveSamples" onclick="submitMasterForm(\'RemoveSamples\')">Remove selected samples (start from scratch to re-do)</button>'
+	  . "\n"
+	  . '<script>' . "\n"
+	  . 'function submitMasterForm( v )' . "\n" . '{' . "\n"
+	  . 'var x = document.getElementById("master");' . "\n"
+	  . ' x._submit.value = v;' . "\n"
+	  . ' x.submit(\'RemoveSamples\');' . "\n"
+	  . 'document.getElementById("demo").innerHTML=x;' . "\n" . '}' . "\n"
+	  . '</script>' . "\n";
+	if ( -f $path . "loadings.png" ) {
+		$script .=
+		    "</span><span id='loadings'  style='display:none'>\n"
+		  . "<button onclick='capture2D(\"data2\")'>To Scrapbook</button>\n"
+		  . "<img id='data2' src='"
+		  . $c->uri_for( '/files/index' . $path . 'loadings.png' )
+		  . "' alt='2D gene loadings' width='400px'>\n";
+	}
+	if ( !( $script =~ m/webGLStart/ ) ) {
+		## new version
+		$script .= '<script type="text/javascript">'
+		  . "\nwebGLStart = function(){rgl.start();}\n";
+		if ( -f "$path/densityWebGL/index.html" ) {
+			$script .= "KwebGLStart = function(){Krgl.start();}\n";
+		}
+		$script .= "</script>\n";
+	}
+	$c->stash->{'webGL'}           = $script;
+	$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();"';
+
+	
+}
+
 sub slurp_webGL {
 	my ( $self, $c, $file, $path ) = @_;
 	$path ||= $c->session_path();
@@ -655,6 +761,11 @@ sub slurp_webGL {
 	my ( $script, $use, @onload );
 	$use = 0;
 	return 0 unless ( -f "$path/webGL/index.html" );
+	open ( IN, "$path/webGL/index.html" );
+	if ( grep ('rgl 0.95.1247 by writeWebGL', <IN> )){
+		return $self->slurp_webGL_old( $c, $file, $path );
+	}	
+	
 	$script =
 	    "<form action=''>\n"
 	  . "<table border='0'>"
@@ -682,7 +793,7 @@ sub slurp_webGL {
 	my ( $full, $partA, $partB, $rgl_js);
 	( $full, $partB, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileA, $fileB );
 	( $full, $partA, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileB, $fileA );
-	$rgl_js =~ 
+
 	#$rgl_js =~ s/this.textureCanvas = document.createElement\("canvas"\);/this.textureCanvas = document.createElement\("canvas"\);\nthis.textureCanvas.getContext("experimental-webgl", {preserveDrawingBuffer: true})/;
 #	open ( OUT , ">$path/densityWebGL/rgl.js" ) or die $!;
 	#print OUT $rgl_js;

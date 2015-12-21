@@ -1,12 +1,12 @@
 
 function capture3D( cid ) {
 	  var canvas  = document.getElementById(cid);
-	  x= canvas.childNodes[0];
-	  console.log(x.getContext('webgl', {preserveDrawingBuffer: true}))
-	  alert( x.getContext('webgl', {preserveDrawingBuffer: true}) )
-	  
-	  
-	  var data = canvas.childNodes[0].toDataURL();
+
+	  if ( typeof canvas.childNodes[0] == 'object' ){
+	      canvas= canvas.childNodes[0]; // this is required for the rgl lib  0.95.1429
+	  }  
+	    
+	  var data = canvas.toDataURL();
 	  var err = "Error";
 	 
 	  if (window.XMLHttpRequest){
