@@ -275,8 +275,8 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 	if (!horizontal) {
 		if (!add) {
 			plot.window(xlim = xlim, ylim = ylim)
-			axis(2, cex.axis=cex.axis)
-			axis(1, at = at, label = label, cex.axis=cex.axis)
+			axis(2)
+			axis(1, at = at, label = label)
 		}
 		box()
 		for (i in 1:n) {
@@ -290,23 +290,13 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 						q3[i], col = rectCol)
 				points(at[i], med[i], pch = pchMed, col = colMed)
 			}
-			else{
-				lines(at[c(i, i)], c(lower[i], upper[i]), lwd = lwd, 
-						lty = lty)
-				lines(c(at[i]- boxwidth/2, at[i] + boxwidth/2), c(lower[i], lower[i]), lwd = lwd, 
-						lty = lty)
-				lines( c(at[i]- boxwidth/2, at[i] + boxwidth/2), c(upper[i], upper[i]), lwd = lwd, 
-						lty = lty)
-				points(at[i], med[i], pch = pchMed, col = colMed, cex=2)
-			}
 		}
-		
 	}
 	else {
 		if (!add) {
 			plot.window(xlim = ylim, ylim = xlim)
-			axis(1,cex.axis =cex.axis)
-			axis(2, at = at, label = label, cex.axis=cex.axis)
+			axis(1)
+			axis(2, at = at, label = label)
 		}
 		box()
 		for (i in 1:n) {
@@ -322,6 +312,7 @@ vioplot <-function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL,
 			}
 		}
 	}
+	
 	if ( ! is.null(main) ){
 		title( main, cex.main = 2)
 	}
@@ -530,9 +521,9 @@ plot.violines <- function ( ma, groups.n, clus, boot = 1000, plot.neg=FALSE, mv=
 		}
 		
 		lila$h = 0.3
-		if ( ! is.null(plot.neg) ){
-			lila$drawRect = FALSE
-		}
+	#	if ( ! is.null(plot.neg) ){
+	#		lila$drawRect = FALSE
+	#	}
 		try(do.call(vioplot,lila), silent=F )
 		dev.off()
 		if ( plotsvg == 1 ) {

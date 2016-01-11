@@ -13,14 +13,14 @@
 
 #     ABSTRACT => q[Catalyst based application]
 #     AUTHOR => [q[Stefan Lang]]
-#     BUILD_REQUIRES => { ExtUtils::MakeMaker=>q[6.36], jQuery::File::Upload=>q[0], Test::More=>q[0.88] }
+#     BUILD_REQUIRES => { jQuery::File::Upload=>q[0], Test::More=>q[0.88], ExtUtils::MakeMaker=>q[6.36] }
 #     CONFIGURE_REQUIRES => {  }
 #     DISTNAME => q[HTpcrA]
 #     EXE_FILES => [q[script/CleanTemp.pl], q[script/htpcra_cgi.pl], q[script/htpcra_create.pl], q[script/htpcra_fastcgi.pl], q[script/htpcra_server.pl], q[script/htpcra_test.pl], q[script/install.pl], q[script/libPatcher.pl], q[script/minimize_css.pl]]
 #     LICENSE => q[perl]
 #     NAME => q[HTpcrA]
 #     NO_META => q[1]
-#     PREREQ_PM => { Catalyst::Plugin::Static::Simple=>q[0], GD::SVG=>q[0], Catalyst::Runtime=>q[5.90019], namespace::autoclean=>q[0], Moose=>q[0], Catalyst::Plugin::RequireSSL=>q[0], Catalyst::Plugin::Session::Store::FastMmap=>q[0], Catalyst::Action::RenderView=>q[0], Test::More=>q[0.88], Catalyst::Plugin::ErrorCatcher=>q[0], Catalyst::Plugin::SecureCookies=>q[0], Catalyst::Model::Factory::PerRequest=>q[0], Number::Format=>q[0], Catalyst::Plugin::Session=>q[0], ExtUtils::MakeMaker=>q[6.36], Catalyst::View::TT=>q[0], Catalyst::Plugin::Session::State::Cookie=>q[0], Catalyst::Plugin::ConfigLoader=>q[0], DateTime::Format::MySQL=>q[0], Statistics::Descriptive=>q[0], Config::General=>q[0], Date::Simple=>q[0], jQuery::File::Upload=>q[0], Catalyst::Plugin::FormBuilder=>q[0], HTML::Template=>q[0] }
+#     PREREQ_PM => { jQuery::File::Upload=>q[0], Date::Simple=>q[0], Catalyst::Model::Factory::PerRequest=>q[0], Catalyst::Plugin::FormBuilder=>q[0], namespace::autoclean=>q[0], Catalyst::View::TT=>q[0], Catalyst::Plugin::Session=>q[0], Number::Format=>q[0], Statistics::Descriptive=>q[0], Catalyst::Plugin::Static::Simple=>q[0], Catalyst::Action::RenderView=>q[0], Catalyst::Plugin::SecureCookies=>q[0], ExtUtils::MakeMaker=>q[6.36], Config::General=>q[0], HTML::Template=>q[0], Test::More=>q[0.88], Catalyst::Runtime=>q[5.90019], Catalyst::Plugin::RequireSSL=>q[0], DateTime::Format::MySQL=>q[0], Moose=>q[0], GD::SVG=>q[0], Catalyst::Plugin::Session::Store::FastMmap=>q[0], Catalyst::Plugin::Session::State::Cookie=>q[0], Catalyst::Plugin::ErrorCatcher=>q[0], Catalyst::Plugin::ConfigLoader=>q[0] }
 #     TEST_REQUIRES => {  }
 #     VERSION => q[0.81]
 #     VERSION_FROM => q[lib/HTpcrA.pm]
@@ -298,112 +298,112 @@ TO_INST_PM = lib/CatalystX/Profile_SL.pm \
 	lib/stefans_libs/plot_old/color.pm \
 	lib/stefans_libs/root.pm
 
-PM_TO_BLIB = lib/stefans_libs/root.pm \
-	blib/lib/stefans_libs/root.pm \
-	lib/HTpcrA/Model/PCR_Raw_Files.pm \
-	blib/lib/HTpcrA/Model/PCR_Raw_Files.pm \
-	lib/HTpcrA/Controller/DropSamples.pm \
-	blib/lib/HTpcrA/Controller/DropSamples.pm \
-	lib/HTpcrA/Controller/Filemerger.pm \
-	blib/lib/HTpcrA/Controller/Filemerger.pm \
-	lib/HTpcrA/Model/RandomForest.pm \
-	blib/lib/HTpcrA/Model/RandomForest.pm \
-	lib/CatalystX/nytprof.out \
-	blib/lib/CatalystX/nytprof.out \
-	lib/HTpcrA/Model/HelpFile.pm \
-	blib/lib/HTpcrA/Model/HelpFile.pm \
-	lib/HTpcrA/Controller/Error.pm \
-	blib/lib/HTpcrA/Controller/Error.pm \
-	lib/HTpcrA/Controller/Root.pm \
-	blib/lib/HTpcrA/Controller/Root.pm \
-	lib/HTpcrA/Model/scrapbook.pm \
-	blib/lib/HTpcrA/Model/scrapbook.pm \
-	lib/htpcr.conf.useless \
-	blib/lib/htpcr.conf.useless \
-	lib/stefans_libs/HTpcrA/methods.pm \
-	blib/lib/stefans_libs/HTpcrA/methods.pm \
-	lib/stefans_libs/GeneGroups.pm \
-	blib/lib/stefans_libs/GeneGroups.pm \
-	lib/HTpcrA/Controller/DropGenes.pm \
-	blib/lib/HTpcrA/Controller/DropGenes.pm \
-	lib/HTpcrA/EnableFiles.pm \
-	blib/lib/HTpcrA/EnableFiles.pm \
-	lib/HTpcrA/Controller/Coexpression.pm \
-	blib/lib/HTpcrA/Controller/Coexpression.pm \
-	lib/HTpcrA/Controller/Regroup.pm \
-	blib/lib/HTpcrA/Controller/Regroup.pm \
-	lib/stefans_libs/GeneGroups/R_table.pm \
-	blib/lib/stefans_libs/GeneGroups/R_table.pm \
-	lib/HTpcrA/Model/mech.pm \
-	blib/lib/HTpcrA/Model/mech.pm \
-	lib/stefans_libs/plot_old/color.pm \
-	blib/lib/stefans_libs/plot_old/color.pm \
-	lib/HTpcrA/Controller/analyse.pm \
-	blib/lib/HTpcrA/Controller/analyse.pm \
-	lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm \
+PM_TO_BLIB = lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm \
 	blib/lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm \
-	lib/HTpcrA/Model/MethodsSection.pm \
-	blib/lib/HTpcrA/Model/MethodsSection.pm \
-	lib/stefans_libs/flexible_data_structures/BinList.pm \
-	blib/lib/stefans_libs/flexible_data_structures/BinList.pm \
-	lib/HTpcrA/Controller/Scrapbook.pm \
-	blib/lib/HTpcrA/Controller/Scrapbook.pm \
-	lib/stefans_libs/HTpcrA/Menue.pm \
-	blib/lib/stefans_libs/HTpcrA/Menue.pm \
-	lib/HTpcrA/Model/java_splicer.pm \
-	blib/lib/HTpcrA/Model/java_splicer.pm \
-	lib/HTpcrA/Controller/PValues.pm \
-	blib/lib/HTpcrA/Controller/PValues.pm \
-	lib/HTpcrA/Model/GeneGroups.pm \
-	blib/lib/HTpcrA/Model/GeneGroups.pm \
-	lib/stefans_libs/file_readers/PCR_Raw_Tables.pm \
-	blib/lib/stefans_libs/file_readers/PCR_Raw_Tables.pm \
-	lib/HTpcrA/Controller/Files.pm \
-	blib/lib/HTpcrA/Controller/Files.pm \
-	lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm \
-	blib/lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm \
-	lib/HTpcrA/Model/Menu.pm \
-	blib/lib/HTpcrA/Model/Menu.pm \
 	lib/stefans_libs/file_readers/help_data.pm \
 	blib/lib/stefans_libs/file_readers/help_data.pm \
-	lib/HTpcrA/Controller/grouping_2d.pm \
-	blib/lib/HTpcrA/Controller/grouping_2d.pm \
-	lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm \
-	blib/lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm \
-	lib/stefans_libs/GeneGroups/Set.pm \
-	blib/lib/stefans_libs/GeneGroups/Set.pm \
-	lib/HTpcrA/Controller/RandomForest.pm \
-	blib/lib/HTpcrA/Controller/RandomForest.pm \
-	lib/HTpcrA/Controller/gene_group.pm \
-	blib/lib/HTpcrA/Controller/gene_group.pm \
-	lib/stefans_libs/plot_old/Font.pm \
-	blib/lib/stefans_libs/plot_old/Font.pm \
-	lib/HTpcrA/Model/PValues.pm \
-	blib/lib/HTpcrA/Model/PValues.pm \
-	lib/htpcra.conf \
-	blib/lib/htpcra.conf \
-	lib/CatalystX/Profile_SL.pm \
-	blib/lib/CatalystX/Profile_SL.pm \
-	lib/HTpcrA/Model/Coexpr.pm \
-	blib/lib/HTpcrA/Model/Coexpr.pm \
-	lib/HTpcrA/View/HTML.pm \
-	blib/lib/HTpcrA/View/HTML.pm \
 	lib/stefans_libs/Description.pm \
 	blib/lib/stefans_libs/Description.pm \
-	lib/HTpcrA/Controller/help.pm \
-	blib/lib/HTpcrA/Controller/help.pm \
+	lib/HTpcrA/View/HTML.pm \
+	blib/lib/HTpcrA/View/HTML.pm \
+	lib/stefans_libs/flexible_data_structures/BinList.pm \
+	blib/lib/stefans_libs/flexible_data_structures/BinList.pm \
+	lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm \
+	blib/lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm \
 	lib/stefans_libs/file_readers/Patcher.pm \
 	blib/lib/stefans_libs/file_readers/Patcher.pm \
-	lib/stefans_libs/plot_old/axis.pm \
-	blib/lib/stefans_libs/plot_old/axis.pm \
-	lib/stefans_libs/flexible_data_structures/BinList/Histogram.pm \
-	blib/lib/stefans_libs/flexible_data_structures/BinList/Histogram.pm \
-	lib/CatalystX/Profile_SL/Controller/nytprof.out \
-	blib/lib/CatalystX/Profile_SL/Controller/nytprof.out \
 	lib/HTpcrA.pm \
 	blib/lib/HTpcrA.pm \
+	lib/HTpcrA/Model/PCR_Raw_Files.pm \
+	blib/lib/HTpcrA/Model/PCR_Raw_Files.pm \
+	lib/stefans_libs/plot_old/color.pm \
+	blib/lib/stefans_libs/plot_old/color.pm \
+	lib/stefans_libs/HTpcrA/methods.pm \
+	blib/lib/stefans_libs/HTpcrA/methods.pm \
+	lib/htpcra.conf \
+	blib/lib/htpcra.conf \
+	lib/stefans_libs/GeneGroups/Set.pm \
+	blib/lib/stefans_libs/GeneGroups/Set.pm \
+	lib/HTpcrA/Model/GeneGroups.pm \
+	blib/lib/HTpcrA/Model/GeneGroups.pm \
+	lib/stefans_libs/HTpcrA/Menue.pm \
+	blib/lib/stefans_libs/HTpcrA/Menue.pm \
+	lib/CatalystX/Profile_SL.pm \
+	blib/lib/CatalystX/Profile_SL.pm \
+	lib/HTpcrA/Controller/Regroup.pm \
+	blib/lib/HTpcrA/Controller/Regroup.pm \
+	lib/HTpcrA/Controller/grouping_2d.pm \
+	blib/lib/HTpcrA/Controller/grouping_2d.pm \
+	lib/HTpcrA/Controller/RandomForest.pm \
+	blib/lib/HTpcrA/Controller/RandomForest.pm \
+	lib/HTpcrA/Model/Menu.pm \
+	blib/lib/HTpcrA/Model/Menu.pm \
+	lib/stefans_libs/file_readers/PCR_Raw_Tables.pm \
+	blib/lib/stefans_libs/file_readers/PCR_Raw_Tables.pm \
 	lib/stefans_libs/HTpcrA/ScrapBook.pm \
-	blib/lib/stefans_libs/HTpcrA/ScrapBook.pm
+	blib/lib/stefans_libs/HTpcrA/ScrapBook.pm \
+	lib/HTpcrA/EnableFiles.pm \
+	blib/lib/HTpcrA/EnableFiles.pm \
+	lib/HTpcrA/Controller/Error.pm \
+	blib/lib/HTpcrA/Controller/Error.pm \
+	lib/CatalystX/Profile_SL/Controller/nytprof.out \
+	blib/lib/CatalystX/Profile_SL/Controller/nytprof.out \
+	lib/HTpcrA/Controller/Root.pm \
+	blib/lib/HTpcrA/Controller/Root.pm \
+	lib/HTpcrA/Controller/Coexpression.pm \
+	blib/lib/HTpcrA/Controller/Coexpression.pm \
+	lib/HTpcrA/Controller/Filemerger.pm \
+	blib/lib/HTpcrA/Controller/Filemerger.pm \
+	lib/HTpcrA/Model/HelpFile.pm \
+	blib/lib/HTpcrA/Model/HelpFile.pm \
+	lib/HTpcrA/Model/MethodsSection.pm \
+	blib/lib/HTpcrA/Model/MethodsSection.pm \
+	lib/HTpcrA/Controller/analyse.pm \
+	blib/lib/HTpcrA/Controller/analyse.pm \
+	lib/HTpcrA/Model/PValues.pm \
+	blib/lib/HTpcrA/Model/PValues.pm \
+	lib/stefans_libs/plot_old/axis.pm \
+	blib/lib/stefans_libs/plot_old/axis.pm \
+	lib/stefans_libs/plot_old/Font.pm \
+	blib/lib/stefans_libs/plot_old/Font.pm \
+	lib/HTpcrA/Controller/help.pm \
+	blib/lib/HTpcrA/Controller/help.pm \
+	lib/HTpcrA/Controller/DropSamples.pm \
+	blib/lib/HTpcrA/Controller/DropSamples.pm \
+	lib/HTpcrA/Model/RandomForest.pm \
+	blib/lib/HTpcrA/Model/RandomForest.pm \
+	lib/stefans_libs/GeneGroups/R_table.pm \
+	blib/lib/stefans_libs/GeneGroups/R_table.pm \
+	lib/HTpcrA/Controller/PValues.pm \
+	blib/lib/HTpcrA/Controller/PValues.pm \
+	lib/HTpcrA/Model/scrapbook.pm \
+	blib/lib/HTpcrA/Model/scrapbook.pm \
+	lib/stefans_libs/GeneGroups.pm \
+	blib/lib/stefans_libs/GeneGroups.pm \
+	lib/htpcr.conf.useless \
+	blib/lib/htpcr.conf.useless \
+	lib/HTpcrA/Model/Coexpr.pm \
+	blib/lib/HTpcrA/Model/Coexpr.pm \
+	lib/stefans_libs/flexible_data_structures/BinList/Histogram.pm \
+	blib/lib/stefans_libs/flexible_data_structures/BinList/Histogram.pm \
+	lib/stefans_libs/root.pm \
+	blib/lib/stefans_libs/root.pm \
+	lib/HTpcrA/Model/java_splicer.pm \
+	blib/lib/HTpcrA/Model/java_splicer.pm \
+	lib/HTpcrA/Model/mech.pm \
+	blib/lib/HTpcrA/Model/mech.pm \
+	lib/HTpcrA/Controller/DropGenes.pm \
+	blib/lib/HTpcrA/Controller/DropGenes.pm \
+	lib/CatalystX/nytprof.out \
+	blib/lib/CatalystX/nytprof.out \
+	lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm \
+	blib/lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm \
+	lib/HTpcrA/Controller/Files.pm \
+	blib/lib/HTpcrA/Controller/Files.pm \
+	lib/HTpcrA/Controller/Scrapbook.pm \
+	blib/lib/HTpcrA/Controller/Scrapbook.pm \
+	lib/HTpcrA/Controller/gene_group.pm \
+	blib/lib/HTpcrA/Controller/gene_group.pm
 
 
 # --- MakeMaker platform_constants section:
@@ -625,119 +625,119 @@ POD2MAN = $(POD2MAN_EXE)
 
 
 manifypods : pure_all  \
-	script/htpcra_server.pl \
 	script/install.pl \
 	script/libPatcher.pl \
-	script/htpcra_test.pl \
 	script/CleanTemp.pl \
+	script/htpcra_test.pl \
 	script/minimize_css.pl \
-	script/htpcra_create.pl \
-	script/htpcra_cgi.pl \
 	script/htpcra_fastcgi.pl \
-	lib/HTpcrA/Model/PCR_Raw_Files.pm \
-	lib/stefans_libs/root.pm \
-	lib/HTpcrA/Controller/DropSamples.pm \
-	lib/HTpcrA/Controller/Filemerger.pm \
-	lib/HTpcrA/Model/RandomForest.pm \
-	lib/HTpcrA/Controller/Error.pm \
-	lib/HTpcrA/Model/HelpFile.pm \
-	lib/HTpcrA/Controller/Root.pm \
-	lib/HTpcrA/Model/scrapbook.pm \
-	lib/stefans_libs/GeneGroups.pm \
-	lib/stefans_libs/HTpcrA/methods.pm \
-	lib/HTpcrA/Controller/DropGenes.pm \
-	lib/HTpcrA/EnableFiles.pm \
-	lib/HTpcrA/Controller/Coexpression.pm \
-	lib/HTpcrA/Controller/Regroup.pm \
+	script/htpcra_create.pl \
+	script/htpcra_server.pl \
+	script/htpcra_cgi.pl \
 	lib/HTpcrA/Model/mech.pm \
-	lib/stefans_libs/GeneGroups/R_table.pm \
-	lib/HTpcrA/Controller/analyse.pm \
-	lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm \
-	lib/HTpcrA/Model/MethodsSection.pm \
-	lib/stefans_libs/flexible_data_structures/BinList.pm \
-	lib/HTpcrA/Controller/Scrapbook.pm \
-	lib/stefans_libs/HTpcrA/Menue.pm \
-	lib/HTpcrA/Controller/PValues.pm \
-	lib/HTpcrA/Model/java_splicer.pm \
-	lib/HTpcrA/Model/GeneGroups.pm \
-	lib/stefans_libs/file_readers/PCR_Raw_Tables.pm \
-	lib/HTpcrA/Controller/Files.pm \
-	lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm \
-	lib/HTpcrA/Model/Menu.pm \
-	lib/HTpcrA/Controller/grouping_2d.pm \
-	lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm \
-	lib/stefans_libs/GeneGroups/Set.pm \
-	lib/HTpcrA/Controller/RandomForest.pm \
-	lib/HTpcrA/Controller/gene_group.pm \
-	lib/HTpcrA/Model/PValues.pm \
-	lib/HTpcrA/Model/Coexpr.pm \
-	lib/CatalystX/Profile_SL.pm \
-	lib/HTpcrA/View/HTML.pm \
-	lib/stefans_libs/Description.pm \
-	lib/HTpcrA/Controller/help.pm \
-	lib/stefans_libs/file_readers/Patcher.pm \
-	lib/stefans_libs/plot_old/axis.pm \
 	lib/stefans_libs/flexible_data_structures/BinList/Histogram.pm \
+	lib/HTpcrA/Model/java_splicer.pm \
+	lib/stefans_libs/root.pm \
+	lib/HTpcrA/Controller/Scrapbook.pm \
+	lib/HTpcrA/Controller/gene_group.pm \
+	lib/HTpcrA/Controller/Files.pm \
+	lib/HTpcrA/Controller/DropGenes.pm \
+	lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm \
+	lib/HTpcrA/Controller/DropSamples.pm \
+	lib/HTpcrA/Model/RandomForest.pm \
+	lib/HTpcrA/Controller/help.pm \
+	lib/stefans_libs/plot_old/axis.pm \
+	lib/HTpcrA/Controller/Filemerger.pm \
+	lib/HTpcrA/Model/HelpFile.pm \
+	lib/HTpcrA/Controller/analyse.pm \
+	lib/HTpcrA/Model/PValues.pm \
+	lib/HTpcrA/Model/MethodsSection.pm \
+	lib/stefans_libs/GeneGroups.pm \
+	lib/HTpcrA/Model/Coexpr.pm \
+	lib/HTpcrA/Model/scrapbook.pm \
+	lib/HTpcrA/Controller/PValues.pm \
+	lib/stefans_libs/GeneGroups/R_table.pm \
+	lib/stefans_libs/HTpcrA/Menue.pm \
+	lib/HTpcrA/Controller/grouping_2d.pm \
+	lib/CatalystX/Profile_SL.pm \
+	lib/HTpcrA/Controller/Regroup.pm \
+	lib/stefans_libs/HTpcrA/ScrapBook.pm \
+	lib/stefans_libs/file_readers/PCR_Raw_Tables.pm \
+	lib/HTpcrA/EnableFiles.pm \
+	lib/HTpcrA/Controller/Error.pm \
+	lib/HTpcrA/Controller/Root.pm \
+	lib/HTpcrA/Controller/Coexpression.pm \
+	lib/HTpcrA/Controller/RandomForest.pm \
+	lib/HTpcrA/Model/Menu.pm \
+	lib/stefans_libs/file_readers/Patcher.pm \
+	lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm \
+	lib/stefans_libs/flexible_data_structures/BinList.pm \
 	lib/HTpcrA.pm \
-	lib/stefans_libs/HTpcrA/ScrapBook.pm
+	lib/HTpcrA/Model/PCR_Raw_Files.pm \
+	lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm \
+	lib/stefans_libs/Description.pm \
+	lib/HTpcrA/View/HTML.pm \
+	lib/HTpcrA/Model/GeneGroups.pm \
+	lib/stefans_libs/GeneGroups/Set.pm \
+	lib/stefans_libs/HTpcrA/methods.pm
 	$(NOECHO) $(POD2MAN) --section=1 --perm_rw=$(PERM_RW) \
-	  script/htpcra_server.pl $(INST_MAN1DIR)/htpcra_server.pl.$(MAN1EXT) \
 	  script/install.pl $(INST_MAN1DIR)/install.pl.$(MAN1EXT) \
 	  script/libPatcher.pl $(INST_MAN1DIR)/libPatcher.pl.$(MAN1EXT) \
-	  script/htpcra_test.pl $(INST_MAN1DIR)/htpcra_test.pl.$(MAN1EXT) \
 	  script/CleanTemp.pl $(INST_MAN1DIR)/CleanTemp.pl.$(MAN1EXT) \
+	  script/htpcra_test.pl $(INST_MAN1DIR)/htpcra_test.pl.$(MAN1EXT) \
 	  script/minimize_css.pl $(INST_MAN1DIR)/minimize_css.pl.$(MAN1EXT) \
+	  script/htpcra_fastcgi.pl $(INST_MAN1DIR)/htpcra_fastcgi.pl.$(MAN1EXT) \
 	  script/htpcra_create.pl $(INST_MAN1DIR)/htpcra_create.pl.$(MAN1EXT) \
-	  script/htpcra_cgi.pl $(INST_MAN1DIR)/htpcra_cgi.pl.$(MAN1EXT) \
-	  script/htpcra_fastcgi.pl $(INST_MAN1DIR)/htpcra_fastcgi.pl.$(MAN1EXT) 
+	  script/htpcra_server.pl $(INST_MAN1DIR)/htpcra_server.pl.$(MAN1EXT) \
+	  script/htpcra_cgi.pl $(INST_MAN1DIR)/htpcra_cgi.pl.$(MAN1EXT) 
 	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
-	  lib/HTpcrA/Model/PCR_Raw_Files.pm $(INST_MAN3DIR)/HTpcrA::Model::PCR_Raw_Files.$(MAN3EXT) \
-	  lib/stefans_libs/root.pm $(INST_MAN3DIR)/stefans_libs::root.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/DropSamples.pm $(INST_MAN3DIR)/HTpcrA::Controller::DropSamples.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/Filemerger.pm $(INST_MAN3DIR)/HTpcrA::Controller::Filemerger.$(MAN3EXT) \
-	  lib/HTpcrA/Model/RandomForest.pm $(INST_MAN3DIR)/HTpcrA::Model::RandomForest.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/Error.pm $(INST_MAN3DIR)/HTpcrA::Controller::Error.$(MAN3EXT) \
-	  lib/HTpcrA/Model/HelpFile.pm $(INST_MAN3DIR)/HTpcrA::Model::HelpFile.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/Root.pm $(INST_MAN3DIR)/HTpcrA::Controller::Root.$(MAN3EXT) \
-	  lib/HTpcrA/Model/scrapbook.pm $(INST_MAN3DIR)/HTpcrA::Model::scrapbook.$(MAN3EXT) \
-	  lib/stefans_libs/GeneGroups.pm $(INST_MAN3DIR)/stefans_libs::GeneGroups.$(MAN3EXT) \
-	  lib/stefans_libs/HTpcrA/methods.pm $(INST_MAN3DIR)/stefans_libs::HTpcrA::methods.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/DropGenes.pm $(INST_MAN3DIR)/HTpcrA::Controller::DropGenes.$(MAN3EXT) \
-	  lib/HTpcrA/EnableFiles.pm $(INST_MAN3DIR)/HTpcrA::EnableFiles.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/Coexpression.pm $(INST_MAN3DIR)/HTpcrA::Controller::Coexpression.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/Regroup.pm $(INST_MAN3DIR)/HTpcrA::Controller::Regroup.$(MAN3EXT) \
 	  lib/HTpcrA/Model/mech.pm $(INST_MAN3DIR)/HTpcrA::Model::mech.$(MAN3EXT) \
-	  lib/stefans_libs/GeneGroups/R_table.pm $(INST_MAN3DIR)/stefans_libs::GeneGroups::R_table.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/analyse.pm $(INST_MAN3DIR)/HTpcrA::Controller::analyse.$(MAN3EXT) \
-	  lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm $(INST_MAN3DIR)/CatalystX::Profile_SL::Controller::ControlProfiling.$(MAN3EXT) \
-	  lib/HTpcrA/Model/MethodsSection.pm $(INST_MAN3DIR)/HTpcrA::Model::MethodsSection.$(MAN3EXT) \
-	  lib/stefans_libs/flexible_data_structures/BinList.pm $(INST_MAN3DIR)/stefans_libs::flexible_data_structures::BinList.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/Scrapbook.pm $(INST_MAN3DIR)/HTpcrA::Controller::Scrapbook.$(MAN3EXT) \
-	  lib/stefans_libs/HTpcrA/Menue.pm $(INST_MAN3DIR)/stefans_libs::HTpcrA::Menue.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/PValues.pm $(INST_MAN3DIR)/HTpcrA::Controller::PValues.$(MAN3EXT) \
-	  lib/HTpcrA/Model/java_splicer.pm $(INST_MAN3DIR)/HTpcrA::Model::java_splicer.$(MAN3EXT) \
-	  lib/HTpcrA/Model/GeneGroups.pm $(INST_MAN3DIR)/HTpcrA::Model::GeneGroups.$(MAN3EXT) \
-	  lib/stefans_libs/file_readers/PCR_Raw_Tables.pm $(INST_MAN3DIR)/stefans_libs::file_readers::PCR_Raw_Tables.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/Files.pm $(INST_MAN3DIR)/HTpcrA::Controller::Files.$(MAN3EXT) \
-	  lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm $(INST_MAN3DIR)/stefans_libs::flexible_data_structures::BinList::XY_Group.$(MAN3EXT) 
-	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
-	  lib/HTpcrA/Model/Menu.pm $(INST_MAN3DIR)/HTpcrA::Model::Menu.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/grouping_2d.pm $(INST_MAN3DIR)/HTpcrA::Controller::grouping_2d.$(MAN3EXT) \
-	  lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm $(INST_MAN3DIR)/stefans_libs::flexible_data_structures::data_table::arraySorter.$(MAN3EXT) \
-	  lib/stefans_libs/GeneGroups/Set.pm $(INST_MAN3DIR)/stefans_libs::GeneGroups::Set.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/RandomForest.pm $(INST_MAN3DIR)/HTpcrA::Controller::RandomForest.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/gene_group.pm $(INST_MAN3DIR)/HTpcrA::Controller::gene_group.$(MAN3EXT) \
-	  lib/HTpcrA/Model/PValues.pm $(INST_MAN3DIR)/HTpcrA::Model::PValues.$(MAN3EXT) \
-	  lib/HTpcrA/Model/Coexpr.pm $(INST_MAN3DIR)/HTpcrA::Model::Coexpr.$(MAN3EXT) \
-	  lib/CatalystX/Profile_SL.pm $(INST_MAN3DIR)/CatalystX::Profile_SL.$(MAN3EXT) \
-	  lib/HTpcrA/View/HTML.pm $(INST_MAN3DIR)/HTpcrA::View::HTML.$(MAN3EXT) \
-	  lib/stefans_libs/Description.pm $(INST_MAN3DIR)/stefans_libs::Description.$(MAN3EXT) \
-	  lib/HTpcrA/Controller/help.pm $(INST_MAN3DIR)/HTpcrA::Controller::help.$(MAN3EXT) \
-	  lib/stefans_libs/file_readers/Patcher.pm $(INST_MAN3DIR)/stefans_libs::file_readers::Patcher.$(MAN3EXT) \
-	  lib/stefans_libs/plot_old/axis.pm $(INST_MAN3DIR)/stefans_libs::plot_old::axis.$(MAN3EXT) \
 	  lib/stefans_libs/flexible_data_structures/BinList/Histogram.pm $(INST_MAN3DIR)/stefans_libs::flexible_data_structures::BinList::Histogram.$(MAN3EXT) \
+	  lib/HTpcrA/Model/java_splicer.pm $(INST_MAN3DIR)/HTpcrA::Model::java_splicer.$(MAN3EXT) \
+	  lib/stefans_libs/root.pm $(INST_MAN3DIR)/stefans_libs::root.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/Scrapbook.pm $(INST_MAN3DIR)/HTpcrA::Controller::Scrapbook.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/gene_group.pm $(INST_MAN3DIR)/HTpcrA::Controller::gene_group.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/Files.pm $(INST_MAN3DIR)/HTpcrA::Controller::Files.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/DropGenes.pm $(INST_MAN3DIR)/HTpcrA::Controller::DropGenes.$(MAN3EXT) \
+	  lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm $(INST_MAN3DIR)/stefans_libs::flexible_data_structures::BinList::XY_Group.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/DropSamples.pm $(INST_MAN3DIR)/HTpcrA::Controller::DropSamples.$(MAN3EXT) \
+	  lib/HTpcrA/Model/RandomForest.pm $(INST_MAN3DIR)/HTpcrA::Model::RandomForest.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/help.pm $(INST_MAN3DIR)/HTpcrA::Controller::help.$(MAN3EXT) \
+	  lib/stefans_libs/plot_old/axis.pm $(INST_MAN3DIR)/stefans_libs::plot_old::axis.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/Filemerger.pm $(INST_MAN3DIR)/HTpcrA::Controller::Filemerger.$(MAN3EXT) \
+	  lib/HTpcrA/Model/HelpFile.pm $(INST_MAN3DIR)/HTpcrA::Model::HelpFile.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/analyse.pm $(INST_MAN3DIR)/HTpcrA::Controller::analyse.$(MAN3EXT) \
+	  lib/HTpcrA/Model/PValues.pm $(INST_MAN3DIR)/HTpcrA::Model::PValues.$(MAN3EXT) \
+	  lib/HTpcrA/Model/MethodsSection.pm $(INST_MAN3DIR)/HTpcrA::Model::MethodsSection.$(MAN3EXT) \
+	  lib/stefans_libs/GeneGroups.pm $(INST_MAN3DIR)/stefans_libs::GeneGroups.$(MAN3EXT) \
+	  lib/HTpcrA/Model/Coexpr.pm $(INST_MAN3DIR)/HTpcrA::Model::Coexpr.$(MAN3EXT) \
+	  lib/HTpcrA/Model/scrapbook.pm $(INST_MAN3DIR)/HTpcrA::Model::scrapbook.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/PValues.pm $(INST_MAN3DIR)/HTpcrA::Controller::PValues.$(MAN3EXT) \
+	  lib/stefans_libs/GeneGroups/R_table.pm $(INST_MAN3DIR)/stefans_libs::GeneGroups::R_table.$(MAN3EXT) \
+	  lib/stefans_libs/HTpcrA/Menue.pm $(INST_MAN3DIR)/stefans_libs::HTpcrA::Menue.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/grouping_2d.pm $(INST_MAN3DIR)/HTpcrA::Controller::grouping_2d.$(MAN3EXT) \
+	  lib/CatalystX/Profile_SL.pm $(INST_MAN3DIR)/CatalystX::Profile_SL.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/Regroup.pm $(INST_MAN3DIR)/HTpcrA::Controller::Regroup.$(MAN3EXT) \
+	  lib/stefans_libs/HTpcrA/ScrapBook.pm $(INST_MAN3DIR)/stefans_libs::HTpcrA::ScrapBook.$(MAN3EXT) \
+	  lib/stefans_libs/file_readers/PCR_Raw_Tables.pm $(INST_MAN3DIR)/stefans_libs::file_readers::PCR_Raw_Tables.$(MAN3EXT) 
+	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
+	  lib/HTpcrA/EnableFiles.pm $(INST_MAN3DIR)/HTpcrA::EnableFiles.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/Error.pm $(INST_MAN3DIR)/HTpcrA::Controller::Error.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/Root.pm $(INST_MAN3DIR)/HTpcrA::Controller::Root.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/Coexpression.pm $(INST_MAN3DIR)/HTpcrA::Controller::Coexpression.$(MAN3EXT) \
+	  lib/HTpcrA/Controller/RandomForest.pm $(INST_MAN3DIR)/HTpcrA::Controller::RandomForest.$(MAN3EXT) \
+	  lib/HTpcrA/Model/Menu.pm $(INST_MAN3DIR)/HTpcrA::Model::Menu.$(MAN3EXT) \
+	  lib/stefans_libs/file_readers/Patcher.pm $(INST_MAN3DIR)/stefans_libs::file_readers::Patcher.$(MAN3EXT) \
+	  lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm $(INST_MAN3DIR)/stefans_libs::flexible_data_structures::data_table::arraySorter.$(MAN3EXT) \
+	  lib/stefans_libs/flexible_data_structures/BinList.pm $(INST_MAN3DIR)/stefans_libs::flexible_data_structures::BinList.$(MAN3EXT) \
 	  lib/HTpcrA.pm $(INST_MAN3DIR)/HTpcrA.$(MAN3EXT) \
-	  lib/stefans_libs/HTpcrA/ScrapBook.pm $(INST_MAN3DIR)/stefans_libs::HTpcrA::ScrapBook.$(MAN3EXT) 
+	  lib/HTpcrA/Model/PCR_Raw_Files.pm $(INST_MAN3DIR)/HTpcrA::Model::PCR_Raw_Files.$(MAN3EXT) \
+	  lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm $(INST_MAN3DIR)/CatalystX::Profile_SL::Controller::ControlProfiling.$(MAN3EXT) \
+	  lib/stefans_libs/Description.pm $(INST_MAN3DIR)/stefans_libs::Description.$(MAN3EXT) \
+	  lib/HTpcrA/View/HTML.pm $(INST_MAN3DIR)/HTpcrA::View::HTML.$(MAN3EXT) \
+	  lib/HTpcrA/Model/GeneGroups.pm $(INST_MAN3DIR)/HTpcrA::Model::GeneGroups.$(MAN3EXT) \
+	  lib/stefans_libs/GeneGroups/Set.pm $(INST_MAN3DIR)/stefans_libs::GeneGroups::Set.$(MAN3EXT) \
+	  lib/stefans_libs/HTpcrA/methods.pm $(INST_MAN3DIR)/stefans_libs::HTpcrA::methods.$(MAN3EXT) 
 
 
 
@@ -749,16 +749,16 @@ manifypods : pure_all  \
 
 EXE_FILES = script/CleanTemp.pl script/htpcra_cgi.pl script/htpcra_create.pl script/htpcra_fastcgi.pl script/htpcra_server.pl script/htpcra_test.pl script/install.pl script/libPatcher.pl script/minimize_css.pl
 
-pure_all :: $(INST_SCRIPT)/libPatcher.pl $(INST_SCRIPT)/htpcra_test.pl $(INST_SCRIPT)/CleanTemp.pl $(INST_SCRIPT)/install.pl $(INST_SCRIPT)/htpcra_server.pl $(INST_SCRIPT)/htpcra_cgi.pl $(INST_SCRIPT)/htpcra_fastcgi.pl $(INST_SCRIPT)/htpcra_create.pl $(INST_SCRIPT)/minimize_css.pl
+pure_all :: $(INST_SCRIPT)/libPatcher.pl $(INST_SCRIPT)/install.pl $(INST_SCRIPT)/minimize_css.pl $(INST_SCRIPT)/htpcra_fastcgi.pl $(INST_SCRIPT)/htpcra_create.pl $(INST_SCRIPT)/htpcra_cgi.pl $(INST_SCRIPT)/htpcra_server.pl $(INST_SCRIPT)/CleanTemp.pl $(INST_SCRIPT)/htpcra_test.pl
 	$(NOECHO) $(NOOP)
 
 realclean ::
 	$(RM_F) \
-	  $(INST_SCRIPT)/libPatcher.pl $(INST_SCRIPT)/htpcra_test.pl \
-	  $(INST_SCRIPT)/CleanTemp.pl $(INST_SCRIPT)/install.pl \
-	  $(INST_SCRIPT)/htpcra_server.pl $(INST_SCRIPT)/htpcra_cgi.pl \
-	  $(INST_SCRIPT)/htpcra_fastcgi.pl $(INST_SCRIPT)/htpcra_create.pl \
-	  $(INST_SCRIPT)/minimize_css.pl 
+	  $(INST_SCRIPT)/libPatcher.pl $(INST_SCRIPT)/install.pl \
+	  $(INST_SCRIPT)/minimize_css.pl $(INST_SCRIPT)/htpcra_fastcgi.pl \
+	  $(INST_SCRIPT)/htpcra_create.pl $(INST_SCRIPT)/htpcra_cgi.pl \
+	  $(INST_SCRIPT)/htpcra_server.pl $(INST_SCRIPT)/CleanTemp.pl \
+	  $(INST_SCRIPT)/htpcra_test.pl 
 
 $(INST_SCRIPT)/libPatcher.pl : script/libPatcher.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
 	$(NOECHO) $(RM_F) $(INST_SCRIPT)/libPatcher.pl
@@ -766,35 +766,17 @@ $(INST_SCRIPT)/libPatcher.pl : script/libPatcher.pl $(FIRST_MAKEFILE) $(INST_SCR
 	$(FIXIN) $(INST_SCRIPT)/libPatcher.pl
 	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/libPatcher.pl
 
-$(INST_SCRIPT)/htpcra_test.pl : script/htpcra_test.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
-	$(NOECHO) $(RM_F) $(INST_SCRIPT)/htpcra_test.pl
-	$(CP) script/htpcra_test.pl $(INST_SCRIPT)/htpcra_test.pl
-	$(FIXIN) $(INST_SCRIPT)/htpcra_test.pl
-	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/htpcra_test.pl
-
-$(INST_SCRIPT)/CleanTemp.pl : script/CleanTemp.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
-	$(NOECHO) $(RM_F) $(INST_SCRIPT)/CleanTemp.pl
-	$(CP) script/CleanTemp.pl $(INST_SCRIPT)/CleanTemp.pl
-	$(FIXIN) $(INST_SCRIPT)/CleanTemp.pl
-	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/CleanTemp.pl
-
 $(INST_SCRIPT)/install.pl : script/install.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
 	$(NOECHO) $(RM_F) $(INST_SCRIPT)/install.pl
 	$(CP) script/install.pl $(INST_SCRIPT)/install.pl
 	$(FIXIN) $(INST_SCRIPT)/install.pl
 	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/install.pl
 
-$(INST_SCRIPT)/htpcra_server.pl : script/htpcra_server.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
-	$(NOECHO) $(RM_F) $(INST_SCRIPT)/htpcra_server.pl
-	$(CP) script/htpcra_server.pl $(INST_SCRIPT)/htpcra_server.pl
-	$(FIXIN) $(INST_SCRIPT)/htpcra_server.pl
-	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/htpcra_server.pl
-
-$(INST_SCRIPT)/htpcra_cgi.pl : script/htpcra_cgi.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
-	$(NOECHO) $(RM_F) $(INST_SCRIPT)/htpcra_cgi.pl
-	$(CP) script/htpcra_cgi.pl $(INST_SCRIPT)/htpcra_cgi.pl
-	$(FIXIN) $(INST_SCRIPT)/htpcra_cgi.pl
-	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/htpcra_cgi.pl
+$(INST_SCRIPT)/minimize_css.pl : script/minimize_css.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
+	$(NOECHO) $(RM_F) $(INST_SCRIPT)/minimize_css.pl
+	$(CP) script/minimize_css.pl $(INST_SCRIPT)/minimize_css.pl
+	$(FIXIN) $(INST_SCRIPT)/minimize_css.pl
+	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/minimize_css.pl
 
 $(INST_SCRIPT)/htpcra_fastcgi.pl : script/htpcra_fastcgi.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
 	$(NOECHO) $(RM_F) $(INST_SCRIPT)/htpcra_fastcgi.pl
@@ -808,11 +790,29 @@ $(INST_SCRIPT)/htpcra_create.pl : script/htpcra_create.pl $(FIRST_MAKEFILE) $(IN
 	$(FIXIN) $(INST_SCRIPT)/htpcra_create.pl
 	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/htpcra_create.pl
 
-$(INST_SCRIPT)/minimize_css.pl : script/minimize_css.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
-	$(NOECHO) $(RM_F) $(INST_SCRIPT)/minimize_css.pl
-	$(CP) script/minimize_css.pl $(INST_SCRIPT)/minimize_css.pl
-	$(FIXIN) $(INST_SCRIPT)/minimize_css.pl
-	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/minimize_css.pl
+$(INST_SCRIPT)/htpcra_cgi.pl : script/htpcra_cgi.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
+	$(NOECHO) $(RM_F) $(INST_SCRIPT)/htpcra_cgi.pl
+	$(CP) script/htpcra_cgi.pl $(INST_SCRIPT)/htpcra_cgi.pl
+	$(FIXIN) $(INST_SCRIPT)/htpcra_cgi.pl
+	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/htpcra_cgi.pl
+
+$(INST_SCRIPT)/htpcra_server.pl : script/htpcra_server.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
+	$(NOECHO) $(RM_F) $(INST_SCRIPT)/htpcra_server.pl
+	$(CP) script/htpcra_server.pl $(INST_SCRIPT)/htpcra_server.pl
+	$(FIXIN) $(INST_SCRIPT)/htpcra_server.pl
+	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/htpcra_server.pl
+
+$(INST_SCRIPT)/CleanTemp.pl : script/CleanTemp.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
+	$(NOECHO) $(RM_F) $(INST_SCRIPT)/CleanTemp.pl
+	$(CP) script/CleanTemp.pl $(INST_SCRIPT)/CleanTemp.pl
+	$(FIXIN) $(INST_SCRIPT)/CleanTemp.pl
+	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/CleanTemp.pl
+
+$(INST_SCRIPT)/htpcra_test.pl : script/htpcra_test.pl $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
+	$(NOECHO) $(RM_F) $(INST_SCRIPT)/htpcra_test.pl
+	$(CP) script/htpcra_test.pl $(INST_SCRIPT)/htpcra_test.pl
+	$(FIXIN) $(INST_SCRIPT)/htpcra_test.pl
+	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/htpcra_test.pl
 
 
 
@@ -832,22 +832,22 @@ clean_subdirs :
 
 clean :: clean_subdirs
 	- $(RM_F) \
-	  *perl.core $(INST_ARCHAUTODIR)/extralibs.all \
-	  lib$(BASEEXT).def core.[0-9][0-9][0-9][0-9] \
-	  core.[0-9][0-9][0-9] *$(LIB_EXT) \
+	  core.[0-9][0-9][0-9] tmon.out \
+	  core.[0-9][0-9][0-9][0-9] perl.exe \
+	  $(INST_ARCHAUTODIR)/extralibs.ld core.[0-9][0-9][0-9][0-9][0-9] \
+	  *$(OBJ_EXT) MYMETA.yml \
+	  $(BASEEXT).def core \
+	  core.*perl.*.? $(BASEEXT).x \
+	  $(BASEEXT).bso pm_to_blib \
+	  *$(LIB_EXT) pm_to_blib.ts \
+	  blibdirs.ts $(INST_ARCHAUTODIR)/extralibs.all \
+	  $(BASEEXT).exp so_locations \
+	  $(MAKE_APERL_FILE) perl \
+	  mon.out *perl.core \
+	  core.[0-9][0-9] core.[0-9] \
+	  $(BOOTSTRAP) perlmain.c \
 	  MYMETA.json perl$(EXE_EXT) \
-	  perl pm_to_blib.ts \
-	  $(BASEEXT).def perl.exe \
-	  $(MAKE_APERL_FILE) mon.out \
-	  $(BASEEXT).bso so_locations \
-	  blibdirs.ts core.*perl.*.? \
-	  core.[0-9][0-9][0-9][0-9][0-9] MYMETA.yml \
-	  $(BASEEXT).exp perlmain.c \
-	  $(BASEEXT).x core \
-	  $(INST_ARCHAUTODIR)/extralibs.ld core.[0-9] \
-	  *$(OBJ_EXT) $(BOOTSTRAP) \
-	  tmon.out core.[0-9][0-9] \
-	  pm_to_blib 
+	  lib$(BASEEXT).def 
 	- $(RM_RF) \
 	  blib 
 	- $(NOECHO) $(RM_F) $(MAKEFILE_OLD)
@@ -1204,60 +1204,60 @@ ppd :
 
 pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
 	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', q[$(PM_FILTER)], '\''$(PERM_DIR)'\'')' -- \
-	  lib/stefans_libs/root.pm blib/lib/stefans_libs/root.pm \
-	  lib/HTpcrA/Model/PCR_Raw_Files.pm blib/lib/HTpcrA/Model/PCR_Raw_Files.pm \
-	  lib/HTpcrA/Controller/DropSamples.pm blib/lib/HTpcrA/Controller/DropSamples.pm \
-	  lib/HTpcrA/Controller/Filemerger.pm blib/lib/HTpcrA/Controller/Filemerger.pm \
-	  lib/HTpcrA/Model/RandomForest.pm blib/lib/HTpcrA/Model/RandomForest.pm \
-	  lib/CatalystX/nytprof.out blib/lib/CatalystX/nytprof.out \
-	  lib/HTpcrA/Model/HelpFile.pm blib/lib/HTpcrA/Model/HelpFile.pm \
-	  lib/HTpcrA/Controller/Error.pm blib/lib/HTpcrA/Controller/Error.pm \
-	  lib/HTpcrA/Controller/Root.pm blib/lib/HTpcrA/Controller/Root.pm \
-	  lib/HTpcrA/Model/scrapbook.pm blib/lib/HTpcrA/Model/scrapbook.pm \
-	  lib/htpcr.conf.useless blib/lib/htpcr.conf.useless \
-	  lib/stefans_libs/HTpcrA/methods.pm blib/lib/stefans_libs/HTpcrA/methods.pm \
-	  lib/stefans_libs/GeneGroups.pm blib/lib/stefans_libs/GeneGroups.pm \
-	  lib/HTpcrA/Controller/DropGenes.pm blib/lib/HTpcrA/Controller/DropGenes.pm \
-	  lib/HTpcrA/EnableFiles.pm blib/lib/HTpcrA/EnableFiles.pm \
-	  lib/HTpcrA/Controller/Coexpression.pm blib/lib/HTpcrA/Controller/Coexpression.pm \
-	  lib/HTpcrA/Controller/Regroup.pm blib/lib/HTpcrA/Controller/Regroup.pm \
-	  lib/stefans_libs/GeneGroups/R_table.pm blib/lib/stefans_libs/GeneGroups/R_table.pm \
-	  lib/HTpcrA/Model/mech.pm blib/lib/HTpcrA/Model/mech.pm \
-	  lib/stefans_libs/plot_old/color.pm blib/lib/stefans_libs/plot_old/color.pm \
-	  lib/HTpcrA/Controller/analyse.pm blib/lib/HTpcrA/Controller/analyse.pm \
 	  lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm blib/lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm \
-	  lib/HTpcrA/Model/MethodsSection.pm blib/lib/HTpcrA/Model/MethodsSection.pm \
-	  lib/stefans_libs/flexible_data_structures/BinList.pm blib/lib/stefans_libs/flexible_data_structures/BinList.pm \
-	  lib/HTpcrA/Controller/Scrapbook.pm blib/lib/HTpcrA/Controller/Scrapbook.pm \
-	  lib/stefans_libs/HTpcrA/Menue.pm blib/lib/stefans_libs/HTpcrA/Menue.pm \
-	  lib/HTpcrA/Model/java_splicer.pm blib/lib/HTpcrA/Model/java_splicer.pm \
-	  lib/HTpcrA/Controller/PValues.pm blib/lib/HTpcrA/Controller/PValues.pm \
-	  lib/HTpcrA/Model/GeneGroups.pm blib/lib/HTpcrA/Model/GeneGroups.pm \
-	  lib/stefans_libs/file_readers/PCR_Raw_Tables.pm blib/lib/stefans_libs/file_readers/PCR_Raw_Tables.pm \
-	  lib/HTpcrA/Controller/Files.pm blib/lib/HTpcrA/Controller/Files.pm \
-	  lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm blib/lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm \
-	  lib/HTpcrA/Model/Menu.pm blib/lib/HTpcrA/Model/Menu.pm \
-	  lib/stefans_libs/file_readers/help_data.pm blib/lib/stefans_libs/file_readers/help_data.pm 
-	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', q[$(PM_FILTER)], '\''$(PERM_DIR)'\'')' -- \
-	  lib/HTpcrA/Controller/grouping_2d.pm blib/lib/HTpcrA/Controller/grouping_2d.pm \
-	  lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm blib/lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm \
-	  lib/stefans_libs/GeneGroups/Set.pm blib/lib/stefans_libs/GeneGroups/Set.pm \
-	  lib/HTpcrA/Controller/RandomForest.pm blib/lib/HTpcrA/Controller/RandomForest.pm \
-	  lib/HTpcrA/Controller/gene_group.pm blib/lib/HTpcrA/Controller/gene_group.pm \
-	  lib/stefans_libs/plot_old/Font.pm blib/lib/stefans_libs/plot_old/Font.pm \
-	  lib/HTpcrA/Model/PValues.pm blib/lib/HTpcrA/Model/PValues.pm \
-	  lib/htpcra.conf blib/lib/htpcra.conf \
-	  lib/CatalystX/Profile_SL.pm blib/lib/CatalystX/Profile_SL.pm \
-	  lib/HTpcrA/Model/Coexpr.pm blib/lib/HTpcrA/Model/Coexpr.pm \
-	  lib/HTpcrA/View/HTML.pm blib/lib/HTpcrA/View/HTML.pm \
+	  lib/stefans_libs/file_readers/help_data.pm blib/lib/stefans_libs/file_readers/help_data.pm \
 	  lib/stefans_libs/Description.pm blib/lib/stefans_libs/Description.pm \
-	  lib/HTpcrA/Controller/help.pm blib/lib/HTpcrA/Controller/help.pm \
+	  lib/HTpcrA/View/HTML.pm blib/lib/HTpcrA/View/HTML.pm \
+	  lib/stefans_libs/flexible_data_structures/BinList.pm blib/lib/stefans_libs/flexible_data_structures/BinList.pm \
+	  lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm blib/lib/stefans_libs/flexible_data_structures/data_table/arraySorter.pm \
 	  lib/stefans_libs/file_readers/Patcher.pm blib/lib/stefans_libs/file_readers/Patcher.pm \
-	  lib/stefans_libs/plot_old/axis.pm blib/lib/stefans_libs/plot_old/axis.pm \
-	  lib/stefans_libs/flexible_data_structures/BinList/Histogram.pm blib/lib/stefans_libs/flexible_data_structures/BinList/Histogram.pm \
-	  lib/CatalystX/Profile_SL/Controller/nytprof.out blib/lib/CatalystX/Profile_SL/Controller/nytprof.out \
 	  lib/HTpcrA.pm blib/lib/HTpcrA.pm \
-	  lib/stefans_libs/HTpcrA/ScrapBook.pm blib/lib/stefans_libs/HTpcrA/ScrapBook.pm 
+	  lib/HTpcrA/Model/PCR_Raw_Files.pm blib/lib/HTpcrA/Model/PCR_Raw_Files.pm \
+	  lib/stefans_libs/plot_old/color.pm blib/lib/stefans_libs/plot_old/color.pm \
+	  lib/stefans_libs/HTpcrA/methods.pm blib/lib/stefans_libs/HTpcrA/methods.pm \
+	  lib/htpcra.conf blib/lib/htpcra.conf \
+	  lib/stefans_libs/GeneGroups/Set.pm blib/lib/stefans_libs/GeneGroups/Set.pm \
+	  lib/HTpcrA/Model/GeneGroups.pm blib/lib/HTpcrA/Model/GeneGroups.pm \
+	  lib/stefans_libs/HTpcrA/Menue.pm blib/lib/stefans_libs/HTpcrA/Menue.pm \
+	  lib/CatalystX/Profile_SL.pm blib/lib/CatalystX/Profile_SL.pm \
+	  lib/HTpcrA/Controller/Regroup.pm blib/lib/HTpcrA/Controller/Regroup.pm \
+	  lib/HTpcrA/Controller/grouping_2d.pm blib/lib/HTpcrA/Controller/grouping_2d.pm \
+	  lib/HTpcrA/Controller/RandomForest.pm blib/lib/HTpcrA/Controller/RandomForest.pm \
+	  lib/HTpcrA/Model/Menu.pm blib/lib/HTpcrA/Model/Menu.pm \
+	  lib/stefans_libs/file_readers/PCR_Raw_Tables.pm blib/lib/stefans_libs/file_readers/PCR_Raw_Tables.pm \
+	  lib/stefans_libs/HTpcrA/ScrapBook.pm blib/lib/stefans_libs/HTpcrA/ScrapBook.pm \
+	  lib/HTpcrA/EnableFiles.pm blib/lib/HTpcrA/EnableFiles.pm \
+	  lib/HTpcrA/Controller/Error.pm blib/lib/HTpcrA/Controller/Error.pm \
+	  lib/CatalystX/Profile_SL/Controller/nytprof.out blib/lib/CatalystX/Profile_SL/Controller/nytprof.out \
+	  lib/HTpcrA/Controller/Root.pm blib/lib/HTpcrA/Controller/Root.pm \
+	  lib/HTpcrA/Controller/Coexpression.pm blib/lib/HTpcrA/Controller/Coexpression.pm \
+	  lib/HTpcrA/Controller/Filemerger.pm blib/lib/HTpcrA/Controller/Filemerger.pm \
+	  lib/HTpcrA/Model/HelpFile.pm blib/lib/HTpcrA/Model/HelpFile.pm \
+	  lib/HTpcrA/Model/MethodsSection.pm blib/lib/HTpcrA/Model/MethodsSection.pm \
+	  lib/HTpcrA/Controller/analyse.pm blib/lib/HTpcrA/Controller/analyse.pm \
+	  lib/HTpcrA/Model/PValues.pm blib/lib/HTpcrA/Model/PValues.pm \
+	  lib/stefans_libs/plot_old/axis.pm blib/lib/stefans_libs/plot_old/axis.pm \
+	  lib/stefans_libs/plot_old/Font.pm blib/lib/stefans_libs/plot_old/Font.pm 
+	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', q[$(PM_FILTER)], '\''$(PERM_DIR)'\'')' -- \
+	  lib/HTpcrA/Controller/help.pm blib/lib/HTpcrA/Controller/help.pm \
+	  lib/HTpcrA/Controller/DropSamples.pm blib/lib/HTpcrA/Controller/DropSamples.pm \
+	  lib/HTpcrA/Model/RandomForest.pm blib/lib/HTpcrA/Model/RandomForest.pm \
+	  lib/stefans_libs/GeneGroups/R_table.pm blib/lib/stefans_libs/GeneGroups/R_table.pm \
+	  lib/HTpcrA/Controller/PValues.pm blib/lib/HTpcrA/Controller/PValues.pm \
+	  lib/HTpcrA/Model/scrapbook.pm blib/lib/HTpcrA/Model/scrapbook.pm \
+	  lib/stefans_libs/GeneGroups.pm blib/lib/stefans_libs/GeneGroups.pm \
+	  lib/htpcr.conf.useless blib/lib/htpcr.conf.useless \
+	  lib/HTpcrA/Model/Coexpr.pm blib/lib/HTpcrA/Model/Coexpr.pm \
+	  lib/stefans_libs/flexible_data_structures/BinList/Histogram.pm blib/lib/stefans_libs/flexible_data_structures/BinList/Histogram.pm \
+	  lib/stefans_libs/root.pm blib/lib/stefans_libs/root.pm \
+	  lib/HTpcrA/Model/java_splicer.pm blib/lib/HTpcrA/Model/java_splicer.pm \
+	  lib/HTpcrA/Model/mech.pm blib/lib/HTpcrA/Model/mech.pm \
+	  lib/HTpcrA/Controller/DropGenes.pm blib/lib/HTpcrA/Controller/DropGenes.pm \
+	  lib/CatalystX/nytprof.out blib/lib/CatalystX/nytprof.out \
+	  lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm blib/lib/stefans_libs/flexible_data_structures/BinList/XY_Group.pm \
+	  lib/HTpcrA/Controller/Files.pm blib/lib/HTpcrA/Controller/Files.pm \
+	  lib/HTpcrA/Controller/Scrapbook.pm blib/lib/HTpcrA/Controller/Scrapbook.pm \
+	  lib/HTpcrA/Controller/gene_group.pm blib/lib/HTpcrA/Controller/gene_group.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 
 

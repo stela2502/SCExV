@@ -144,7 +144,15 @@ sub copy_files {
 
 ## this is a horrible hack, but I have not found where the config would be loaded from!
 my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
-my $OK = $patcher -> replace_string( "root => '[\\/\\w]*'," , "root => '$install_path',\nhome => '$install_path'," );
+my $OK = $patcher -> replace_string( "\\sroot =\\> '[\\/\\w]*'," , " root => '$install_path',\nhome => '$install_path'," );
+my $options ='';
+for ( my $i = 0; $i < @options; $i += 2 ){
+	$options .= "\t$options[$i] => '$options[$i+1]',\n" if ( defined $options[$i+1] );
+}
+unless ( $options =~ m/ncore/ ) {
+	$options .= "\tncore => 1,\n";
+}
+my $OK2 = $patcher -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,","$options" );
 $patcher -> write_file();
 
 #$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
@@ -165,17 +173,6 @@ my ($save, $save_home);
 #print $patcher;
 
 #$patcher -> write_file();
-
-my $patcher2 = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
-my $options ='';
-for ( my $i = 0; $i < @options; $i += 2 ){
-	$options .= "\t$options[$i] => '$options[$i+1]',\n" if ( defined $options[$i+1] );
-}
-unless ( $options =~ m/ncore/ ) {
-	$options .= "\tncore => 1,\n";
-}
-my $OK2 = $patcher2 -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,", "root => '$install_path',\n$options" );
-$patcher2 -> write_file();
 
 my $replace = $install_path;
 my @files ;

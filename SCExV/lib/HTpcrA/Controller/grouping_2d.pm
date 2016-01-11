@@ -25,9 +25,9 @@ Catalyst Controller.
 sub index : Path : Form {
 	my ( $self, $c, $geneA, $geneB ) = @_;
 	my $path = $self->check($c);
-	
+
 	my $hash = $self->config_file( $c, 'grouping2D.txt' );
-	$c->stash->{'script'} = $self->Javascript($c);
+	$self->Javascript($c);
 	$self->{'form_array'} = [];
 	opendir( DIR, $path . "preprocess/" );
 
@@ -141,7 +141,7 @@ sub index : Path : Form {
 			}
 			else {
 				my ( $xaxis, $yaxis ) =
-				  $data->axies( $geneA, $geneB , GD::Image->new(10,10) );
+				  $data->axies( $geneA, $geneB, GD::Image->new( 10, 10 ) );
 				if ( $dataset->{'x1'} =~ m/\d+/ ) {
 					foreach ( 'x1', 'x2' ) {
 						$dataset->{$_} = $xaxis->pix2value( $dataset->{$_} );
@@ -183,9 +183,12 @@ sub index : Path : Form {
 			$c->detach();
 		}
 		if ( $c->form->submitted() eq 'Analyze using this grouping' ) {
-			$c->model('scrapbook')->init( $c->scrapbook() )
-			  ->Add("The final 2D grouping for $geneA vs. $geneB" , $self->path($c) . "Grouping.$geneA.$geneB.png" );
-			$c->res->redirect( $c->uri_for("/analyse/re_run/Grouping.$geneA.$geneB") );
+			$c->model('scrapbook')->init( $c->scrapbook() )->Add(
+				"The final 2D grouping for $geneA vs. $geneB",
+				$self->path($c) . "Grouping.$geneA.$geneB.png"
+			);
+			$c->res->redirect(
+				$c->uri_for("/analyse/re_run/Grouping.$geneA.$geneB") );
 			$c->detach();
 		}
 
@@ -196,20 +199,21 @@ sub index : Path : Form {
 	if ( defined $geneB ) {
 		$gg->read_grouping( $self->path($c) . "Grouping.$geneA.$geneB" )
 		  if ( -f $self->path($c) . "Grouping.$geneA.$geneB" );
-		$gg->read_old_grouping( $self->path($c)."../2D_data_color.xls" );
+		$gg->read_old_grouping( $self->path($c) . "../2D_data_color.xls" );
 		$gg->{'data'} = $data;
 		$gg->plot( $self->path($c) . "Grouping.$geneA.$geneB.png",
-			$geneA, $geneB);
-		if ( $gg->nGroup() == 0 ){
-			$c->stash->{'warning'} = "The sample colors are taken from the last active grouping.";
+			$geneA, $geneB );
+		if ( $gg->nGroup() == 0 ) {
+			$c->stash->{'warning'} =
+			  "The sample colors are taken from the last active grouping.";
 		}
 		$c->stash->{'data'} =
 		  $c->uri_for(
 			'/files/index/' . $self->path($c) . "Grouping.$geneA.$geneB.png" );
 	}
 	else {
-		$c->stash->{'data'} =
-		  '/static/images/No_selection.png';    ## this is served by apache!
+		$c->stash->{'data'} = $c->uri_for('/static/images/No_selection.png')
+		  ;    ## this is served by apache!
 	}
 
 	#Carp::confess( $gg->AsString() );
@@ -217,7 +221,7 @@ sub index : Path : Form {
 
 #$c->form->template({ type => 'TT2', 'template' => 'root/src/form/grouping_2d.tt2', variable => 'form' });
 	$c->form->template(
-		$c->config->{'root'}.'src'. '/form/grouping_2d.tt2' );
+		$c->config->{'root'} . 'src' . '/form/grouping_2d.tt2' );
 	$c->stash->{'template'} = 'grouping_2d.tt2';
 
 }
@@ -248,15 +252,17 @@ sub path {
 
 sub Javascript {
 	my ( $self, $c ) = @_;
-	return $self->Script($c,
-'<link rel="stylesheet" type="text/css" href="/css/imgareaselect-default.css" />'
-	  . "\n"
-	  . '<script type="text/javascript" src="/scripts/jquery.min.js"></script>'
-	  . "\n"
-	  . '<script type="text/javascript" src="/scripts/jquery.imgareaselect.pack.js"></script>'
-	  . "\n"
-	  . '<script type="text/javascript" src="/scripts/grouping2d.js"></script>'
-	  . "\n" );
+	my $uri = $c->uri_for("/");
+	return $self->Script(
+		$c,
+		join(
+			"\n", "<link rel='stylesheet' type='text/css' href='".$c->uri_for("/css/imgareaselect-default.css")."' />",
+			map { "<script type='text/javascript' src='".$c->uri_for($_)."' ></script>" }
+			  "/scripts/jquery.min.js",
+			"/scripts/jquery.imgareaselect.pack.js",
+			"/scripts/grouping2d.js"
+		)
+	);
 }
 
 =head1 AUTHOR
