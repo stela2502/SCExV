@@ -154,6 +154,7 @@ my ($save, $save_home);
 #$save = $1;
 #$patcher -> {'str_rep'} =~ m/Home (.*)/;
 #$save_home = $1;
+<<<<<<< HEAD
 ##Carp::confess ($patcher->{'filename'}. "  root_save = $save; Home save = $save_home\n" );
 #
 #$OK = $patcher -> replace_string( "root .*", "root $install_path" );
@@ -165,6 +166,18 @@ my ($save, $save_home);
 ### not important any longer as the HTpcrA.pm file is patched directly!
 #print $patcher;
 #
+=======
+#Carp::confess ($patcher->{'filename'}. "  root_save = $save; Home save = $save_home\n" );
+
+#$OK = $patcher -> replace_string( "root .*", "root $install_path" );
+#$OK += $patcher -> replace_string( "Home .*", "Home $install_path" );
+#$OK += $patcher -> replace_string( "\tform_path .*", "\tform_path $install_path"."src/form/");
+#
+##Carp::confess ( $patcher->{'str_rep'}. "written to file ".$patcher ->{'filename'}  );
+#Carp::confess ( "I could not patch the config file!\n" ) unless ( $OK==3);
+#print $patcher;
+
+>>>>>>> refs/remotes/origin/testing
 #$patcher -> write_file();
 
 my $patcher2 = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );

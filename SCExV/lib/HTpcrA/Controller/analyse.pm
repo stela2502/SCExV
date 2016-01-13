@@ -31,17 +31,17 @@ sub update_form {
 	$c->form->name('master');
 	$self->{'form_array'} = [];
 	$hash = $self->defined_or_set_to_default( $hash, $self->init_dataset() );
-	
+
 	push(
 		@{ $self->{'form_array'} },
 		{
-			'comment'  => 'Automatic Re-Order',
-			'name'     => 'automaticReorder',
-			'options'  =>  { '0' => 'No', '1' => 'Yes' },
-			'value'    => $hash->{'automaticReorder'} || 1,
+			'comment' => 'Automatic Re-Order',
+			'name'    => 'automaticReorder',
+			'options' => { '0' => 'No', '1' => 'Yes' },
+			'value' => $hash->{'automaticReorder'} || 1,
 			'required' => 1,
 		}
-	);		
+	);
 	push(
 		@{ $self->{'form_array'} },
 		{
@@ -65,10 +65,40 @@ sub update_form {
 	push(
 		@{ $self->{'form_array'} },
 		{
-			'comment' => 'Vioplots only expressing cells',
+			'comment' => 'plot type',
+			'name'    => 'use_beans',
+			'options' => { '0' => 'vioplot', '1' => 'beanplot' },
+			'value' => $hash->{'use_beans'} ||= 1,
+			'required' => 1,
+		}
+	);
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment' => 'plot data',
 			'name'    => 'zscoredVioplot',
-			'options' => { '0' => 'No', '1' => 'Yes' },
+			'options' => { '0' => 'ct', '1' => 'z scored' },
 			'value' => $hash->{'zscoredVioplot'} ||= 1,
+			'required' => 1,
+		}
+	);
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment' => 'set not expressed value to min expression value -1',
+			'name'    => 'move_neg',
+			'options' => { '0' => 'No', '1' => 'Yes' },
+			'value' => $hash->{'move_neg'} ||= 1,
+			'required' => 1,
+		}
+	);
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment' => 'plot non-expressing cells',
+			'name'    => 'plot_neg',
+			'options' => { '0' => 'No', '1' => 'Yes' },
+			'value' => $hash->{'plot_neg'} ||= 1,
 			'required' => 1,
 		}
 	);
@@ -247,7 +277,6 @@ sub fileok : Local : Form {
 	$c->stash->{'template'} = 'message.tt2';
 }
 
-
 sub init_dataset {
 	return {
 		'cluster_amount' => 3,
@@ -261,13 +290,16 @@ sub init_dataset {
 		'plotsvg'        => 0,
 		'zscoredVioplot' => 1,
 		'cluster_type'   => 'hierarchical clust',
+		'plot_neg'       => 1,
+		'move_neg'       => 1,
+		'use_beans'      => 1,
 	};
 }
 
 sub run_first : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->path($c);
-	$self->check($c,'upload');
+	$self->check( $c, 'upload' );
 	## I need to write the first config file? NO!
 	my $dataset =
 	  $self->defined_or_set_to_default( { 'UG' => 'Group by plateID' },
@@ -293,8 +325,11 @@ sub run_first : Local : Form {
 
 sub re_run : Local {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->check($c,'upload');
-	my $dataset = $self->defined_or_set_to_default( $self->config_file( $c, 'rscript.Configs.txt' ), $self->init_dataset() );
+	my $path = $self->check( $c, 'upload' );
+	my $dataset =
+	  $self->defined_or_set_to_default(
+		$self->config_file( $c, 'rscript.Configs.txt' ),
+		$self->init_dataset() );
 	$args[0] ||= '';
 	if ( -f $path . "/" . $args[0] ) {
 		$dataset->{'UG'} = $args[0];
@@ -317,9 +352,46 @@ sub re_run : Local {
 	$c->detach();
 }
 
+sub rfgrouping : Local {
+	my ( $self, $c ) = @_;
+	my $path = $self->check( $c, 'upload' );
+
+	my %xml_escape_map = (
+		'<' => '&lt;',
+		'>' => '&gt;',
+		'"' => '&quot;',
+		'&' => '&amp;',
+	);
+
+	opendir( my $dh, $path );
+	my @rf_groups = grep { /randomForest/ && -f $path . $_ } readdir($dh);
+	closedir $dh;
+
+	# Begin the XML document
+	my $xml =
+	    '<?xml version="1.0" encoding="utf-8" ?>' . "\n"
+	  . "<CHANGED>"
+	  . scalar(@rf_groups)
+	  . "</CHANGED>\n";
+	if ( scalar(@rf_groups) ) {
+		$xml .= "<GROUPS type='array'>\n";
+		foreach (@rf_groups) {
+			$xml .= "<value>$_</value>\n";
+		}
+		# Terminate the xml
+		$xml .= '</GROUPS>' . "\n";
+	}
+	$c->res->content_type('text/xml');
+	$c->res->write($xml);
+	$c->res->code(204);
+}
+
 sub index : Path : Form {
 	my ( $self, $c, @args ) = @_;
-	my $path = $self->check($c,'upload');
+	my $path = $self->check( $c, 'upload' );
+	if ( -f $path . "rf_submitted.info" && ! (-f $path . "rf_recieved.info" ) ) {
+		$c->stash->{'RFsubmitted'} = 1;
+	}
 	if ( -f $path . "RandomForest_create_groupings.R" ) {
 		chdir($path);
 		system(
@@ -365,8 +437,10 @@ sub index : Path : Form {
 				  if ( -f $path . "mdsGrouping" );
 
 #my $tmp = root::get_hashEntries_as_string( $dataset , 3, "why not remove some samples?? before conversion");
-				my ( $xaxis, $yaxis ) =
-				  $data->axies( @{ $data->{'header'} }[ 1, 2 ] , GD::Image->new( 10,10) );
+				my ( $xaxis, $yaxis ) = $data->axies(
+					@{ $data->{'header'} }[ 1, 2 ],
+					GD::Image->new( 10, 10 )
+				);
 				foreach ( 'x1', 'x2' ) {
 					$dataset->{$_} =
 					  $xaxis->pix2value( $dataset->{$_} * 2 );   ## html scaling
@@ -448,7 +522,7 @@ sub index : Path : Form {
 		  "<h3>Show expression for </h3>" . $c->stash->{'figure_2d'};
 	}
 	$c->form->type('TT2');
-	$c->form->template( $c->config->{'root'}.'src'. '/form/analysis.tt2' );
+	$c->form->template( $c->config->{'root'} . 'src' . '/form/analysis.tt2' );
 	$c->stash->{'template'} = 'analyse.tt2';
 }
 
@@ -471,13 +545,24 @@ sub R_script {
 	my $path = $c->session_path();
 
 	## init script
-	my $script =
-	    "source ('libs/Tool_Plot.R')\n"
-	  .  "source ('libs/Tool_Coexpression.R')\n"
-	  . "load( 'norm_data.RData')\n"
-	  . "source ('libs/Tool_grouping.R')\n";
+	my $script = $self->_R_source(
+		'libs/Tool_Plot.R',
+		'libs/Tool_Coexpression.R',
+		'libs/Tool_grouping.R',
+		'libs/beanplot_mod/beanplotbeanlines.R',
+		'libs/beanplot_mod/beanplot.R',
+		'libs/beanplot_mod/getgroupsfromarguments.R',
+		'libs/beanplot_mod/beanplotinnerborders.R',
+		'libs/beanplot_mod/beanplotscatters.R',
+		'libs/beanplot_mod/makecombinedname.R',
+		'libs/beanplot_mod/beanplotpolyshapes.R',
+		'libs/beanplot_mod/fixcolorvector.R',
+		'libs/beanplot_mod/seemslog.R'
+	);
+	$script .= "load( 'norm_data.RData')\n";
 	if ( -f $path . "Gene_grouping.randomForest.txt" ) {
-		$script .= "source ('libs/Tool_RandomForest.R')\n"
+		$script .=
+		    "source ('libs/Tool_RandomForest.R')\n"
 		  . "load('RandomForestdistRFobject_genes.RData')\n"
 		  . "createGeneGroups_randomForest (data.filtered, $dataset->{'randomForest'})\n"
 		  . "source ('Gene_grouping.randomForest.txt')\n";
@@ -485,13 +570,12 @@ sub R_script {
 	if ( -f $path . 'userDefGrouping.data'
 		&& $dataset->{'UG'} eq "Use my grouping" )
 	{
-		$script .=
-		    "userGroups <- read.table ( file= 'userDefGrouping.data' )\n"
+		$script .= "userGroups <- read.table ( file= 'userDefGrouping.data' )\n"
 		  . "groups.n <-length (levels(as.factor(userGroups\$groupID) ))\n ";
 	}
 	elsif ( $dataset->{'UG'} eq "Group by plateID" ) {
 		$script .=
-		    "userGroups <- data.frame(cellName = rownames(data.filtered\$PCR), groupID = data.filtered\$ArrayID ) \n "
+"userGroups <- data.frame(cellName = rownames(data.filtered\$PCR), groupID = data.filtered\$ArrayID ) \n "
 		  . "groups.n <-length (levels(as.factor(userGroups\$groupID) ))\n ";
 	}
 	elsif ( -f $path . $dataset->{'UG'} ) {    ## an expression based grouping!
@@ -501,14 +585,32 @@ sub R_script {
 	else {
 		$script .= "groups.n <-$dataset->{'cluster_amount'}\n";
 	}
-
+	if ( $dataset->{'move_neg'} ) {
+		$script .= "move.neg <- TRUE\n";
+	}
+	else {
+		$script .= "move.neg <- FALSE\n";
+	}
+	if ( $dataset->{'plot_neg'} ) {
+		$script .= "plot.neg <- TRUE\n";
+	}
+	else {
+		$script .= "plot.neg <- FALSE\n";
+	}
+	if ( $dataset->{'use_beans'} ) {
+		$script .= "beanplots = TRUE\n";
+	}
+	else {
+		$script .= "beanplots = FALSE\n";
+	}
 	$script .=
 	    "plotsvg = $dataset->{'plotsvg'}\n"
 	  . "zscoredVioplot = $dataset->{'zscoredVioplot'}\n"
 	  . "onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
 	  . " onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
 	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "
-	  . " ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot)\n"
+	  . " ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot"
+	  . ", move.neg = move.neg, plot.neg=plot.neg, beanplots=beanplots" . ")\n"
 	  . "\nsave( data, file='analysis.RData' )\n\n";
 
 	## now lets identify the most interesting genes:
@@ -545,8 +647,9 @@ sub R_script {
 	);
 	open( RS2, ">$path/densityWebGL.R" );
 
-	print RS2 "options(rgl.useNULL=TRUE)\n"
-	  . "library(ks)\n"
+	print RS2 "options(rgl.useNULL=TRUE)\n" . "library(ks)\n"
+
+	  #  . "library(RDRToolbox)\n"
 	  . "load( 'clusters.RData' )\n"
 	  . "usable <- is.na(match( obj\$clusters, which(table(as.factor(obj\$clusters)) < 4 ) )) == T\n"
 	  . "use <- obj\n"
@@ -555,15 +658,19 @@ sub R_script {
 	  . "cols <- rainbow(max(as.numeric(obj\$clusters)))\n"
 	  . "H <- Hkda( use\$mds.coord, use\$clusters, bw='plugin')\n"
 	  . "kda.fhat <- kda( use\$mds.coord, use\$clusters,Hs=H, compute.cont=TRUE)\n"
-	  . "try(plot(kda.fhat, cex=par3d('cex'=0.01), colors = cols[as.numeric(names(table(use\$clusters)))] ),silent=F)\n"
-	  . "try( writeWebGL(dir = 'densityWebGL', width=470, height=470 ) ,silent=F )\n";
+	  . "try(plot(kda.fhat, size=0.001, colors = cols[as.numeric(names(table(use\$clusters)))] ),silent=F)\n"
+
+	  #	  . "try (rgl.clear('material'))\n"
+	  #	  . "try (rgl.clear('bbox') )\n"
+	  #	  . "try (axes3d(labels = FALSE, tick = FALSE))\n"
+	  . "try( writeWebGL(dir = 'densityWebGL', width=470, height=470, prefix='K', template='libs/densityWebGL.html' ) ,silent=F )\n";
 
 	close(RS2);
 	system(
 '/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- densityWebGL.R >> R.run.log"'
 	);
 	$self->{'webGL'} = "$path/webGL/index.html";
-	$self->Coexpression_R_script( $path );
+	$self->Coexpression_R_script($path);
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {
 		## color the arrays by group color!
 		$c->session->{'groupbyplate'} = 1;
@@ -581,18 +688,19 @@ sub R_script {
 }
 
 sub Coexpression_R_script {
-	my ( $self, $path ) =@_;
+	my ( $self, $path ) = @_;
 	## create the corexpression analysis script and start that - do not wait for it to finish!
 	## The file should only be available in the downloaded zip file. Hence I probably should wait for it in the download section....
 	## first rm the old outfile!!!
-	unlink( $path.'Coexpression_4_Cytoscape.txt' ) if ( -f  $path.'Coexpression_4_Cytoscape.txt' );
+	unlink( $path . 'Coexpression_4_Cytoscape.txt' )
+	  if ( -f $path . 'Coexpression_4_Cytoscape.txt' );
 	## read in the analzed data!
 	## call function coexpressGenes( dataObj ) and write the returned table into the previousely deleted file using R
-	open ( OUT, ">".$path."Coexpression.R") or Carp::confess( $! );
+	open( OUT, ">" . $path . "Coexpression.R" ) or Carp::confess($!);
 	print OUT "source('libs/Tool_Coexpression.R')\nload('analysis.RData')\n"
-	."t <- coexpressGenes(data)\n"
-	."write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')";
-	close ( OUT);
+	  . "t <- coexpressGenes(data)\n"
+	  . "write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')";
+	close(OUT);
 	system(
 '/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- Coexpression.R >> R.run.log" &'
 	);

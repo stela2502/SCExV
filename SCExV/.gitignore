@@ -2,4 +2,11 @@
 /root/tmp/
 /t/data/Output/
 /t/data/Outpath/
-/.includepath
+BugRreport_rgl*
+/BugReport_rgl.tar.gz
+/HTpcrA-0.70.tar.gz
+/HTpcrA-0.80.tar.gz
+/HTpcrA-0.81.tar.gz
+/HTpcrA-0.90.tar.gz
+/MANIFEST.bak
+/Makefile.old

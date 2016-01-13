@@ -48,7 +48,7 @@ sub check {
 	my ( $self, $c, $what ) = @_;
 	$what ||= 'analysis';
 	my $path = $c->session_path();
-	unless ( $what eq 'nothing' ){
+	unless ( $what eq 'nothing' ) {
 		unless ( -f $path . "/norm_data.RData" ) {
 			$c->res->redirect( $c->uri_for("/files/upload/") );
 			$c->detach();
@@ -61,7 +61,7 @@ sub check {
 		}
 	}
 	$c->model('Menu')->Reinit();
-	$self->file_upload( $c, {});
+	$self->file_upload( $c, {} );
 	$c->cookie_check();
 	return $path;
 }
@@ -91,7 +91,7 @@ sub colors_Hex {
 					@{ $session_hash->{$filetype} }[$_]->{'color'} = $colors[$_]
 					  if (
 						ref( @{ $session_hash->{$filetype} }[$_] ) eq "HASH" );
-				} 0 .. (@colors-1);
+				} 0 .. ( @colors - 1 );
 			}
 		}
 	}
@@ -185,7 +185,7 @@ sub order_files {
 			my ($A) = $a->{'filename'} =~ m/$processed_form->{'orderKey'}(\d+)/;
 			my ($B) = $b->{'filename'} =~ m/$processed_form->{'orderKey'}(\d+)/;
 			$A <=> $B;
-		} @{$files}
+		  } @{$files}
 	];
 }
 
@@ -231,7 +231,7 @@ sub __fix_file_problems {
 			foreach my $problem ( $_ =~ m/(["']-?\d+,\d+,?\d*["'])/g ) {
 				$rep = $problem;
 				$rep =~ s/["',]//g;
-				$_ =~ s/$problem/$rep/;
+				$_   =~ s/$problem/$rep/;
 			}
 			print OUT $_;
 		}
@@ -261,8 +261,7 @@ sub process_files_to_R {
 	if ( -f $c->session_path() . $object_name . '.data' )
 	{    ## the restricted data tables
 		$self->{'R_file_read'} = $path_add . $object_name . '.data';
-		$str =
-		    "$object_name <-  read.table('$self->{'R_file_read'}')\n"
+		$str = "$object_name <-  read.table('$self->{'R_file_read'}')\n"
 		  . "$object_name.d<- as.matrix($object_name)\n";
 	}
 	elsif ( -f $c->session_path() . 'merged_' . $object_name . '.xls' ) {
@@ -606,6 +605,13 @@ sub printEntry {
 	return $string;
 }
 
+sub _R_source {
+	my ( $self, @files ) = @_;
+	my $str = "";
+	map { $str .= "source('$_')\n" } @files;
+	return $str;
+}
+
 sub path {
 	my ( $self, $c ) = @_;
 	return $c->session_path();
@@ -634,7 +640,7 @@ sub check_value {
 				$value = $value->{'filename'};
 			}
 			$value;
-		} @values
+		  } @values
 	);
 }
 
@@ -646,10 +652,9 @@ sub slurp_webGL {
 		$c->stash->{'message'} .= join( "", <IN> );
 		close(IN);
 	}
-	my ( $script, $use );
+	my ( $script, $use, @onload );
 	$use = 0;
 	return 0 unless ( -f "$path/webGL/index.html" );
-	open( IN, "<$path/webGL/index.html" );
 	$script =
 	    "<form action=''>\n"
 	  . "<table border='0'>"
@@ -663,49 +668,33 @@ sub slurp_webGL {
 	  . "<input type='radio' name='plotSelector' value='kernel' \n"
 	  . "onClick=\"showElementByVisible('kernel');hideElementByDisplay('twoD');hideElementByDisplay('threeD');hideElementByDisplay('loadings')\">3 components (density)\n</td></tr></table>"
 	  . "</form>\n"
-	  . "<span id='threeD' style='display:inline;'>\n<button onclick='capture3D(\"canvas\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/webGL/index.html -->\n";
-	while (<IN>) {
-		$use = 1 if ( $_ =~ m/div align="center"/ );
-		$use = 0 if ( $_ =~ m/<hr>/ );
-		$script .= $_ if ($use);
-	}
-	close(IN);
-	$script .= "<!-- END READ FROM FILE $path/webGL/index.html -->\n";
+	  . "<span id='threeD' style='display:inline;'>\n<button onclick='capture3D(\"div\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/webGL/index.html -->\n";
+	my ($fileA, $fileB);
+	
+	($fileA, $onload[0]) = $c->model('java_splicer')->read_webGL( "$path/webGL/index.html" );
+	$onload[0] = 'webGLStart();' unless ( defined  $onload[0]);
 	if ( -f "$path/densityWebGL/index.html" ) {
-		open( IN, "<$path/densityWebGL/index.html" );
-		$use = 0;
-		my $tmp =
-"</span><span id='kernel'  style='display:none'>\n<button onclick='capture3D(\"canvas2\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/densityWebGL/index.html-->\n";
-		while (<IN>) {
-			$use = 1 if ( $_ =~ m/div align="center"/ );
-			$use = 0 if ( $_ =~ m/<p id="debug">/ );
-			$tmp .= $_ if ($use);
-		}
-		close(IN);
-		$tmp .= "<!-- END READ FROM FILE $path/densityWebGL/index.html-->\n";
-		$tmp .=
-"\t</div>\n\t<br>Drag mouse to rotate model. Use mouse wheel or middle button to zoom it.\n";
-		$tmp =~ s/textureCanvas/textureCanvas2/g;
-		$tmp =~ s/"canvas"/"canvas2"/g;
-		$tmp =~ s/([fv])shader/K$1shader/g;
-		foreach ( $tmp =~ m/function (\w+)\(/g ) {
-			$tmp =~ s/$_/K$_/g;
-		}
-		## and in the new version
-		# var rgl = new rglClass();
-		# rgl.start = function() {
-		$tmp =~ s/var rgl = new rglClass/var Krgl = new rglClass/g;
-		$tmp =~ s/rgl\./Krgl./g;
-		$script .= $tmp;
+		($fileB, $onload[1]) = $c->model('java_splicer')->read_webGL( "$path/densityWebGL/index.html" );
+		$onload[1] = 'KwebGLStart();' unless ( defined  $onload[1]);
+	}else {
+		Carp::confess( "Seriouse problem: density wegGL was not produced!" );
 	}
-	my $uri =
-	  $c->uri_for( '/files/index' . $path . "webGL/" . 'CanvasMatrix.js' );
-	$script =~ s/src="CanvasMatrix.js"/src="$uri" charset="utf-8"/g;
+	my ( $full, $partA, $partB, $rgl_js);
+	( $full, $partB, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileA, $fileB );
+	( $full, $partA, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileB, $fileA );
+	$rgl_js =~ 
+	#$rgl_js =~ s/this.textureCanvas = document.createElement\("canvas"\);/this.textureCanvas = document.createElement\("canvas"\);\nthis.textureCanvas.getContext("experimental-webgl", {preserveDrawingBuffer: true})/;
+#	open ( OUT , ">$path/densityWebGL/rgl.js" ) or die $!;
+	#print OUT $rgl_js;
+	#close ( OUT );
+	$self->Script( $c, '<script type="text/javascript" src="'. $c->uri_for( '/scripts/rglClass.src.js' ).'"></script>');
+	$self->Script( $c, '<script type="text/javascript" src="'. $c->uri_for( '/scripts/CanvasMatrix4.js' ).'"></script>');
+	
+	$script .= $partA
+	."<!-- END READ FROM FILE $path/webGL/index.html -->\n"
+	."</span><span id='kernel'  style='display:none'>\n<button onclick='capture3D(\"Kdiv\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/densityWebGL/index.html-->\n"
+	.$partB."<br><b>Known bug - Drag the white area above to make the plot appear</b>";
 
-	$script =~
-s/ canvas.getContext\("webgl"\)/ canvas.getContext("webgl", {preserveDrawingBuffer: true})/g;
-	$script =~
-s/ canvas.getContext\("experimental-webgl"\)/ canvas.getContext("experimental-webgl", {preserveDrawingBuffer: true})/g;
 	$script .=
 	    "</span><span id='twoD'  style='display:none'>\n"
 	  . "<button onclick='capture2D(\"data\")'>To Scrapbook</button>\n"
@@ -739,6 +728,7 @@ s/ canvas.getContext\("experimental-webgl"\)/ canvas.getContext("experimental-we
 		$script .= "</script>\n";
 	}
 	$c->stash->{'webGL'}           = $script;
+#	$c->stash->{'body_extensions'} = 'onload="'.join('', @onload).'"';
 	$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();"';
 
 }
@@ -821,11 +811,10 @@ sub create_multi_image_scalable_canvas {
 	my ( $self, $c, $obj_name, $view_name, $boxname, @figure_files ) = @_;
 
 	my @return =
-	  (     "<table border='0' cellspacing='0' cellpadding='0'>\n"
+	  (     "<table border='0' cellspacing='0' cellpadding='0'>\n" 
 		  . "<tr>\n"
 		  . "<td width='100%'>" );
-	$self->{'select_box'} =
-	    "<form id='$obj_name'><p><select\n"
+	$self->{'select_box'} = "<form id='$obj_name'><p><select\n"
 	  . "name='$boxname' size='1' onChange='loadimage(\"$obj_name\", \"$boxname\" )'>\n";
 	$self->{'select_options'} = [];
 	my ( $default, $key, $map, $path, $id );
@@ -848,7 +837,7 @@ sub create_multi_image_scalable_canvas {
 		  . "_$id' style='display:none'>\n";
 		unless ( $self->{'select_box'} =~ m/option selected value/ ) {
 			$self->{'select_box'} .=
-			    "<option selected value='$boxname" . "_"
+			    "<option selected value='$boxname" . "_" 
 			  . $id
 			  . "'>$key</option>\n";
 		}
@@ -871,11 +860,10 @@ sub create_selector_table_4_figures {
 	my ( $self, $c, $obj_name, $view_name, $boxname, @figure_files ) = @_;
 
 	my @return =
-	  (     "<table border='0' cellspacing='0' cellpadding='0'>\n"
+	  (     "<table border='0' cellspacing='0' cellpadding='0'>\n" 
 		  . "<tr>\n"
 		  . "<td width='100%'>" );
-	$self->{'select_box'} =
-	    "<form id='$obj_name'><p><select\n"
+	$self->{'select_box'} = "<form id='$obj_name'><p><select\n"
 	  . "name='$boxname' size='1' onChange='showimage(\"$obj_name\", \"$view_name\", \"$boxname\" )'>\n";
 	$self->{'select_options'} = [];
 	my ( $default, $key, $map, $path );
@@ -932,7 +920,7 @@ sub create_selector_table_4_figures {
 			$tmp = $d->{$boxname};
 		}
 		$default =
-		    "<td width='100%'><p align='center'><img src='"
+		    "<td width='100%'><p align='center'><img src='" 
 		  . $tmp
 		  . "' width='100%' id='$view_name'></td>\n";
 	}

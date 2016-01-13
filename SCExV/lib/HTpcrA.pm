@@ -33,7 +33,7 @@ use Catalyst qw/
 
 extends 'Catalyst';
 
-our $VERSION = '0.80';
+our $VERSION = '0.90';
 
 # Configure the application.
 #
@@ -100,7 +100,7 @@ sub session_path {
 	if (defined $path){
 		return $path if ( $path =~ m!/tmp/[\w\d]! && -d $path );
 	}
-	my $root = $self->config->{'root'};
+	my $Root = $self->config->{'root'};
 
 	#	my $root = "/var/www/html/HTPCR";
 	$session_id = $self->get_session_id();
@@ -108,15 +108,18 @@ sub session_path {
 		$self->res->redirect( $self->uri_for("/") );
 		$self->detach();
 	}
-	$path = $root . "/tmp/" . $self->get_session_id() . "/";
-	$path = $root . "/tmp/" . $self->get_session_id() . "/" if ($path =~ m!//$! );
+	$path = $Root . "/tmp/" . $self->get_session_id() . "/";
+	$path = $Root . "/tmp/" . $self->get_session_id() . "/" if ($path =~ m!//$! );
 	unless ( -d $path ) {
 		mkdir($path)
 		  or Carp::confess("I could not create the session path $path\n$!\n");
 		mkdir( $path . "libs/" );
-		system( "cp $root/R_lib/Tool* $path" . "libs/" );
+		system( "cp $Root/R_lib/Tool* $path" . "libs/" );
+		system( "cp $Root/R_lib/densityWebGL.html $path" . "libs/" );
+		mkdir( $path . "libs/beanplot_mod/" );
+		system( "cp $Root/R_lib/beanplot_mod/*.R $path" . "libs/beanplot_mod/" );
 		Carp::confess(
-			"cp $root/R_lib/Tool* $path" . "libs/\n did not work: $!\n" )
+			"cp $Root/R_lib/Tool* $path" . "libs/\n did not work: $!\n" )
 		  unless ( -f $path . "libs/Tool_Pipe.R" );
 	}
 	$self->session->{'path'} = $path;

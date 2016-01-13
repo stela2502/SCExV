@@ -315,6 +315,7 @@ sub recieve_RandomForest {
 	system(
 '/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- RandomForest_create_groupings.R > R.run.log &\"'
 	);
+	system( "touch ".$c->session_path()."rf_recieved.info");
 	return 1;
 }
 
