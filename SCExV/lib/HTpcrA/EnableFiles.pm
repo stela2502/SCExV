@@ -687,7 +687,8 @@ sub slurp_webGL {
 #	open ( OUT , ">$path/densityWebGL/rgl.js" ) or die $!;
 	#print OUT $rgl_js;
 	#close ( OUT );
-	$self->Script( $c, '<script type="text/javascript" src="'. $c->uri_for( '/scripts/rgl.js' ).'"></script>');
+	$self->Script( $c, '<script type="text/javascript" src="'. $c->uri_for( '/scripts/rglClass.src.js' ).'"></script>');
+	$self->Script( $c, '<script type="text/javascript" src="'. $c->uri_for( '/scripts/CanvasMatrix4.js' ).'"></script>');
 	
 	$script .= $partA
 	."<!-- END READ FROM FILE $path/webGL/index.html -->\n"

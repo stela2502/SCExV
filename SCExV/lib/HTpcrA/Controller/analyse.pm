@@ -352,9 +352,46 @@ sub re_run : Local {
 	$c->detach();
 }
 
+sub rfgrouping : Local {
+	my ( $self, $c ) = @_;
+	my $path = $self->check( $c, 'upload' );
+
+	my %xml_escape_map = (
+		'<' => '&lt;',
+		'>' => '&gt;',
+		'"' => '&quot;',
+		'&' => '&amp;',
+	);
+
+	opendir( my $dh, $path );
+	my @rf_groups = grep { /randomForest/ && -f $path . $_ } readdir($dh);
+	closedir $dh;
+
+	# Begin the XML document
+	my $xml =
+	    '<?xml version="1.0" encoding="utf-8" ?>' . "\n"
+	  . "<CHANGED>"
+	  . scalar(@rf_groups)
+	  . "</CHANGED>\n";
+	if ( scalar(@rf_groups) ) {
+		$xml .= "<GROUPS type='array'>\n";
+		foreach (@rf_groups) {
+			$xml .= "<value>$_</value>\n";
+		}
+		# Terminate the xml
+		$xml .= '</GROUPS>' . "\n";
+	}
+	$c->res->content_type('text/xml');
+	$c->res->write($xml);
+	$c->res->code(204);
+}
+
 sub index : Path : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->check( $c, 'upload' );
+	if ( -f $path . "rf_submitted.info" && ! (-f $path . "rf_recieved.info" ) ) {
+		$c->stash->{'RFsubmitted'} = 1;
+	}
 	if ( -f $path . "RandomForest_create_groupings.R" ) {
 		chdir($path);
 		system(
@@ -422,7 +459,7 @@ sub index : Path : Form {
 
 				## now I need to create a new R script!!!
 				my $script =
-				    'mark.mds <- read.table( file="' 
+				    'mark.mds <- read.table( file="'
 				  . $path
 				  . '2D_data.xls' . '" )' . "\n";
 
@@ -509,12 +546,17 @@ sub R_script {
 
 	## init script
 	my $script = $self->_R_source(
-		'libs/Tool_Plot.R', 'libs/Tool_Coexpression.R', 'libs/Tool_grouping.R',
-		'libs/beanplot_mod/beanplotbeanlines.R', 'libs/beanplot_mod/beanplot.R',
+		'libs/Tool_Plot.R',
+		'libs/Tool_Coexpression.R',
+		'libs/Tool_grouping.R',
+		'libs/beanplot_mod/beanplotbeanlines.R',
+		'libs/beanplot_mod/beanplot.R',
 		'libs/beanplot_mod/getgroupsfromarguments.R',
 		'libs/beanplot_mod/beanplotinnerborders.R',
-		'libs/beanplot_mod/beanplotscatters.R',   'libs/beanplot_mod/makecombinedname.R',
-		'libs/beanplot_mod/beanplotpolyshapes.R', 'libs/beanplot_mod/fixcolorvector.R',
+		'libs/beanplot_mod/beanplotscatters.R',
+		'libs/beanplot_mod/makecombinedname.R',
+		'libs/beanplot_mod/beanplotpolyshapes.R',
+		'libs/beanplot_mod/fixcolorvector.R',
 		'libs/beanplot_mod/seemslog.R'
 	);
 	$script .= "load( 'norm_data.RData')\n";
@@ -605,9 +647,9 @@ sub R_script {
 	);
 	open( RS2, ">$path/densityWebGL.R" );
 
-	print RS2 "options(rgl.useNULL=TRUE)\n"
-	  . "library(ks)\n"
-	#  . "library(RDRToolbox)\n"
+	print RS2 "options(rgl.useNULL=TRUE)\n" . "library(ks)\n"
+
+	  #  . "library(RDRToolbox)\n"
 	  . "load( 'clusters.RData' )\n"
 	  . "usable <- is.na(match( obj\$clusters, which(table(as.factor(obj\$clusters)) < 4 ) )) == T\n"
 	  . "use <- obj\n"
@@ -617,9 +659,10 @@ sub R_script {
 	  . "H <- Hkda( use\$mds.coord, use\$clusters, bw='plugin')\n"
 	  . "kda.fhat <- kda( use\$mds.coord, use\$clusters,Hs=H, compute.cont=TRUE)\n"
 	  . "try(plot(kda.fhat, size=0.001, colors = cols[as.numeric(names(table(use\$clusters)))] ),silent=F)\n"
-#	  . "try (rgl.clear('material'))\n"
-#	  . "try (rgl.clear('bbox') )\n"
-#	  . "try (axes3d(labels = FALSE, tick = FALSE))\n"
+
+	  #	  . "try (rgl.clear('material'))\n"
+	  #	  . "try (rgl.clear('bbox') )\n"
+	  #	  . "try (axes3d(labels = FALSE, tick = FALSE))\n"
 	  . "try( writeWebGL(dir = 'densityWebGL', width=470, height=470, prefix='K', template='libs/densityWebGL.html' ) ,silent=F )\n";
 
 	close(RS2);
@@ -643,8 +686,6 @@ sub R_script {
 	return "$path/webGL/index.html";
 
 }
-
-
 
 sub Coexpression_R_script {
 	my ( $self, $path ) = @_;

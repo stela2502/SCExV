@@ -22,15 +22,21 @@ sub post_randomForest {
 	$mech->get( 'http://'
 		  . $c->config->{'calcserver'}->{'ip'}
 		  . $c->config->{'calcserver'}->{'subpage'} );
-	
+	my $t = $mech->content();
+	eval{
 	$mech->form_number(1);
 	$mech->field(  'filename'   => $file  );
 	$mech->field(  'key'        => $md5_sum  );
 	$mech->field(  'session'    => $c->get_session_id()  );
 	$mech->field(  'rpage' => $returnpage  );
 	$mech->submit();
-	return 1 if ( $mech->content() =~ m/Done!/ );
-	Carp::confess( "putative error on the caluclation server - I did not recieve the 'Done!' signal\n", $c, $file, $md5_sum, $returnpage, $mech->content() );
+	};
+	if ( $mech->content() =~ m/Done!/ ){
+		system( "touch ".$c->session_path()."rf_submitted.info");
+		system ( "rm ".$c->session_path()."rf_recieved.info") if ( -f $c->session_path()."rf_recieved.info");
+		return 1;
+	}
+	Carp::confess( "putative error on the caluclation server - I did not recieve the 'Done!' signal\n", $c, $file, $md5_sum, $returnpage, $mech->content(), "Original page:</br>".$t );
 }
 
 =head1 NAME

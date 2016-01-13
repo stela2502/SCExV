@@ -7,6 +7,9 @@
 <table border = 0 width = 100%>
 <tr><td valign="middle"><h1 class="title"><a href="[%c.uri_for('/') %]"><img id='logo' style="border:0px;" src="[%c.uri_for('/static/images/SCexV_logo.gif')%]" width =150px; ></a></h1></td>
 <td valign="middle">[% PROCESS site/Menu %]</td>
+[% IF RFsubmitted %] 
+<td align="right"> <button onclick='RFcheck(document.getElementByID("master")'>Check random forest</button></td>
+[% END %]
 <td align="right"> <button ondrop='processFigure(event)' ondragover='allowDrop(event)' onclick='window.open("[%c.uri_for('/scrapbook/textadd/') %]", "ScrapBook" )' > <b>Scrapbook</b> </button> 
     <a href="#" onClick="MyWindow=window.open('[%c.uri_for('/help/index/scrapbook/link/button/')%]' ,'MyWindow',
  'width=500,heig‌​ht=500'); return false;" id="analyse" name="analyse">
