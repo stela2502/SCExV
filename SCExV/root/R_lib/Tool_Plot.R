@@ -3,8 +3,10 @@ options(rgl.useNULL=TRUE)
 
 library(rgl)
 library(RDRToolbox)
+library(rglwidget)
 library(vioplot)
-#library(beanplot)
+library(htmlwidgets)
+library(ks)
 
 library(RSvgDevice)
 
@@ -565,16 +567,8 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 	}
 	obj$colors <- apply( t(col2rgb( cols ) ), 1, paste,collapse=' ')[obj$clusters]
 	
-	## plot the mds data
-	try(plotDR( obj$mds.coord[order(obj$clusters),], col=cols, labels=obj$clusters[order(obj$clusters)] ),silent=F)
-#	try (rgl.clear('material'))
-#	try ( rgl.clear('bbox') )
-#	try (axes3d(labels = FALSE, tick = FALSE))
+	create_webgl ( obj )
 	
-	try(writeWebGL( width=470, height=470 ),silent=F)
-	png(file='./webGL/MDS_2D.png', width=800,height=800)
-	plotDR( obj$mds.coord[order(obj$clusters),1:2], col=cols, labels=obj$clusters[order(obj$clusters)] )
-	dev.off()
 	save( obj, file='clusters.RData')
 	write.table (obj$mds.coord[order(obj$clusters),1:2], file = './2D_data.xls' )
 	sample.cols.rgb <-t(col2rgb( cols[obj$clusters[order(obj$clusters)]]))
@@ -678,11 +672,36 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 	}
 	print ( paste( 'plot.funct( ma , groups.n, clus =  obj$clusters, boot = 1000, plot.neg =',plot.neg,', mv =', mv))
 	plot.funct( ma , groups.n, clus =  obj$clusters, boot = 1000, plot.neg=plot.neg, mv = mv  )
-
 	obj
 }
 
-
+create_webgl <- function ( obj, size = 440 ) {
+	cols = rainbow( max(obj$clusters) )
+	
+	try(plotDR( obj$mds.coord[order(obj$clusters),], col=cols, labels=obj$clusters[order(obj$clusters)] ),silent=F)
+	
+	try({ret <- rglwidget(elementId='rgl', width=size, height=size)},silent=F)
+	try( saveWidget(ret, 'threeD.html', selfcontained = FALSE) ,silent=F)
+	rgl.close()
+	
+	system( 'mkdir webGL' )
+	png(file='./webGL/MDS_2D.png', width=800,height=800)
+	plotDR( obj$mds.coord[order(obj$clusters),1:2], col=cols, labels=obj$clusters[order(obj$clusters)] )
+	dev.off()
+	usable <- is.na(match( obj$clusters, which(table(as.factor(obj$clusters)) < 4 ) )) == T
+	
+	use <- obj
+	use$clusters <- obj$clusters[usable]
+	use$mds.coord <- obj$mds.coord[usable,]
+	cols <- rainbow(max(as.numeric(obj$clusters)))
+	H <- Hkda( use$mds.coord, use$clusters, bw='plugin')
+	kda.fhat <- kda( use$mds.coord, use$clusters,Hs=H, compute.cont=TRUE)
+	try(plot(kda.fhat, size=0.001, colors = cols[as.numeric(names(table(use$clusters)))] ),silent=F)
+	
+	try(ret <- rglwidget(elementId='Krgl', width=size, height=size),silent=F)
+	try(saveWidget(ret, 'kernel.html', selfcontained = FALSE),silent=F)
+	rgl.close()
+}
 
 
 

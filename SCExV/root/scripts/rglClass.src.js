@@ -466,6 +466,7 @@ rglwidgetClass = function() {
 			  result = result +   "   gl_FragColor = lighteffect;\n";
 
 			result = result + "	}\n";
+	  alert(result);
       return result;
     };
 

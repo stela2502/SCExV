@@ -644,6 +644,27 @@ sub check_value {
 	);
 }
 
+=head2 slurp_webGL
+This function creates a form with an array showing all mds plots.
+These objects can only be put into the scrapbook using a button.
+=cut
+
+sub _span_element {
+	my ( $self, $str, $span_id, $capture_id, $disp ) = @_;
+	my $ret = "<span id='$span_id' style='";
+	if ($disp) {
+		$ret .= "display:inline;";
+	}
+	else {
+		$ret .= "display:none;";
+	}
+	$ret .=
+	  "'>\n<button onclick='capture3D(\"$capture_id\")'>To Scrapbook</button>\n"
+	  . $str
+	  . "</span>\n";
+	return $ret;
+}
+
 sub slurp_webGL {
 	my ( $self, $c, $file, $path ) = @_;
 	$path ||= $c->session_path();
@@ -652,84 +673,71 @@ sub slurp_webGL {
 		$c->stash->{'message'} .= join( "", <IN> );
 		close(IN);
 	}
-	my ( $script, $use, @onload );
-	$use = 0;
-	return 0 unless ( -f "$path/webGL/index.html" );
-	$script =
-	    "<form action=''>\n"
-	  . "<table border='0'>"
-	  . "<tr><td>"
-	  . "<input type='radio' name='plotSelector' value='2D'\n"
-	  . "onClick=\"showElementByVisible('twoD');hideElementByDisplay('threeD');hideElementByDisplay('kernel');hideElementByDisplay('loadings')\">2 components\n</td><td>"
-	  . "<input type='radio' name='plotSelector' value='3D' checked\n"
-	  . "onClick=\"showElementByVisible('threeD');hideElementByDisplay('twoD');hideElementByDisplay('kernel');hideElementByDisplay('loadings')\">3 components (scatter)\n</td></tr><tr><td>"
-	  . "<input type='radio' name='plotSelector' value='2D_loadings' \n"
-	  . "onClick=\"showElementByVisible('loadings');hideElementByDisplay('threeD');hideElementByDisplay('twoD');hideElementByDisplay('kernel')\">2 components (loadings)\n</td><td>"
-	  . "<input type='radio' name='plotSelector' value='kernel' \n"
-	  . "onClick=\"showElementByVisible('kernel');hideElementByDisplay('twoD');hideElementByDisplay('threeD');hideElementByDisplay('loadings')\">3 components (density)\n</td></tr></table>"
-	  . "</form>\n"
-	  . "<span id='threeD' style='display:inline;'>\n<button onclick='capture3D(\"div\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/webGL/index.html -->\n";
-	my ($fileA, $fileB);
-	
-	($fileA, $onload[0]) = $c->model('java_splicer')->read_webGL( "$path/webGL/index.html" );
-	$onload[0] = 'webGLStart();' unless ( defined  $onload[0]);
-	if ( -f "$path/densityWebGL/index.html" ) {
-		($fileB, $onload[1]) = $c->model('java_splicer')->read_webGL( "$path/densityWebGL/index.html" );
-		$onload[1] = 'KwebGLStart();' unless ( defined  $onload[1]);
-	}else {
-		Carp::confess( "Seriouse problem: density wegGL was not produced!" );
-	}
-	my ( $full, $partA, $partB, $rgl_js);
-	( $full, $partB, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileA, $fileB );
-	( $full, $partA, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileB, $fileA );
-	$rgl_js =~ 
-	#$rgl_js =~ s/this.textureCanvas = document.createElement\("canvas"\);/this.textureCanvas = document.createElement\("canvas"\);\nthis.textureCanvas.getContext("experimental-webgl", {preserveDrawingBuffer: true})/;
-#	open ( OUT , ">$path/densityWebGL/rgl.js" ) or die $!;
-	#print OUT $rgl_js;
-	#close ( OUT );
-	$self->Script( $c, '<script type="text/javascript" src="'. $c->uri_for( '/scripts/rglClass.src.js' ).'"></script>');
-	$self->Script( $c, '<script type="text/javascript" src="'. $c->uri_for( '/scripts/CanvasMatrix4.js' ).'"></script>');
-	
-	$script .= $partA
-	."<!-- END READ FROM FILE $path/webGL/index.html -->\n"
-	."</span><span id='kernel'  style='display:none'>\n<button onclick='capture3D(\"Kdiv\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/densityWebGL/index.html-->\n"
-	.$partB."<br><b>Known bug - Drag the white area above to make the plot appear</b>";
+	my ( $script );
+	my @all = ( 'twoD', 'threeD', 'loadings', 'kernel' );
+#	my @all = ( 'threeD','twoD',  'loadings', 'kernel' );
+	my $values = {
+		'twoD'     => '2 components',
+		'threeD'   => '3 components (scatter)',
+		'loadings' => '2 components (loadings)',
+		'kernel'   => '3 components (density)'
+	};
+	$script = "<form action=''>\n" . "<table border='0'>" . "<tr>" . join(
+		"",
+		map {
+			my $v = $_;
+			my $ret =
+			    "<td><input type='radio' name='plotSelector'"
+			  . " onClick=\"showElementByVisible('$v');"
+			  . join( "",
+				map { "hideElementByDisplay('$_');" } grep { ! /$v/ } @all );
+			if ( $v eq $all[1] ) {
+				$ret .= "\" checked>$values->{$v}\n</td></tr><tr>\n";
+			}
+			else {
+				$ret .= "\">$values->{$v}\n</td>\n";
+			}
+			$ret;
+		  } @all
+	) . "</tr></table></form>\n";
 
 	$script .=
-	    "</span><span id='twoD'  style='display:none'>\n"
-	  . "<button onclick='capture2D(\"data\")'>To Scrapbook</button>\n"
-	  . "<img id='data' src='"
-	  . $c->uri_for( '/files/index' . $path . 'webGL/MDS_2D.png' )
-	  . "' alt='2D image of the MDS results' width='400px'>\n"
-	  . '<button type="submit" value="RemoveSamples" onclick="submitMasterForm(\'RemoveSamples\')">Remove selected samples (start from scratch to re-do)</button>'
-	  . "\n"
-	  . '<script>' . "\n"
-	  . 'function submitMasterForm( v )' . "\n" . '{' . "\n"
-	  . 'var x = document.getElementById("master");' . "\n"
-	  . ' x._submit.value = v;' . "\n"
-	  . ' x.submit(\'RemoveSamples\');' . "\n"
-	  . 'document.getElementById("demo").innerHTML=x;' . "\n" . '}' . "\n"
-	  . '</script>' . "\n";
+	  $self->_span_element(
+		$c->model('rgl3dplots')->process_rgl_html("$path/threeD.html"),
+		'threeD', "rgl", 1 );
+
+	$script .=
+	  $self->_span_element(
+		$c->model('rgl3dplots')->process_rgl_html("$path/kernel.html"),
+		'kernel', 'Krgl', 1 );
+	$self->Script( $c,
+		    '<script>function submitMasterForm( v ){'
+		  . 'var x = document.getElementById("master");'
+		  . ' x._submit.value = v;'
+		  . ' x.submit(\'RemoveSamples\');'
+		  . 'document.getElementById("demo").innerHTML=x;}</script>' );
+
+	$script .= $self->_span_element(
+		"<img id='data' src='"
+		  . $c->uri_for( '/files/index' . $path . 'webGL/MDS_2D.png' )
+		  . "' alt='2D image of the MDS results' width='440px'>\n"
+		  . '<button type="submit" value="RemoveSamples" onclick="submitMasterForm(\'RemoveSamples\')">'
+		  . 'Remove selected samples (start from scratch to re-do)</button>',
+		'twoD', 'data', 0
+	);
+
 	if ( -f $path . "loadings.png" ) {
-		$script .=
-		    "</span><span id='loadings'  style='display:none'>\n"
-		  . "<button onclick='capture2D(\"data2\")'>To Scrapbook</button>\n"
-		  . "<img id='data2' src='"
-		  . $c->uri_for( '/files/index' . $path . 'loadings.png' )
-		  . "' alt='2D gene loadings' width='400px'>\n";
+		$script .= $self->_span_element(
+			"<img id='data2' src='"
+			  . $c->uri_for( '/files/index' . $path . 'loadings.png' )
+			  . "' alt='2D gene loadings' width='440px'>",
+			'loadings', "data2", 0
+		);
 	}
-	if ( !( $script =~ m/webGLStart/ ) ) {
-		## new version
-		$script .= '<script type="text/javascript">'
-		  . "\nwebGLStart = function(){rgl.start();}\n";
-		if ( -f "$path/densityWebGL/index.html" ) {
-			$script .= "KwebGLStart = function(){Krgl.start();}\n";
-		}
-		$script .= "</script>\n";
-	}
-	$c->stash->{'webGL'}           = $script;
-#	$c->stash->{'body_extensions'} = 'onload="'.join('', @onload).'"';
-	$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();"';
+	$c->stash->{'webGL'} = $script;
+	$self->Scripts($c,'/scripts/htmlwidgets.js', '/css/rgl.css', '/scripts/rglClass.src.js', '/scripts/CanvasMatrix.src.js', '/scripts/rglWebGL.js' );
+	$c->stash->{'body_extensions'} = "onload='hideElementByDisplay(\"kernel\");'";
+	#$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();"';
 
 }
 
@@ -775,20 +783,32 @@ sub slurp_Heatmaps {
 			)
 		);
 	}
+	$self->Scripts( $c, '/scripts/jquery.min.js',
+		'/scripts/jquery.mousewheel.min.js',
+		'/scripts/CanvasScale.js' );
 	$self->Script( $c,
-		    '<script type="text/javascript" src="'
-		  . $c->uri_for('/scripts/jquery.min.js')
-		  . '"></script>'
-		  . '<script type="text/javascript" src="'
-		  . $c->uri_for('/scripts/jquery.mousewheel.min.js') . '"'
-		  . "></script>\n"
-		  . '<script type="text/javascript" src="'
-		  . $c->uri_for('/scripts/CanvasScale.js') . '"'
-		  . "></script>\n" . "\n"
-		  . "<script type='text/javascript'>\n \$(window).load ( function () {"
+		    "<script type='text/javascript'>\n \$(window).load ( function () {"
 		  . "img_reset( 'picture_1' );"
 		  . "register_mousewheelzoom('ScalableCanvas');} );</script>\n" );
 
+}
+
+sub Scripts {
+	my ( $self, $c, @files ) = @_;
+	my $s = '';
+	foreach (@files) {
+		if ( $_ =~ m/css$/ ) {
+			$s .= '<link rel="stylesheet" type="text/css" href="'
+			  . $c->uri_for($_) . '" />' . "\n";
+		}
+		else {
+			$s .=
+			    '<script type="text/javascript" src="'
+			  . $c->uri_for($_)
+			  . '"></script>' . "\n";
+		}
+	}
+	return $self->Script( $c, $s );
 }
 
 sub Script {
