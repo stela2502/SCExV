@@ -35,7 +35,8 @@ my $plugin_path = "$FindBin::Bin";
 
 my $VERSION = 'v1.0';
 
-my ( $install_path,$help,$server_user,$debug, @options, $web_root );
+my ( $install_path,$help,$server_user,$debug, @options, 
+	$capture_rgl_libs, $web_root );
 
 #my $root_path = "/var/www/html/HTPCR/";
 
@@ -44,6 +45,7 @@ Getopt::Long::GetOptions(
 	"-server_user=s" => \$server_user,
 	"-web_root=s" => \$web_root,
 	"-options=s{,}" => \@options,
+	"-capture_rgl_libs" => \$capture_rgl_libs, 
 
 	"-help"  => \$help,
 	"-debug" => \$debug
@@ -85,7 +87,10 @@ sub helpString {
    -web_root      :the root of the web server - css and jscript files are installed there
                    default to '/var/www/html/'
    -options       :additional option for the SCExV server like
-                   randomForest 1 ncore 4 
+                   randomForest 1 ncore 4
+                   
+   -capture_rgl_libs  :if unsure do not use! local modifications to the rglClass.src.js will be lost!
+   
    -help   :print this help
    -debug  :verbose output
    
@@ -138,7 +143,7 @@ sub copy_files {
 }
 
 
-system ( "$plugin_path/capture_rgl_javascript.pl" );
+system ( "$plugin_path/capture_rgl_javascript.pl" ) if ( $capture_rgl_libs );
 
 ## patch the main function to include the new root path
 

@@ -662,6 +662,9 @@ sub _span_element {
 	  "'>\n<button onclick='capture3D(\"$capture_id\")'>To Scrapbook</button>\n"
 	  . $str
 	  . "</span>\n";
+	if ( $ret =~ m/<img/){
+		$ret =~ s/capture3D/capture2D/g;
+	}
 	return $ret;
 }
 
@@ -736,7 +739,7 @@ sub slurp_webGL {
 	}
 	$c->stash->{'webGL'} = $script;
 	$self->Scripts($c,'/scripts/htmlwidgets.js', '/css/rgl.css', '/scripts/rglClass.src.js', '/scripts/CanvasMatrix.src.js', '/scripts/rglWebGL.js' );
-	$c->stash->{'body_extensions'} = "onload='hideElementByDisplay(\"kernel\");'";
+	$c->stash->{'body_extensions'} = "onload='hideElementByDisplay(\"kernel\");lastImage = 0;'";
 	#$c->stash->{'body_extensions'} = 'onload="webGLStart();KwebGLStart();"';
 
 }
