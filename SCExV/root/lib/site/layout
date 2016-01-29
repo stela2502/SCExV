@@ -50,6 +50,8 @@
 
 [% END %]
 
+[% PROCESS site/message %]
+
 <table border = 0 width = 100%>
 <tr><td colspan="3"> <div id="header"></div>
 

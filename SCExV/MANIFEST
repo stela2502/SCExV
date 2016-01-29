@@ -48,6 +48,7 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Scripts.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
+lib/.gitignore
 lib/CatalystX/Profile_SL.pm
 lib/CatalystX/Profile_SL/Controller/ControlProfiling.pm
 lib/htpcr.conf
@@ -74,12 +75,14 @@ lib/HTpcrA/htpcra.conf
 lib/HTpcrA/Model/Coexpr.pm
 lib/HTpcrA/Model/GeneGroups.pm
 lib/HTpcrA/Model/HelpFile.pm
+lib/HTpcrA/Model/java_splicer.pm
 lib/HTpcrA/Model/mech.pm
 lib/HTpcrA/Model/Menu.pm
 lib/HTpcrA/Model/MethodsSection.pm
 lib/HTpcrA/Model/PCR_Raw_Files.pm
 lib/HTpcrA/Model/PValues.pm
 lib/HTpcrA/Model/RandomForest.pm
+lib/HTpcrA/Model/rgl3dplots.pm
 lib/HTpcrA/Model/scrapbook.pm
 lib/HTpcrA/View/HTML.pm
 lib/stefans_libs/Description.pm
@@ -108,6 +111,7 @@ MANIFEST.SKIP
 META.yml
 MYMETA.json
 MYMETA.yml
+pm_to_blib
 README.txt
 rebuilt.sh
 root/css/border-anim-h.gif
@@ -119,6 +123,7 @@ root/css/imgareaselect-default.css
 root/css/imgareaselect-deprecated.css
 root/css/mag-default.css
 root/css/mag.css
+root/css/rgl.css
 root/css/site.css
 root/css/style.css
 root/css/table_sorter.css
@@ -145,6 +150,7 @@ root/lib/site/html
 root/lib/site/layout
 root/lib/site/leftSide
 root/lib/site/Menu
+root/lib/site/message
 root/lib/site/piwik
 root/lib/site/wrapper
 root/md5_hashes.xls
@@ -211,11 +217,16 @@ root/rte/insert_table.htm
 root/rte/palette.htm
 root/rte/richtext_compressed.js
 root/rte/rte.css
+root/scripts/.gitignore
 root/scripts/analysis_index.js
+root/scripts/CanvasMatrix.js
+root/scripts/CanvasMatrix.src.js
+root/scripts/CanvasMatrix4.js
 root/scripts/CanvasScale.js
 root/scripts/figures.js
 root/scripts/grouping2d.js
 root/scripts/Heatmap2WebGL.js
+root/scripts/htmlwidgets.js
 root/scripts/htpcra_multifile_upload.js
 root/scripts/jquery.bridget.js
 root/scripts/jquery.imgareaselect.js
@@ -224,6 +235,9 @@ root/scripts/jquery.imgareaselect.pack.js
 root/scripts/jquery.min.js
 root/scripts/jquery.mousewheel.min.js
 root/scripts/main.js
+root/scripts/old_rglClass.src.js
+root/scripts/rglClass.src.js
+root/scripts/rglWebGL.js
 root/scripts/SCExV.js
 root/scripts/scrapbook.js
 root/scripts/table_paginate.js
@@ -278,6 +292,8 @@ root/static/images/SCexV_logo.gif
 root/static/images/SCexV_logo.png
 root/static/images/Untitled.xcf
 root/static/images/ViSex_logo.gif
+script/.gitignore
+script/capture_rgl_javascript.pl
 script/CleanTemp.pl
 script/htpcra_cgi.pl
 script/htpcra_create.pl
@@ -294,6 +310,7 @@ Source_Pics/Questions.gif
 Source_Pics/Questions.png
 Source_Pics/Questions.svg
 SOURCEDIR.ignore
+t/.gitignore
 t/.RData
 t/01app.t
 t/02_1_app_RandomForest.t
@@ -314,6 +331,7 @@ t/controller_help.t
 t/controller_PValues.t
 t/controller_RandomForest.t
 t/controller_test.t
+t/data/.gitignore
 t/data/2D_data.xls
 t/data/2D_data_color.xls
 t/data/compr.fluidigm_dataset.cvs
@@ -326,6 +344,7 @@ t/data/fluidigm_dataset.csv
 t/data/fluidigmTable.data
 t/data/GeneGroup.txt
 t/data/ggplot4/.gitignore
+t/data/ggplot4/2D_data_color.xls
 t/data/ggplot4/Grouping.CD45.2.PE.Texas.Red.A.CD55.PE.A
 t/data/ggplot4/merged_data_Table.xls
 t/data/ggplot4/Sample_Colors.xls
@@ -333,6 +352,8 @@ t/data/Grouping_Colors.xls
 t/data/help_strings.txt
 t/data/htpcra.conf
 t/data/merged_mdsCoord.xls
+t/data/oldRGL/density.html
+t/data/oldRGL/points.html
 t/data/PCR_dataset.csv
 t/data/problematic_2D_data.xls
 t/data/problematic_2D_data_color.xls
@@ -351,6 +372,8 @@ t/data/source_data/Not_working_FACS_data.csv
 t/data/source_data/Sample_Colors.xls
 t/data/source_data/test.png
 t/data/source_data/Unreadable_modified_Heatmap.csv
+t/data/splice_java_A.html
+t/data/splice_java_B.html
 t/data/test.data.f1.xls
 t/data/test.data.f2.tab
 t/data/TestDatasetAnalyzed.zip
@@ -360,11 +383,14 @@ t/data_table_2.t
 t/Delete_me.html
 t/help_data.t
 t/model_Coexpr.t
+t/model_java_splicer.t
 t/model_mechanize.t
 t/model_PValues.t
 t/model_RandomForest_recieve.t
 t/model_RandomForest_send.t
 t/model_RandomForest_x_send_to_server.t
+t/model_rgl3dplots.t
+t/R.run.log
 t/regroup_logics.t
 t/save.xls
 t/simpleBarGraph.t

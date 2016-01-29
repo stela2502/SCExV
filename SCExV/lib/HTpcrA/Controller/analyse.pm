@@ -233,8 +233,6 @@ sub update_form {
 			'required' => 0,
 		}
 	);
-
-#$c->stash->{'formNames'} = [map { $_->{'name'} } @{$self->{'form_array'}}[2..(@{$self->{'form_array'}}-1)] ];
 	$c->form->method('post');
 	foreach ( @{ $self->{'form_array'} } ) {
 		$c->form->field( %{$_} );
@@ -378,6 +376,7 @@ sub rfgrouping : Local {
 		foreach (@rf_groups) {
 			$xml .= "<value>$_</value>\n";
 		}
+
 		# Terminate the xml
 		$xml .= '</GROUPS>' . "\n";
 	}
@@ -389,7 +388,8 @@ sub rfgrouping : Local {
 sub index : Path : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->check( $c, 'upload' );
-	if ( -f $path . "rf_submitted.info" && ! (-f $path . "rf_recieved.info" ) ) {
+	if ( -f $path . "rf_submitted.info" && !( -f $path . "rf_recieved.info" ) )
+	{
 		$c->stash->{'RFsubmitted'} = 1;
 	}
 	if ( -f $path . "RandomForest_create_groupings.R" ) {
@@ -459,7 +459,7 @@ sub index : Path : Form {
 
 				## now I need to create a new R script!!!
 				my $script =
-				    'mark.mds <- read.table( file="'
+				    'mark.mds <- read.table( file="' 
 				  . $path
 				  . '2D_data.xls' . '" )' . "\n";
 
@@ -731,24 +731,12 @@ sub md5_table {
 
 sub Javascript {
 	my ( $self, $c ) = @_;
-	return $self->Script( $c,
-		    '<link rel="stylesheet" type="text/css" href="'
-		  . $c->uri_for('/css/imgareaselect-default.css') . '" />' . "\n"
-		  . '<script type="text/javascript" src="'
-		  . $c->uri_for('/scripts/jquery.min.js')
-		  . '"></script>' . "\n"
-		  . '<script type="text/javascript" src="'
-		  . $c->uri_for('/scripts/jquery.imgareaselect.pack.js')
-		  . '"></script>' . "\n"
-		  . '<script type="text/javascript" src="'
-		  . $c->uri_for('/scripts/jquery.bridget.js') . '"'
-		  . "></script>\n"
-		  . '<script type="text/javascript" src="'
-		  . $c->uri_for('/scripts/figures.js')
-		  . '"></script>' . "\n"
-		  . '<script type="text/javascript" src="'
-		  . $c->uri_for('/scripts/analysis_index.js') . '"'
-		  . "></script>\n" );
+	return $self->Scripts(
+		$c,                           '/css/imgareaselect-default.css',
+		'/scripts/jquery.min.js',     '/scripts/jquery.imgareaselect.pack.js',
+		'/scripts/jquery.bridget.js', '/scripts/figures.js',
+		'/scripts/analysis_index.js'
+	);
 }
 
 sub R_process_data_part {

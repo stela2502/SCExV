@@ -33,11 +33,11 @@ sub index : Path : Form {
 	
 	$self->slurp_Heatmaps( $c, $path );
 	
-	if ( -f "$path/webGL/index.html" ) {
+#	if ( -f "$path/webGL/index.html" ) {
 		$self->{'webGL'} = "$path/webGL/index.html";
 		$self->slurp_webGL( $c, $self->{'webGL'}, $path );
 		$c->stash->{'buttons'}         = $self->exclude_buttons($c);
-	}
+#	}
 
 	## now the form to remove the samples
 	$self->{'form_array'} = [];
