@@ -540,7 +540,10 @@ sub R_script {
 	  . join( "', '", @{ $dataset->{'controlM'} } ) . "' ),"
 	  . " use_pass_fail = '$dataset->{'use_pass_fail'}', "
 	  . "max.value=40, max.ct= $dataset->{'maxCT'} , max.control=$dataset->{'maxGenes'},  norm.function='$dataset->{'normalize2'}', negContrGenes=negContrGenes )\n"
-	  . "save( data.filtered, file='../norm_data.RData' )\n";
+	  . "save( data.filtered, file='../norm_data.RData' )\n"
+	  . "write.table(data.filtered\$PCR, file ='../PCR_data_4_normalized_publication.xls', sep='\t', row.names=F)\n"
+	  . "write.table(data.filtered\$z\$PCR, file ='../PCR_data_4_zscored_publication.xls', sep='\t', row.names=F)\n";
+	  ;
 	$script =~ s/c\( '.?.?\/?' \)/NULL/g;
 
 	open( RSCRIPT, ">$path/Preprocess.R" )

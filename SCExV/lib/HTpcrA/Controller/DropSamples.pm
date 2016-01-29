@@ -125,7 +125,7 @@ sub Select_Options {
 	$self->{'select_options'} = [
 		map {
 			{ $_ => $_ }
-		} @{ $data_table->GetAsArray('Samples') }
+		} sort @{ $data_table->GetAsArray('Samples') }
 	];
 	$self->{"Group_2_Sample"} =
 	  $data_table->GetAsHashedArray( 'Cluster', 'Samples' );
