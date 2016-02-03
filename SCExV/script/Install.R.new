@@ -6,13 +6,12 @@ source("http://bioconductor.org/biocLite.R")
 biocLite("RDRToolbox")
 biocLite("Biobase")
 biocLite("BiocGenerics")
-biocLite("RDRToolbox")
 
 ## randomForest support
 ## CITE: Tao Shi and Steve Horvath (2006) Unsupervised Learning with Random Forest Predictors. Journal of Computational and Graphical Statistics. Volume 15, Number 1, March 2006, pp. 118-138(21)
 install.packages( c('MASS', 'cluster', 'survival', 'randomForest', 'Hmisc') )
 
-install.packages( c('abind', 'reshape', 'ggplot2', 'boot', 'devtools', 'corrplot' ) )
+install.packages( c('abind', 'reshape', 'ggplot2', 'boot', 'devtools', 'corrplot', 'gtools', 'gplots', 'vioplot', 'ks' ) )
 
 install.packages( c('htmlwidgets', 'rglwidget' ) )
 library(devtools)

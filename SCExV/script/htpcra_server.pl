@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -d:NYTProf
+#!/usr/bin/env perl
 
 BEGIN {
     $ENV{CATALYST_SCRIPT_GEN} = 40;
