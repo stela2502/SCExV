@@ -519,7 +519,8 @@ sub R_script {
 	my $script =
 	    "source ('../libs/Tool_Pipe.R')\n"
 	  . "source ('../libs/Tool_Plot.R')\n"
-	  . "negContrGenes <- NULL\n";
+	  . "negContrGenes <- NULL\n"
+	  . "plotsvg = 0\n";
 	$script .=
 	  "negContrGenes <- c ( '"
 	  . join( "', '", @{ $dataset->{'negControllGenes'} } ) . "')\n"
@@ -541,8 +542,6 @@ sub R_script {
 	  . " use_pass_fail = '$dataset->{'use_pass_fail'}', "
 	  . "max.value=40, max.ct= $dataset->{'maxCT'} , max.control=$dataset->{'maxGenes'},  norm.function='$dataset->{'normalize2'}', negContrGenes=negContrGenes )\n"
 	  . "save( data.filtered, file='../norm_data.RData' )\n"
-	  . "write.table(data.filtered\$PCR, file ='../PCR_data_4_normalized_publication.xls', sep='\t', row.names=F)\n"
-	  . "write.table(data.filtered\$z\$PCR, file ='../PCR_data_4_zscored_publication.xls', sep='\t', row.names=F)\n";
 	  ;
 	$script =~ s/c\( '.?.?\/?' \)/NULL/g;
 
@@ -899,7 +898,7 @@ sub start_from_zip_file : Local : Form {
 "cd $path && unzip -o '@{$dataset->{ 'zipfile' }}[0]->{'filename'}'"
 			);
 			$self->session_file( $c, 'load' );
-			$c->res->redirect( $c->uri_for("/analyse/index/") );
+			$c->res->redirect( $c->uri_for("/files/renew_rlib/") );
 			$c->detach();
 		}
 		else {

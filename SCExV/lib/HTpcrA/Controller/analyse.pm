@@ -631,7 +631,9 @@ sub R_script {
 
 	  . "## the lists in one file\n\n"
 	  . "write.table( cbind( Samples = rownames(data\$PCR), ArrayID = data\$ArrayID, Cluster =  data\$clusters, 'color.[rgb]' =  data\$colors ),\n"
-	  . "		file='Sample_Colors.xls' , row.names=F, sep='\t',quote=F )\n";
+	  . "		file='Sample_Colors.xls' , row.names=F, sep='\t',quote=F )\n"
+	  . "write.table( cbind( Samples = rownames(data\$PCR),ArrayID = data\$ArrayID, Cluster =  data\$clusters, 'color.[rgb]' =  data\$colors, data\$PCR ),\n"
+	  . "		file='Selected_PCR_data_normlized.xls' , row.names=F, sep='\t',quote=F )\n";
 	unlink("$path/Summary_Stat_Outfile.xls")
 	  if ( -f "$path/Summary_Stat_Outfile.xls" );
 	open( RSCRIPT, ">$path/RScript.R" )
