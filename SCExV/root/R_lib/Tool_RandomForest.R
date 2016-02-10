@@ -57,8 +57,7 @@ Rand <- function(tab,adjust=T) {
 #########################################################################################
 #########################################################################################
 if (exists("pamNew") ) rm(pamNew)
-pamNew <- function (x, k, diss1 = inherits(x, "dist"), metric1 = "euclidean")
-{
+pamNew <- function (x, k, diss1 = inherits(x, "dist"), metric1 = "euclidean"){
 	
 	#############################################################################################################
 	# A new pam clustering function which corrects the clustering membership based on the sillhouette strength. #
