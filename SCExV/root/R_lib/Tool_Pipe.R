@@ -57,7 +57,8 @@ read.PCR <- function(fname,use_pass_fail=T){
 	
 	## we also support tab separated files containing only genes as columns and samples as rows.
 	
-	top20 <- readLines(fname,20)
+	try (top20 <- readLines(fname,20),silent=T)
+	
 	if ( length(grep(";", top20 )) > 0 ) {
 		### CRAP!!! this is the file output from the windows software!
 		print ( paste ( "sed -e 's/,/./g' ", fname, " | sed -e 's/;/,/g' -- > ",fname,".tmp",sep='' ) )
@@ -794,6 +795,8 @@ createDataObj <- function ( PCR=NULL,  FACS=NULL, max.value=40,
 	
 	data <- kick.expressed.negContr.samples(data, negContrGenes )
 	
+	tmp <- data$PCR
+	
 	data$PCR <- plug.999(data$PCR, max.value ) ## does nothing for pre-processed data
 	
 	if ( all ( data$PCR == 40 ) ){
@@ -815,11 +818,25 @@ createDataObj <- function ( PCR=NULL,  FACS=NULL, max.value=40,
 	
 	data.filtered$PCR <- norm.PCR(data.filtered$PCR,norm.function,max.cyc=40, ctrl=ref.genes )
 	#plot.heatmap( list( data = t(data.filtered$PCR), genes=colnames(data.filtered$PCR)), 'Contr_filtered_inverted_norm', title='SD filtered inverted data', width=12,height=6,Colv=F,hclustfun = function(c){hclust( c, method=cmethod)},distfun = function(x){ 1- cor(t(x),method='spearman')} )
-	write.table( data.filtered$z$PCR, file="../PCR_data_normalized_4_publication.xls", sep='\t' )
+	
 
 	data.filtered <- z.score.PCR.mad(data.filtered)
 	#data.filtered$z$PCR <- data.filtered$PCR
+	system ( 'mkdir ../4_GEO' )
+	exp.geo <- function ( tab , fname ) {
+		trans <- t(tab)
+		write.table( cbind( Gene_ID = rownames(trans), trans), file = fname, sep='\t', row.names=F, quote=F )
+	}
 	
+	exp.geo (tmp , 
+			'../4_GEO/All_PCR_data_no_sample_dropped_raw.xls' )
+	exp.geo (tmp[rownames(data.filtered$PCR),],	
+			'../4_GEO/All_PCR_data_raw_4_GEO.xls')
+	exp.geo (data.filtered$PCR,
+			'../4_GEO/All_PCR_data_normalized_4_GEO.xls')
+	exp.geo (data.filtered$z$PCR,
+			'../4_GEO/All_PCR_data_zscored_4_GEO.xls')
+
 	arrays <- arrays <- max(data.filtered$ArrayID)
 	cols <- rainbow(arrays)
 	cmethod <- 'ward'

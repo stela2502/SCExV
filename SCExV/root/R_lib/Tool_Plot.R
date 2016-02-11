@@ -567,7 +567,7 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 	}
 	obj$colors <- apply( t(col2rgb( cols ) ), 1, paste,collapse=' ')[obj$clusters]
 	
-	create_webgl ( obj )
+	try( create_webgl ( obj ), silent=F)
 	
 	save( obj, file='clusters.RData')
 	write.table (obj$mds.coord[order(obj$clusters),1:2], file = './2D_data.xls' )

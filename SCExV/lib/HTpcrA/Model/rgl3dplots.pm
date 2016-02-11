@@ -85,7 +85,7 @@ The inner one contains the 3D canvas and is named threeD or kernel.
  
 sub process_rgl_html{
 	my ( $self, $file ) = @_;
-	open ( IN, "<$file" ) or carp::confess ( "Could not read $file\n$!");
+	open ( IN, "<$file" ) or Carp::confess ( "Could not read $file\n$!");
 	my $use = 0;
 	my $ret = '';
 	while ( <IN> ) {
