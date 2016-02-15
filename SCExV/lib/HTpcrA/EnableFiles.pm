@@ -196,7 +196,7 @@ sub file_format_fixes {
 		$filename = root->filemap($filename);
 
 	}
-
+	my $orig_file;
 	my $outfile = $filename;
 	$outfile = root->filemap(
 		join( "/",
@@ -205,6 +205,7 @@ sub file_format_fixes {
 	);
 	unless ( $outfile->{'total'} eq $filename->{'total'} ) {
 		system("cp '$filename->{'total'}' '$outfile->{'total'}'");
+		$orig_file = $filename;
 		$filename = $outfile;
 		$unique->{ $filename->{'filename'} } = 1;
 	}
@@ -214,7 +215,6 @@ sub file_format_fixes {
 
 	## bloody hack to get rid of the stupid ...3","23,43","32.... format problems
 	$self->__fix_file_problems( $filename->{'total'}, $filetype );
-
 	return ($filename);
 }
 
@@ -232,6 +232,7 @@ sub __fix_file_problems {
 				$rep = $problem;
 				$rep =~ s/["',]//g;
 				$_   =~ s/$problem/$rep/;
+				$_ =~ s/["']//g;
 			}
 			print OUT $_;
 		}
@@ -246,7 +247,7 @@ sub __fix_file_problems {
 
 	close(IN);
 	close(OUT);
-	system("mv '$filename.mod' '$filename'");
+	system("cp '$filename.mod' '$filename'");
 	return 1;
 }
 

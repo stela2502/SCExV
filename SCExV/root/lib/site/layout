@@ -24,6 +24,12 @@
 
 <div id="content">
 
+<!--
+<table border = 2 width = 100% bgcolor="yellow" bordercolor=red >
+<tr><td>Bug detected in the data normalization step: Normalize to mean control gene is not working - fix as soon as possible. Down times possible!</td></tr>
+</table>
+-->
+
 [% IF ERROR %]
 
 <table border = 2 width = 100% bgcolor="yellow" bordercolor=red >

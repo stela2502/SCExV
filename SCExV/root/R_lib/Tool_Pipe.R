@@ -101,6 +101,13 @@ read.PCR <- function(fname,use_pass_fail=T){
 		tab$Sample_Name <- fin.wells$replacement
 		fin.wells <- fin.wells$unique
 		gnameID <- grep ('Name', colnames(tab))[2]
+		if ( var(table(tab[,2])) != 0 ) {
+			t <- table(tab[,2])
+			problems <- paste(collapse=", ", names(t)[which(t != median( t ) )])
+			stop( paste("","","Sorry, but you need to give me unique sample names!",
+							"Problematic sample names:",  problems,
+							"","",sep="\n" ))
+		} 
 		for(i in 1:length(fin.wells)){
 			
 			rq.ind <- which(tab[,2]==fin.wells[i])
@@ -189,8 +196,14 @@ read.FACS <- function(fname,use_pass_fail=T) {
 		
 		line.start <- grep("^Well,",top20)[1]
 		tab.pre <- read.delim(fname,skip=(line.start-1),header=T,sep=",",row.names=1)
+		browser()
 		if ( length(grep ('Min$', colnames( tab.pre))) > 0 ){
 			ftab <- tab.pre[, grep ('Min$', colnames( tab.pre)) ]
+			colnames( ftab ) <- str_replace_all( colnames( ftab ), 'Min$', '' )
+		}
+		else if ( length(grep ('Median$', colnames( tab.pre))) > 0){
+			ftab <- tab.pre[, grep ('Median$', colnames( tab.pre)) ]
+			colnames( ftab ) <- str_replace_all( colnames( ftab ), 'Median$', '' )
 		}
 		else { ## I suppose the file contains only data columns!
 			ftab <- tab.pre
@@ -566,6 +579,10 @@ norm.PCR <- function(tab,meth=c("none","mean control genes","max expression","me
 	
 	tab.ret <- max.cyc-tab.new
 	tab.ret[tab.na] <- 0
+	no.exp <- which( apply( tab.ret, 2, var) == 0 )
+	if ( length( no.exp) > 0 ) {
+		tab.ret[,-no.exp]
+	}
 	tab.ret
 	
 }

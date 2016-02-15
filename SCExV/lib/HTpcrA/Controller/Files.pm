@@ -527,15 +527,15 @@ sub R_script {
 	  if ( defined @{ $dataset->{'negControllGenes'} }[0] );
 	$script .= "data.filtered <- createDataObj ( PCR= c( '../"
 	  . join( "', '../",
-		map { $_->{'filename'} } @{ $seesion_hash->{'PCRTable'} } )
+		map { $_->{'filename'}.".mod" } @{ $seesion_hash->{'PCRTable'} } )
 	  . "' ), "
 	  . " PCR2= c( '../"
 	  . join( "', '../",
-		map { $_->{'filename'} } @{ $seesion_hash->{'PCRTable2'} } )
+		map { $_->{'filename'}.".mod" } @{ $seesion_hash->{'PCRTable2'} } )
 	  . "' ), "
 	  . "FACS= c( '../"
 	  . join( "','../",
-		map { $_->{'filename'} } @{ $seesion_hash->{'facsTable'} } )
+		map { $_->{'filename'}.".mod" } @{ $seesion_hash->{'facsTable'} } )
 	  . "' ), "
 	  . "ref.genes= c( '"
 	  . join( "', '", @{ $dataset->{'controlM'} } ) . "' ),"
