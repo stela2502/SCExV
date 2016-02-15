@@ -605,7 +605,7 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 					Rowv=RowV,
 					Colv=F,
 					hclustfun = function(c){hclust( c, method=cmethod)}
-			), silent=T)
+			), silent=F)
 	
 #	try( collapsed_heatmaps (obj, what='PCR', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
 #	try( collapsed_heatmaps (obj, what='FACS', functions = c('median', 'mean', 'var', 'quantile70' )), silent=T)
@@ -618,7 +618,7 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 					margins = c(1,11), 
 					lwid = c( 1,6), lhei=c(1,5),
 					hclustfun = function(c){hclust( c, method=cmethod)}
-			), silent=T)
+			), silent=F)
 	try( FACS.heatmap ( list( data= t(obj$FACS), genes = colnames(obj$FACS)), 
 					'./facs', 
 					title='FACS data', 
@@ -629,7 +629,7 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 					margins = c(1,11), 
 					lwid = c( 1,6), lhei=c(1,5),
 					hclustfun = function(c){hclust( c, method=cmethod)}
-			), silent=T)
+			), silent=F)
 	
 	try( FACS.heatmap ( list( data= t(obj$FACS)[,order(obj$clusters)], genes = colnames(obj$FACS)), 
 					'./facs_color_groups', 
@@ -642,7 +642,7 @@ analyse.data <- function(obj,onwhat='Expression',groups.n, cmethod, clusterby='M
 					lwid = c( 1,6), lhei=c(1,5),
 					Colv=F,
 					hclustfun = function(c){hclust( c, method=cmethod)}
-			), silent=T)
+			), silent=F)
 	
 	ma  <- NULL
 	mv <- NULL

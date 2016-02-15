@@ -582,7 +582,7 @@ norm.PCR <- function(tab,meth=c("none","mean control genes","max expression","me
 	no.exp <- which( apply( tab.ret, 2, var) == 0 )
 	if ( length( no.exp) > 0 ) {
 		tab.ret[,-no.exp]
-	}
+	}	
 	tab.ret
 	
 }
@@ -838,6 +838,18 @@ createDataObj <- function ( PCR=NULL,  FACS=NULL, max.value=40,
 	
 
 	data.filtered <- z.score.PCR.mad(data.filtered)
+	## now I need to drop the not informative samples (if there are any!
+	t <- which(apply( data.filtered$z$PCR, 1, sd) == 0)
+	if ( length(t) > 0 ) {
+		data.filtered <- remove.samples( data.filtered, t )
+		fname <- 'Preprocess.R.log'
+		fileConn<-file( fname )
+		writeLines ( c(paste( length(t),"samples were dropped due to no diversity in the expression values:"),paste( names(t), collapse="; ")
+				), con=fileConn )
+		close(fileConn)
+	}
+	
+	
 	#data.filtered$z$PCR <- data.filtered$PCR
 	system ( 'mkdir ../4_GEO' )
 	exp.geo <- function ( tab , fname ) {

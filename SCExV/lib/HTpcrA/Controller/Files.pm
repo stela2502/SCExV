@@ -557,6 +557,12 @@ sub R_script {
 	  ->Add("<h3>File Upload</h3>\n<i>options:"
 		  . $self->options_to_HTML_table($dataset)
 		  . "</i>\n" );
+	if ( -f $path."Preprocess.R.log" ){
+		open ( IN , "<".$path."Preprocess.R.log");
+		$c->model('scrapbook')->init( $c->scrapbook() )
+	  		->Add( '<p>'. join("", <IN>)."</p>" );
+	  	close ( IN );
+	}
 	return 1;
 }
 
