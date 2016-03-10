@@ -229,11 +229,12 @@ sub __fix_file_problems {
 		## 1,000 == 1000 !!!!!!!
 		while (<IN>) {
 			foreach my $problem ( $_ =~ m/(["']-?\d+,\d+,?\d*["'])/g ) {
+				##Carp::confess( join(":::", $_ =~ m/(["']-?\d+,\d+,?\d*["'])/g) );
 				$rep = $problem;
 				$rep =~ s/["',]//g;
 				$_   =~ s/$problem/$rep/;
-				$_ =~ s/["']//g;
 			}
+			$_ =~ s/["']//g;
 			print OUT $_;
 		}
 	}

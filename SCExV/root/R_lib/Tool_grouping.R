@@ -43,6 +43,14 @@ group_1D_worker <- function (ma, gene, ranges ) {
 	userGroups
 }
 
+#' @name checkGrouping
+#' @aliases checkGrouping,FluidigmSet-method
+#' @rdname checkGrouping-methods
+#' @docType methods
+#' @description 
+#' @param userGroups a data.frame with three column the first being the sample name and the third the group ID
+#' @param data the fluidigm data object to check against
+#' @export 
 checkGrouping <- function ( userGroups,  data=NULL ){
 	userGroups$groupID <- as.vector( as.numeric( userGroups$groupID ))
 	if ( !is.null(data) ){
@@ -77,6 +85,14 @@ checkGrouping <- function ( userGroups,  data=NULL ){
 	}
 	if ( min(userGroups$groupID) > 1 ){
 		userGroups$groupID <- userGroups$groupID - ( min(userGroups$groupID) -1 )
+	}
+	for ( i in 1:max(userGroups$groupID) ) {
+		if ( length( grep (i,userGroups$groupID) ) == 0 ){
+			m <- which( userGroups$groupID > i)
+			if ( length(m) >0 ) {
+				userGroups$groupID[m] <- userGroups$groupID[m] -1
+			}
+		}
 	}
 	userGroups
 }
