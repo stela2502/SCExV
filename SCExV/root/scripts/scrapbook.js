@@ -1,14 +1,11 @@
 
 function capture3D( cid ) {
 	  var canvas  = document.getElementById(cid);
-	  x= canvas.childNodes[0];
-	  console.log(x.getContext('webgl', {preserveDrawingBuffer: true}))
-	  alert( x.getContext('webgl', {preserveDrawingBuffer: true}) )
+	 // alert( lastImage );
+	 // canvas= canvas.childNodes[0]; 
 	  
-	  
-	  var data = canvas.childNodes[0].toDataURL();
-	  var err = "Error";
-	 
+	  //var data = canvas.toDataURL();
+	  var data = lastImage.src;
 	  if (window.XMLHttpRequest){
 	        var xhReq = new XMLHttpRequest();
 	  }

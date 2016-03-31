@@ -154,7 +154,7 @@ sub index : Path : Form {
 					$gg->AddGroup( $geneA, $geneB, map { $dataset->{$_} } 'x1',
 						'x2', 'y2', 'y1' );
 					$gg->write_R( $c->session_path() . "Grouping.$geneA.$geneB",
-						'data.filtered' );
+						'data.filtered', "Grouping.$geneA.$geneB" );
 					$gg->write_grouping(
 						$self->path($c) . "Grouping.$geneA.$geneB" );
 					$c->model('scrapbook')->init( $c->scrapbook() )

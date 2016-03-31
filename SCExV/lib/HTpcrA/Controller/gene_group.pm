@@ -140,9 +140,9 @@ sub Update_Groups {
 	my $script
 	  = ## this is mean to be read into the analysis scripts after the data has been loaded
 	  "source ( 'libs/Tool_grouping.R')\n"
-	  . "userGroups <- group_1D (data.filtered, '$dataset->{'GOI'}', c("
+	  . "data.filtered <- group_1D (data.filtered, '$dataset->{'GOI'}', c("
 	  . join( ", ", @values )
-	  . " ) )\n";
+	  . " ) )\n". "useGrouping <- '".$dataset->{'GOI'}." 1D Group'\n";
 
 	open( OUT, ">" . $c->session_path() . "Grouping.$dataset->{GOI}" );
 	print OUT $script;

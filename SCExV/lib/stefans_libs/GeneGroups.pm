@@ -96,7 +96,8 @@ sub nGroup {
 
 sub read_data {
 	my ( $self, $filename, $use_data_table ) = @_;
-	return $self->{'data'} if ( $self->{'data_file'} eq $filename && defined  $self->{'data_file'});
+	return $self->{'data'}
+	  if ( $self->{'data_file'} eq $filename && defined $self->{'data_file'} );
 	if ( -f $filename ) {
 		$self->{'data_file'} = $filename;
 		if ($use_data_table) {
@@ -119,11 +120,14 @@ sub read_data {
 	Carp::confess("I can not open the file '$filename'!\n$!\n");
 }
 
-sub read_old_grouping{
+sub read_old_grouping {
 	my ( $self, $filename ) = @_;
-	$self->{'old_grouping'} = stefans_libs::GeneGroups::R_table->new({'filename'=>$filename});
+	$self->{'old_grouping'} =
+	  stefans_libs::GeneGroups::R_table->new( { 'filename' => $filename } );
 	my $e = "Samples, red, green, blue, colorname";
-	Carp::confess ( "I need a file containing the columns $e; NOT ".join(", ",@{$self->{'old_grouping'}->{'header'}})) unless (  join(", ",@{$self->{'old_grouping'}->{'header'}}) eq $e );
+	Carp::confess( "I need a file containing the columns $e; NOT "
+		  . join( ", ", @{ $self->{'old_grouping'}->{'header'} } ) )
+	  unless ( join( ", ", @{ $self->{'old_grouping'}->{'header'} } ) eq $e );
 	return $self->{'old_grouping'};
 }
 
@@ -140,22 +144,28 @@ sub export_R_exclude_samples {
 }
 
 sub export_R {
-	my ( $self, $rObj ) = @_;
-	my $script = "DaTaSeT <- $rObj\$PCR\nif (! is.null( $rObj\$FACS ) ) {  DaTaSeT<- cbind( $rObj\$PCR, $rObj\$FACS )}\n";
-	$rObj = 'DaTaSeT';    
-	$script .=  "userGroups <- data.frame( cellName = rownames($rObj), userInput = rep.int(1, nrow($rObj)), groupID = rep.int(1, nrow($rObj)) )\n";
+	my ( $self, $rObj, $gname ) = @_;
+	my $script =
+"DaTaSeT <- $rObj\@data\nif ( $rObj\@wFACS ) {  DaTaSeT<- cbind( $rObj\@data, $rObj\@facs )}\n";
+	$rObj = 'DaTaSeT';
+	$script .=
+"userGroups <- data.frame( cellName = rownames($rObj), userInput = rep.int(1, nrow($rObj)),"
+	  . " groupID = rep.int(1, nrow($rObj)) )\n";
 	foreach ( $self->__Sets_in_order() ) {
 		$script .= $_->export_R( $self, $rObj, 2 );
 	}
-	$script .= "userGroups <- checkGrouping( userGroups )\n"."rm(DaTaSeT)\n";
+	$script .=
+	    "gr <- userGroups <- checkGrouping( userGroups[,3] )\n"
+	  . "$rObj\@samples[,'$gname'] <- gr\n"
+	  . "rm(DaTaSeT)\n";
 	return $script;
 }
 
 sub write_R {
-	my ( $self, $filename, $rObj ) = @_;
+	my ( $self, $filename, $rObj, $gname ) = @_;
 	open( OUT, ">$filename" )
 	  or Carp::confess("I could not create the file '$filename'\n");
-	print OUT $self->export_R($rObj);
+	print OUT $self->export_R( $rObj, $gname );
 	close(OUT);
 }
 
@@ -223,8 +233,7 @@ sub splice_expression_table {
 			($pg2) = $data_table->Header_Position( $set->{'g2'} );
 			Carp::confess(
 "Gene $set->{'g1'} or $set->{'g2'} not defined in your test set!"
-			  )
-			  unless ( defined $pg1 && defined $pg2 );
+			) unless ( defined $pg1 && defined $pg2 );
 			for (
 				my $line = $return_not_grouped->Lines() - 1 ;
 				$line >= 0 ;
@@ -264,13 +273,14 @@ sub group4 {
 	return $self->{'GS'}->{$key};
 }
 
-sub plot{
+sub plot {
 	my ( $self, $outfile, $geneA, $geneB ) = @_;
-	if ( defined $self->{'old_grouping'} && $self->nGroup() == 0 ){
-		return $self->{'data'}->plotXY_fixed_Colors( $outfile,$geneA, $geneB, $self->{'old_grouping'} );
+	if ( defined $self->{'old_grouping'} && $self->nGroup() == 0 ) {
+		return $self->{'data'}->plotXY_fixed_Colors( $outfile, $geneA, $geneB,
+			$self->{'old_grouping'} );
 	}
 	else {
-		return $self->{'data'}->plotXY($outfile,$geneA, $geneB, $self );
+		return $self->{'data'}->plotXY( $outfile, $geneA, $geneB, $self );
 	}
 }
 

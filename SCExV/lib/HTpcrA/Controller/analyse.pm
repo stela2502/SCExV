@@ -458,31 +458,19 @@ sub index : Path : Form {
 				);
 
 				## now I need to create a new R script!!!
-				my $script =
+				my $script = $c->model('RScript')->create_script().
 				    'mark.mds <- read.table( file="'
 				  . $path
 				  . '2D_data.xls' . '" )' . "\n";
 
-				$script .=
-				    "source ('libs/Tool_Plot.R')\n"
-				  . "source ('libs/Tool_Pipe.R')\n"
-				  . "load( 'norm_data.RData')\n";
 				$script .=
 				    $gg->export_R_exclude_samples('mark.mds')
 				  . "data.filtered <- remove.samples( data.filtered, match(excludeSamples, rownames(data.filtered\$PCR) ) )\n"
 				  . "data.filtered <- sd.filter(data.filtered)\n"
 				  . "## write the new data\n"
 				  . "save( data.filtered, file='norm_data.RData' )\n";
-				unlink( $c->session_path() . "R.error" )
-				  if ( -f $c->session_path() . "R.error" );
-				open( OUT, ">" . $self->path($c) . "ExcludeSamples.R" )
-				  or Carp::confess($!);
-				print OUT $script;
-				close(OUT);
-				chdir($path);
-				system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH  --no-save --no-restore --no-readline -- ExcludeSamples.R"'
-				);
+				
+				$c->model('RScript')->runScript( $c, $path, "ExcludeSamples.R", $script );
 
 				$c->res->redirect( $c->uri_for("/analyse/re_run/") );
 				$c->detach();
@@ -545,22 +533,10 @@ sub R_script {
 	my $path = $c->session_path();
 
 	## init script
-	my $script = $self->_R_source(
-		'libs/Tool_Plot.R',
-		'libs/Tool_Coexpression.R',
-		'libs/Tool_grouping.R',
-		'libs/beanplot_mod/beanplotbeanlines.R',
-		'libs/beanplot_mod/beanplot.R',
-		'libs/beanplot_mod/getgroupsfromarguments.R',
-		'libs/beanplot_mod/beanplotinnerborders.R',
-		'libs/beanplot_mod/beanplotscatters.R',
-		'libs/beanplot_mod/makecombinedname.R',
-		'libs/beanplot_mod/beanplotpolyshapes.R',
-		'libs/beanplot_mod/fixcolorvector.R',
-		'libs/beanplot_mod/seemslog.R'
-	);
+	my $script = $c->model('RScript')->create_script();
 	$script .= "load( 'norm_data.RData')\n";
 	if ( -f $path . "Gene_grouping.randomForest.txt" ) {
+		Carp::confess("Grouping is broken in the developmental version! FIXME!!!");
 		$script .=
 		    "source ('libs/Tool_RandomForest.R')\n"
 		  . "load('RandomForestdistRFobject_genes.RData')\n"
@@ -570,15 +546,16 @@ sub R_script {
 	if ( -f $path . 'userDefGrouping.data'
 		&& $dataset->{'UG'} eq "Use my grouping" )
 	{
+		Carp::confess("Grouping is broken in the developmental version! FIXME!!!");
 		$script .= "userGroups <- read.table ( file= 'userDefGrouping.data' )\n"
 		  . "groups.n <-length (levels(as.factor(userGroups\$groupID) ))\n ";
 	}
 	elsif ( $dataset->{'UG'} eq "Group by plateID" ) {
-		$script .=
-"userGroups <- data.frame(cellName = rownames(data.filtered\$PCR), groupID = data.filtered\$ArrayID ) \n "
-		  . "groups.n <-length (levels(as.factor(userGroups\$groupID) ))\n ";
+		$script .= "groups.n <- max( data.filtered\@samples[,'ArrayID'])\n"
+		   ."useGrouping <- 'ArrayID'\n";
 	}
 	elsif ( -f $path . $dataset->{'UG'} ) {    ## an expression based grouping!
+		Carp::confess("Grouping is broken in the developmental version! FIXME!!!");
 		$script .= "source ('$dataset->{'UG'}')\n"
 		  . "groups.n <-length (levels(as.factor(userGroups\$groupID) ))\n ";
 	}
@@ -606,69 +583,23 @@ sub R_script {
 	$script .=
 	    "plotsvg = $dataset->{'plotsvg'}\n"
 	  . "zscoredVioplot = $dataset->{'zscoredVioplot'}\n"
-	  . "onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
+	  . "onwhat='$dataset->{'cluster_by'}'\n"
+	  . "data <- analyse.data ( data.filtered, groups.n=groups.n, "
 	  . " onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
 	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "
 	  . " ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot"
-	  . ", move.neg = move.neg, plot.neg=plot.neg, beanplots=beanplots" . ")\n"
+	  . ", move.neg = move.neg, plot.neg=plot.neg, beanplots=beanplots, plotsvg =plotsvg)\n"
 	  . "\nsave( data, file='analysis.RData' )\n\n";
 
-	## now lets identify the most interesting genes:
-	$script .=
-"GOI <- NULL\ntry( GOI <- get.GOI( data\$z\$PCR, data\$clusters, exclude= -20 ), silent=T)\n"
-	  . "if ( ! is.null(data\$PCR) && ! is.null(GOI) ) {\n"
-	  . "    rbind( GOI, get.GOI( data\$z\$PCR, data\$clusters, exclude= -20 ) ) \n}\n"
-	  . "write.table( GOI, file='GOI.xls' )\n\n";
-
-	$script .=
-"write.table( cbind( Samples = rownames(data\$PCR), data\$PCR ), file='merged_data_Table.xls' , row.names=F, sep='\t',quote=F )\n"
-	  . "if ( ! is.null(data\$FACS)){\n"
-	  . "write.table( cbind( Samples = rownames(data\$FACS), data\$FACS ), file='merged_FACS_Table.xls' , row.names=F, sep='\t',quote=F )\n"
-	  . "all.data <- cbind(data\$PCR, data\$FACS )\n"
-	  . "write.table(cbind( Samples = rownames(all.data), all.data ), file='merged_data_Table.xls' , row.names=F, sep='\t',quote=F )\n"
-	  . "}\n"
-	  . "write.table( cbind( Samples = rownames(data\$mds.coord), data\$mds.coord ), file='merged_mdsCoord.xls' , row.names=F, sep='\t',quote=F )\n\n"
-
-	  . "## the lists in one file\n\n"
-	  . "write.table( cbind( Samples = rownames(data\$PCR), ArrayID = data\$ArrayID, Cluster =  data\$clusters, 'color.[rgb]' =  data\$colors ),\n"
-	  . "		file='Sample_Colors.xls' , row.names=F, sep='\t',quote=F )\n";
 	unlink("$path/Summary_Stat_Outfile.xls")
 	  if ( -f "$path/Summary_Stat_Outfile.xls" );
-	open( RSCRIPT, ">$path/RScript.R" )
-	  or
-	  Carp::confess("I could not create the R script '$path/RScript.R'\n$!\n");
-	print RSCRIPT $script;
-	close(RSCRIPT);
-	chdir($path);
-	$c->model('RandomForest')->RandomForest( $c, $dataset )
-	  if ( $c->config->{'randomForest'} );
-	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- RScript.R > R.run.log"'
-	);
-	open( RS2, ">$path/densityWebGL.R" );
+	$c->model('RScript')->runScript( $c, $path, 'RScript.R', $script, 1 );
 
-	print RS2 "options(rgl.useNULL=TRUE)\n" . "library(ks)\n"
-
-	  #  . "library(RDRToolbox)\n"
-	  . "load( 'clusters.RData' )\n"
-	  . "usable <- is.na(match( obj\$clusters, which(table(as.factor(obj\$clusters)) < 4 ) )) == T\n"
-	  . "use <- obj\n"
-	  . "use\$clusters <- obj\$clusters[usable]\n"
-	  . "use\$mds.coord <- obj\$mds.coord[usable,]\n"
-	  . "cols <- rainbow(max(as.numeric(obj\$clusters)))\n"
-	  . "H <- Hkda( use\$mds.coord, use\$clusters, bw='plugin')\n"
-	  . "kda.fhat <- kda( use\$mds.coord, use\$clusters,Hs=H, compute.cont=TRUE)\n"
-	  . "try(plot(kda.fhat, size=0.001, colors = cols[as.numeric(names(table(use\$clusters)))] ),silent=F)\n"
-
-	  #	  . "try (rgl.clear('material'))\n"
-	  #	  . "try (rgl.clear('bbox') )\n"
-	  #	  . "try (axes3d(labels = FALSE, tick = FALSE))\n"
-	  . "try( writeWebGL(dir = 'densityWebGL', width=470, height=470, prefix='K', template='libs/densityWebGL.html' ) ,silent=F )\n";
-
-	close(RS2);
-	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- densityWebGL.R >> R.run.log"'
-	);
+	$script =  $c->model('RScript')->create_script($path, 'load');
+	$script .= "library(ks)\n";
+	$script .= "plotDensity(data)\n";
+	$c->model('RScript')->runScript( $c, $path, 'densityWebGL.R', $script, 1 );
+	
 	$self->{'webGL'} = "$path/webGL/index.html";
 	$self->Coexpression_R_script($path);
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {

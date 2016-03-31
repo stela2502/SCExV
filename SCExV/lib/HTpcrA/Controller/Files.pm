@@ -392,7 +392,8 @@ sub upload : Local : Form {
 			$self->config_file( $c, 'Preprocess.Configs.txt', $dataset );
 			$self->file_upload( $c, $dataset );
 			$self->R_script( $c, $dataset );
-			unless ( -f $path . "../norm_data.RData" ) {
+			unless ( -f $c->session_path(). "norm_data.RData" ) {
+				Carp::confess("File ".$c->session_path(). "norm_data.RData". " Not found"  );
 				if ( defined @{ $dataset->{'negControllGenes'} }[0] && length(@{ $dataset->{'negControllGenes'} }[0]) > 0 ) {
 					my $spath = $c->session_path();
 					open( OUT, ">" . $spath . "Error_system_message.txt" );
@@ -516,41 +517,31 @@ sub R_script {
 
 	#Carp::confess ( root->print_perl_var_def( $seesion_hash->{'PCR'} ) );
 
-	my $script =
-	    "source ('../libs/Tool_Pipe.R')\n"
-	  . "source ('../libs/Tool_Plot.R')\n"
+	my $script = $c->model('RScript')->create_script()
 	  . "negContrGenes <- NULL\n";
 	$script .=
 	  "negContrGenes <- c ( '"
 	  . join( "', '", @{ $dataset->{'negControllGenes'} } ) . "')\n"
 	  if ( defined @{ $dataset->{'negControllGenes'} }[0] );
-	$script .= "data.filtered <- createDataObj ( PCR= c( '../"
-	  . join( "', '../",
-		map { $_->{'filename'} } @{ $seesion_hash->{'PCRTable'} } )
-	  . "' ), "
-	  . " PCR2= c( '../"
-	  . join( "', '../",
-		map { $_->{'filename'} } @{ $seesion_hash->{'PCRTable2'} } )
-	  . "' ), "
-	  . "FACS= c( '../"
-	  . join( "','../",
-		map { $_->{'filename'} } @{ $seesion_hash->{'facsTable'} } )
+	
+	$script .= "data.filtered <- createDataObj ( PCR= c( " 
+	  . join(", ", 
+	  	map { "'$_->{'filename'}'" } @{ $seesion_hash->{'PCRTable'} } ) 
+	  . " ), "
+	  . "FACS= c( '"
+	  . join( "','",
+		map { "'$_->{'filename'}'" } @{ $seesion_hash->{'facsTable'} } )
 	  . "' ), "
 	  . "ref.genes= c( '"
 	  . join( "', '", @{ $dataset->{'controlM'} } ) . "' ),"
 	  . " use_pass_fail = '$dataset->{'use_pass_fail'}', "
-	  . "max.value=40, max.ct= $dataset->{'maxCT'} , max.control=$dataset->{'maxGenes'},  norm.function='$dataset->{'normalize2'}', negContrGenes=negContrGenes )\n"
-	  . "save( data.filtered, file='../norm_data.RData' )\n";
+	  . "max.value=40, max.ct= $dataset->{'maxCT'} , max.control=$dataset->{'maxGenes'}, "
+	  . "norm.function='$dataset->{'normalize2'}', negContrGenes=negContrGenes )\n"
+	  . "save( data.filtered, file=file.path(data.filtered\@outpath,'norm_data.RData') )\n";
 	$script =~ s/c\( '.?.?\/?' \)/NULL/g;
-
-	open( RSCRIPT, ">$path/Preprocess.R" )
-	  or Carp::confess(
-		"I could not create the R script '$path/Preprocess.R'\n$!\n");
-	print RSCRIPT $script;
-	chdir($path);
-	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-readline -- Preprocess.R > R.pre.run.log"'
-	);
+	
+	$c->model('RScript')->runScript( $c, $c->session_path(), 'Preprocess.R', $script, 1 );
+	
 	$c->model('scrapbook')->init( $c->scrapbook() )
 	  ->Add("<h3>File Upload</h3>\n<i>options:"
 		  . $self->options_to_HTML_table($dataset)
