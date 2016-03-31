@@ -62,7 +62,9 @@ sub index : Path : Form {
 	}
 	if ( $c->form->submitted && $c->form->validate ) {
 		$hash = $self->__process_returned_form($c);
-		$c->model('PValues')->create_script( $c, $hash );
+		
+		my $script = $c->model('RScript')->create_script($c,'pValues',$hash);
+		$c->model('RScript')->runScript( $c, $path, 'createPvalues.R', $script, 1 );
 		
 		$c->model('scrapbook')->init( $path."/Scrapbook/Scrapbook.html" )
 	  ->Add_Table("<h3>P values calculation</h3>\n<i>options:"

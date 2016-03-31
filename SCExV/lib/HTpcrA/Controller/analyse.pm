@@ -458,31 +458,19 @@ sub index : Path : Form {
 				);
 
 				## now I need to create a new R script!!!
-				my $script =
+				my $script = $c->model('RScript')->create_script().
 				    'mark.mds <- read.table( file="'
 				  . $path
 				  . '2D_data.xls' . '" )' . "\n";
 
-				$script .=
-				    "source ('libs/Tool_Plot.R')\n"
-				  . "source ('libs/Tool_Pipe.R')\n"
-				  . "load( 'norm_data.RData')\n";
 				$script .=
 				    $gg->export_R_exclude_samples('mark.mds')
 				  . "data.filtered <- remove.samples( data.filtered, match(excludeSamples, rownames(data.filtered\$PCR) ) )\n"
 				  . "data.filtered <- sd.filter(data.filtered)\n"
 				  . "## write the new data\n"
 				  . "save( data.filtered, file='norm_data.RData' )\n";
-				unlink( $c->session_path() . "R.error" )
-				  if ( -f $c->session_path() . "R.error" );
-				open( OUT, ">" . $self->path($c) . "ExcludeSamples.R" )
-				  or Carp::confess($!);
-				print OUT $script;
-				close(OUT);
-				chdir($path);
-				system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH  --no-save --no-restore --no-readline -- ExcludeSamples.R"'
-				);
+				
+				$c->model('RScript')->runScript( $c, $path, "ExcludeSamples.R", $script );
 
 				$c->res->redirect( $c->uri_for("/analyse/re_run/") );
 				$c->detach();
@@ -537,140 +525,25 @@ sub R_script {
 	else {
 		$c->session->{'gcolors'} = 0;
 	}
-
+	my $path = $c->session_path();
 	#$c->session->{'PCRTable'} is an array of filemaps for the PCR files
 	if ( @{ $c->session->{'PCRTable'} } == 0 ) {
 		$dataset->{'cluster_by'} = 'FACS';
 	}
-	my $path = $c->session_path();
+	
+	## init scripts
+	my $script = $c->model('RScript')->create_script($c,'analyze',$dataset);
+	$c->model('RScript')->runScript( $c, $path, 'RScript.R', $script, 1 );
 
-	## init script
-	my $script = $self->_R_source(
-		'libs/Tool_Plot.R',
-		'libs/Tool_Coexpression.R',
-		'libs/Tool_grouping.R',
-		'libs/beanplot_mod/beanplotbeanlines.R',
-		'libs/beanplot_mod/beanplot.R',
-		'libs/beanplot_mod/getgroupsfromarguments.R',
-		'libs/beanplot_mod/beanplotinnerborders.R',
-		'libs/beanplot_mod/beanplotscatters.R',
-		'libs/beanplot_mod/makecombinedname.R',
-		'libs/beanplot_mod/beanplotpolyshapes.R',
-		'libs/beanplot_mod/fixcolorvector.R',
-		'libs/beanplot_mod/seemslog.R'
-	);
-	$script .= "load( 'norm_data.RData')\n";
-	if ( -f $path . "Gene_grouping.randomForest.txt" ) {
-		$script .=
-		    "source ('libs/Tool_RandomForest.R')\n"
-		  . "load('RandomForestdistRFobject_genes.RData')\n"
-		  . "createGeneGroups_randomForest (data.filtered, $dataset->{'randomForest'})\n"
-		  . "source ('Gene_grouping.randomForest.txt')\n";
-	}
-	if ( -f $path . 'userDefGrouping.data'
-		&& $dataset->{'UG'} eq "Use my grouping" )
-	{
-		$script .= "userGroups <- read.table ( file= 'userDefGrouping.data' )\n"
-		  . "groups.n <-length (levels(as.factor(userGroups\$groupID) ))\n ";
-	}
-	elsif ( $dataset->{'UG'} eq "Group by plateID" ) {
-		$script .=
-"userGroups <- data.frame(cellName = rownames(data.filtered\$PCR), groupID = data.filtered\$ArrayID ) \n "
-		  . "groups.n <-length (levels(as.factor(userGroups\$groupID) ))\n ";
-	}
-	elsif ( -f $path . $dataset->{'UG'} ) {    ## an expression based grouping!
-		$script .= "source ('$dataset->{'UG'}')\n"
-		  . "groups.n <-length (levels(as.factor(userGroups\$groupID) ))\n ";
-	}
-	else {
-		$script .= "groups.n <-$dataset->{'cluster_amount'}\n";
-	}
-	if ( $dataset->{'move_neg'} ) {
-		$script .= "move.neg <- TRUE\n";
-	}
-	else {
-		$script .= "move.neg <- FALSE\n";
-	}
-	if ( $dataset->{'plot_neg'} ) {
-		$script .= "plot.neg <- TRUE\n";
-	}
-	else {
-		$script .= "plot.neg <- FALSE\n";
-	}
-	if ( $dataset->{'use_beans'} ) {
-		$script .= "beanplots = TRUE\n";
-	}
-	else {
-		$script .= "beanplots = FALSE\n";
-	}
-	$script .=
-	    "plotsvg = $dataset->{'plotsvg'}\n"
-	  . "zscoredVioplot = $dataset->{'zscoredVioplot'}\n"
-	  . "onwhat='$dataset->{'cluster_by'}'\ndata <- analyse.data ( data.filtered, groups.n=groups.n, "
-	  . " onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
-	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "
-	  . " ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot"
-	  . ", move.neg = move.neg, plot.neg=plot.neg, beanplots=beanplots" . ")\n"
-	  . "\nsave( data, file='analysis.RData' )\n\n";
-
-	## now lets identify the most interesting genes:
-	$script .=
-"GOI <- NULL\ntry( GOI <- get.GOI( data\$z\$PCR, data\$clusters, exclude= -20 ), silent=T)\n"
-	  . "if ( ! is.null(data\$PCR) && ! is.null(GOI) ) {\n"
-	  . "    rbind( GOI, get.GOI( data\$z\$PCR, data\$clusters, exclude= -20 ) ) \n}\n"
-	  . "write.table( GOI, file='GOI.xls' )\n\n";
-
-	$script .=
-"write.table( cbind( Samples = rownames(data\$PCR), data\$PCR ), file='merged_data_Table.xls' , row.names=F, sep='\t',quote=F )\n"
-	  . "if ( ! is.null(data\$FACS)){\n"
-	  . "write.table( cbind( Samples = rownames(data\$FACS), data\$FACS ), file='merged_FACS_Table.xls' , row.names=F, sep='\t',quote=F )\n"
-	  . "all.data <- cbind(data\$PCR, data\$FACS )\n"
-	  . "write.table(cbind( Samples = rownames(all.data), all.data ), file='merged_data_Table.xls' , row.names=F, sep='\t',quote=F )\n"
-	  . "}\n"
-	  . "write.table( cbind( Samples = rownames(data\$mds.coord), data\$mds.coord ), file='merged_mdsCoord.xls' , row.names=F, sep='\t',quote=F )\n\n"
-
-	  . "## the lists in one file\n\n"
-	  . "write.table( cbind( Samples = rownames(data\$PCR), ArrayID = data\$ArrayID, Cluster =  data\$clusters, 'color.[rgb]' =  data\$colors ),\n"
-	  . "		file='Sample_Colors.xls' , row.names=F, sep='\t',quote=F )\n";
-	unlink("$path/Summary_Stat_Outfile.xls")
-	  if ( -f "$path/Summary_Stat_Outfile.xls" );
-	open( RSCRIPT, ">$path/RScript.R" )
-	  or
-	  Carp::confess("I could not create the R script '$path/RScript.R'\n$!\n");
-	print RSCRIPT $script;
-	close(RSCRIPT);
-	chdir($path);
-	$c->model('RandomForest')->RandomForest( $c, $dataset )
-	  if ( $c->config->{'randomForest'} );
-	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- RScript.R > R.run.log"'
-	);
-	open( RS2, ">$path/densityWebGL.R" );
-
-	print RS2 "options(rgl.useNULL=TRUE)\n" . "library(ks)\n"
-
-	  #  . "library(RDRToolbox)\n"
-	  . "load( 'clusters.RData' )\n"
-	  . "usable <- is.na(match( obj\$clusters, which(table(as.factor(obj\$clusters)) < 4 ) )) == T\n"
-	  . "use <- obj\n"
-	  . "use\$clusters <- obj\$clusters[usable]\n"
-	  . "use\$mds.coord <- obj\$mds.coord[usable,]\n"
-	  . "cols <- rainbow(max(as.numeric(obj\$clusters)))\n"
-	  . "H <- Hkda( use\$mds.coord, use\$clusters, bw='plugin')\n"
-	  . "kda.fhat <- kda( use\$mds.coord, use\$clusters,Hs=H, compute.cont=TRUE)\n"
-	  . "try(plot(kda.fhat, size=0.001, colors = cols[as.numeric(names(table(use\$clusters)))] ),silent=F)\n"
-
-	  #	  . "try (rgl.clear('material'))\n"
-	  #	  . "try (rgl.clear('bbox') )\n"
-	  #	  . "try (axes3d(labels = FALSE, tick = FALSE))\n"
-	  . "try( writeWebGL(dir = 'densityWebGL', width=470, height=470, prefix='K', template='libs/densityWebGL.html' ) ,silent=F )\n";
-
-	close(RS2);
-	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- densityWebGL.R >> R.run.log"'
-	);
+	$script =  $c->model('RScript')->create_script($c, 'densityPlot', $dataset );
+	$c->model('RScript')->runScript( $c, $path, 'densityWebGL.R', $script, 1 );
+	
 	$self->{'webGL'} = "$path/webGL/index.html";
-	$self->Coexpression_R_script($path);
+	
+	$script =  $c->model('RScript')->create_script($c, 'coexpression', $dataset );
+	## no wait required, as this is downoadable content anyhow
+	$c->model('RScript')->runScript( $c, $path, 'Coexpression.R', $script ); 
+
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {
 		## color the arrays by group color!
 		$c->session->{'groupbyplate'} = 1;
@@ -685,26 +558,6 @@ sub R_script {
 		  . "</i>\n" );
 	return "$path/webGL/index.html";
 
-}
-
-sub Coexpression_R_script {
-	my ( $self, $path ) = @_;
-	## create the corexpression analysis script and start that - do not wait for it to finish!
-	## The file should only be available in the downloaded zip file. Hence I probably should wait for it in the download section....
-	## first rm the old outfile!!!
-	unlink( $path . 'Coexpression_4_Cytoscape.txt' )
-	  if ( -f $path . 'Coexpression_4_Cytoscape.txt' );
-	## read in the analzed data!
-	## call function coexpressGenes( dataObj ) and write the returned table into the previousely deleted file using R
-	open( OUT, ">" . $path . "Coexpression.R" ) or Carp::confess($!);
-	print OUT "source('libs/Tool_Coexpression.R')\nload('analysis.RData')\n"
-	  . "t <- coexpressGenes(data)\n"
-	  . "write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')";
-	close(OUT);
-	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- Coexpression.R >> R.run.log" &'
-	);
-	return 1;
 }
 
 sub md5_table {
@@ -749,82 +602,6 @@ sub Javascript {
 		  . '<script type="text/javascript" src="'
 		  . $c->uri_for('/scripts/analysis_index.js') . '"'
 		  . "></script>\n" );
-}
-
-sub R_process_data_part {
-	my ( $self, $dataset ) = @_;
-
-	## check the FACS data - same sample names??
-	my $script .= "if ( exists('facsTable.d') ){
-if ( sum(is.na(match(rownames(facsTable.d), rownames(PCRTable.d)))==T) == 0 && nrow(facsTable.d) == nrow(PCRTable.d) ){\n"
-	  . "\tfacsTable.d <- facsTable.d[match( rownames(PCRTable.d), rownames(facsTable.d)), ]\n"
-	  . "}else {\n"
-	  . "\tfacsTable <- NULL\n\trm(facsTable.d)\n"
-	  . "\tsystem('echo \"FACS data does not contain the same cells as the PCR data - FACS data ignored!\" > R.error')\n"
-	  . "}\n}\n";
-
-	$script .= "cluster.d <- PCRTable.d\n"
-	  if ( $dataset->{'cluster_by'} eq 'Expression' );
-	$script .=
-	    "if ( exists('facsTable.d') ) { \n"
-	  . "cluster.d <- facsTable.d\n"
-	  . "}else{\ncluster.d <- PCRTable.d\n}\n"
-	  if ( $dataset->{'cluster_by'} eq 'FACS' );
-
-	if ( $dataset->{'mds_alg'} eq "PCA" ) {
-		$script .= " mark.mds <- prcomp( cluster.d )\$x\n ";
-	}
-	elsif ( $dataset->{'mds_alg'} eq "LLE" ) {
-		$script .=
-		  " mark.mds <- LLE( cluster.d, dim = 3, $dataset->{'K'} ) \n ";
-	}
-	elsif ( $dataset->{'mds_alg'} eq 'ISOMAP' ) {
-		$script .=
-" mark.mds <- Isomap( cluster.d, dim = 3, $dataset->{'K'} )\$dim3 \n ";
-	}
-	else {
-		Carp::confess(
-			"I do not know the cluster_alg option $dataset->{'cluster_alg'}\n"
-		);
-	}
-	$script .= "if ( exists('userGroups') ) {\n"
-	  . "pc.clus <- userGroups\$groupID\n}else{\n";
-	$script .= "if ( ! exists('pc.clus') ){\n";
-	if ( $dataset->{'cluster_on'} eq "MDS" ) {
-		$script .=
-"pc.clus <-cutree(hclust(dist( mark.mds[,1:3] ),method = \"ward.D\"),k=groups.n)\n";
-	}
-	elsif ( $dataset->{'cluster_on'} eq "Data values" ) {
-		$script .=
-"pc.clus <-cutree(hclust(as.dist( 1- cor(t(cluster.d))),method = \"ward.D\"),k=groups.n)\n";
-	}
-	$script .= "}\n}\n";
-	return $script;
-}
-
-sub plot_4R {
-	my ( $self, $path, $dataset, @names ) = @_;
-	my $script = '';
-	foreach (@names) {
-		$script .=
-		    "\nif ( exists('$_.d') ){\nt.$_.d <- t($_.d)\n"
-		  . "for ( i in 1:nrow(t.$_.d) ) {\n"
-		  . "	png( file=paste('$path',rownames(t.$_.d)[i],'.png',sep=''), width=800,height=800)\n"
-		  . "   #create color info\n"
-		  . "   lila <- vector('list', groups.n)\n"
-		  . "   for( a in 1:groups.n){\n"
-		  . "      lila[[a]]=t.$_.d[i,which(pc.clus == a)]\n"
-		  . "   }\n"
-		  . "   names(lila)[1]= 'x'\n"
-		  . "   lila\$col= cols\n"
-
-		  #		  . "   lila\$main =paste('Expression of',rownames(t.$_.d)[i])\n"
-		  . "   try( do.call(vioplot,lila), silent=F )\n"
-
-#		  . "   boxplot(t.$_.d[i,]~pc.clus,col=cols,main=paste('Expression of',rownames(t.$_.d)[i],'in the different groups (CT values?)' ))\n"
-		  . "dev.off()\n" . "}\n}\n";
-	}
-	return $script;
 }
 
 =head1 AUTHOR

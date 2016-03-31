@@ -195,6 +195,7 @@ if ( $replace =~ s/$web_root// ){
 		&patch_files( '/scrapbook/imageadd/', "/$replace".'scrapbook/imageadd/', "$plugin_path/../root/scripts/scrapbook.js");
 		&patch_files( '/scrapbook/screenshotadd', "/$replace".'scrapbook/screenshotadd', "$plugin_path/../root/scripts/scrapbook.js");
 	}
+	
 }
 
 system ( 'cat '.$patcher->{'filename'} ) ;
@@ -333,7 +334,7 @@ sub patch_files {
 		my $patcher = stefans_libs::install_helper::Patcher->new( $file );
 		$OK = 0;
 		$OK = $patcher -> replace_string( $pattern, $replace );
-		print "Replaced '$pattern' with '$replace' at $OK position(s) of file $file\n";
+		print "Replaced '$pattern' with '$replace' at $OK position(s) of file $file\n" if ( $OK > 0);
 		$patcher -> write_file() if ( $OK );
 	}
 }

@@ -131,27 +131,11 @@ sub Update_Groups {
 	$dataset->{'GOI'} =~ s/.png//;
 
 	$dataset->{'cutoff'} =~ s/,/./g;
-	my @values = sort { $a <=> $b } split( /\s+/, $dataset->{'cutoff'} );
-	## store these values for later??
-	open( OUT, ">" . $self->path($c) . "$dataset->{GOI}.cut" );
-	print OUT join( "\n", @values );
-	close(OUT);
+	$dataset->{'path'} = $self->path($c);
 
-	my $script
-	  = ## this is mean to be read into the analysis scripts after the data has been loaded
-	  "source ( 'libs/Tool_grouping.R')\n"
-	  . "userGroups <- group_1D (data.filtered, '$dataset->{'GOI'}', c("
-	  . join( ", ", @values )
-	  . " ) )\n";
+	my $script = $c->model('RScript')->create_script($c, 'geneGroup1D', $dataset );
+	$c->model('RScript')->runScript( $c, $c->session_path() , "Grouping.$dataset->{GOI}" , $script, 'NoRun' );
 
-	open( OUT, ">" . $c->session_path() . "Grouping.$dataset->{GOI}" );
-	print OUT $script;
-	close(OUT);
-
-	#	$c->model('scrapbook')->init( $c->scrapbook() )
-	#	  ->Add("<h3>Create Grouing based on one gene</h3>\n<i>options:"
-	#		  . $self->options_to_HTML_table($dataset)
-	#		  . "</i>\n" );
 	return $figure_file;
 }
 
@@ -168,40 +152,14 @@ sub R_script {    ## to plot the histograms!!
 	my ( $self, $c ) = @_;    #the dataset created from the input form
 	my $path = $self->path($c);
 	mkdir($path) unless ( -d $path );
+	my $dataset;
+	$dataset->{'path'} = $path;
+	$dataset->{'subpath'} = 'GG_prep';
+	
 	##init script
-	my $script =
-	  "source ('../libs/Tool_Pipe.R')\n" . "load( '../norm_data.RData')\n";
-
-	## load the previousely defined cut regions
-	opendir( DIR, $self->path($c) );
-	$script .=
-	    "cuts <- vector('list', 1)\n"
-	  . "files <- c( '"
-	  . join( "', '", grep /.cut$/, readdir(DIR) ) . "' )\n";
-	closedir(DIR);
-	$script .=
-	    "library(stringr)\n"
-	  . "for ( i in 1:length(files)){\n"
-	  . "  cuts[[i]] <-readLines( files[i] )\n" . "}\n"
-	  . "names(cuts) <- str_replace_all( files, '.cut', '' )\n";
-
-	## plot all the expression as histogram
-	$script .= "plot.histograms ( data.filtered, cuts )\n";
-
-	$script .=
-	    "## export all gene names for the web frontend\n"
-	  . "n <- rownames(data.filtered\$PCR )\n"
-	  . "if ( ! is.null(data.filtered\$FACS ) ) {\n"
-	  . "  n <- c( n , colnames(data.filtered\$FACS) )\n}\n"
-	  . "write( n, 'Genes.txt', ncolumns=1 ) \n";
-	open( RSCRIPT, ">$path/Gene_Group_Prepare.R" )
-	  or Carp::confess(
-		"I could not create the R script '$path/Gene_Group_Prepare.R'\n$!\n");
-	print RSCRIPT $script;
-	chdir($path);
-	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-readline -- Gene_Group_Prepare.R > R.run.log"'
-	);
+	my $script = $c->model('RScript')->create_script($c, 'geneGroup1D_backend', $dataset );
+	$c->model('RScript')->runScript( $c, $path."../", 'Gene_Group_Prepare.R', $script, 1 );
+	
 	return 1;
 }
 

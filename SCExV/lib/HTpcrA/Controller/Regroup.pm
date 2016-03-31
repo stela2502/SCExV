@@ -189,10 +189,15 @@ sub R_userGroups {
 	  data_table->new( { 'filename' => $path . 'Sample_Colors.xls' } );
 	my ($Rscript);
 
-	$Rscript =
-"source ('libs/Tool_grouping.R')\nuserGroups <-group_on_strings ( data.filtered, c( '"
+	$Rscript =  $c->model('RScript')->create_script($path,1);
+	
+	$Rscript .= "data.filtered <-group_on_strings ( data.filtered, c( '"
 	  . join( "', '", @groupsnames )
 	  . "' ) )\n";
+	 
+	$c->model('RScript')->runScript( $c, $path,"Grouping_" . $dataset->{'GroupingName'}, $Rscript, 'NOT' );
+	
+	
 
 	open( OUT, ">$path" . "Grouping_" . $dataset->{'GroupingName'} ) or die $!;
 	print OUT $Rscript;
@@ -219,8 +224,8 @@ sub R_regroup {
 	  data_table->new( { 'filename' => $path . 'Sample_Colors.xls' } );
 	my ( $old_ids, $Rscript, $OK );
 	## R dataset: group2sample = list ( '1' = c( 'Sample1', 'Sample2' ) )
-	$Rscript =
-"source ('libs/Tool_grouping.R')\nuserGroups <-regroup ( data.filtered, list (";
+	$Rscript = $c->model('RScript')->create_script($path,1)
+		."data.filtered <-regroup ( data.filtered, list (";
 	$OK = 0;
 	for ( my $i = 1 ; $i <= scalar( keys %$dataset ) ; $i++ )
 	{    ## scale from 1 to n

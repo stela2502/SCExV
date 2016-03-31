@@ -81,33 +81,9 @@ sub R_remove_samples {
 	my ( $self, $c, $hash ) = @_;
 	my $path = $c->session_path();
 
-	my $script = "source ('libs/Tool_Pipe.R')\n" . "load( 'norm_data.RData')\n";
+	my $script = $c->model('RScript')->create_script($c, 'remove_samples', $hash );
+	$c->model('RScript')->runScript( $c, $path, 'DropSamples.R', $script, 1 );
 
-	#$hash->{'Samples'} |= [];
-	if ( defined @{ $hash->{'Samples'} }[0] ) {
-		$script .=
-		    "remS <- c ('"
-		  . join( "', '", @{ $hash->{'Samples'} } )
-		  . "')\ndata.filtered = remove.samples(data.filtered, match( remS,rownames(data.filtered\$PCR)) )\n"
-		  if ( @{ $hash->{'Samples'} }[0] =~ m/[\w\d_]+/ );
-	}
-	if ( defined $hash->{'RegExp'} ) {
-		$script .=
-"data.filtered = remove.samples(data.filtered, grep( \"$hash->{'RegExp'}\" ,rownames(data.filtered\$PCR)) )\n"
-		  if ( $hash->{'RegExp'} =~ m/[\w\d_]+/ );
-	}
-
-	$script .=
-"data.filtered <- sd.filter(data.filtered)\n"."data.filtered <- z.score.PCR.mad(data.filtered)\n"."save( data.filtered, file='norm_data.RData' )\n";
-
-	open( RSCRIPT, ">$path/DropSamples.R" )
-	  or Carp::confess(
-		"I could not create the R script '$path/DropSamples.R'\n$!\n");
-	print RSCRIPT $script;
-	chdir($path);
-	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-readline -- DropSamples.R > R.pre.run.log"'
-	);
 	$c->model('scrapbook')->init( $c->scrapbook() )
 	  ->Add("<h3>Drop Samples (Cells)</h3>\n<i>options:"
 		  . $self->options_to_HTML_table($hash)
@@ -125,10 +101,10 @@ sub Select_Options {
 	$self->{'select_options'} = [
 		map {
 			{ $_ => $_ }
-		} @{ $data_table->GetAsArray('Samples') }
+		} @{ $data_table->GetAsArray('SampleName') }
 	];
 	$self->{"Group_2_Sample"} =
-	  $data_table->GetAsHashedArray( 'Cluster', 'Samples' );
+	  $data_table->GetAsHashedArray( 'grouping', 'SampleName' );
 	return $self->{'select_options'};
 }
 
