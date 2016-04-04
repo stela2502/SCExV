@@ -533,8 +533,10 @@ sub R_script {
 	
 	## init scripts
 	my $script = $c->model('RScript')->create_script($c,'analyze',$dataset);
+	unlink("$path/Summary_Stat_Outfile.xls")
+	  if ( -f "$path/Summary_Stat_Outfile.xls" );
 	$c->model('RScript')->runScript( $c, $path, 'RScript.R', $script, 1 );
-
+	
 	$script =  $c->model('RScript')->create_script($c, 'densityPlot', $dataset );
 	$c->model('RScript')->runScript( $c, $path, 'densityWebGL.R', $script, 1 );
 	
