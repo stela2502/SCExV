@@ -46,7 +46,7 @@ our $VERSION = '1.00';
 
 __PACKAGE__->config(
 	root => '/home/slang/git_Projects/SCexV/SCExV/root/',
-	name => 'HTpcrA',
+	name => 'SCExV',
 	# Disable deprecated behavior needed by old applications
 	#disable_component_resolution_regex_fallback => 1,
 	calcserver => {'ip' => '130.235.249.196', 'subpage' => '/NGS_pipeline/fluidigm/index/', 'ncore' => 32 },

@@ -278,7 +278,7 @@ sub source_groups {
 	my $path = $c->session_path();
 
 	my $data_table = data_table->new();
-	open( IN, "<$path" . 'Sample_Colors.xls' ) or die "$!\n";
+	open( IN, "<$path" . 'Sample_Colors.xls' ) or Carp::confess("Internal libraray problem: File not found: $!\n");
 	$data_table->{'used'} = {};
 	open( LOG, ">>$path" . "Logfile_Regroup.txt" );
 	while (<IN>) {

@@ -260,7 +260,7 @@ This script calculates the density 3D plot for the analysis page.
 sub densityPlot {
 	my ( $self, $c, $dataset ) = @_;
 	my $path   = $c->session_path();
-	my $script = $self->_add_fileRead($path);
+	my $script = $self->file_load($c, $dataset);
 	$script .= "library(ks)\n";
 	$script .= "plotDensity(data)\n";
 	return $script;
