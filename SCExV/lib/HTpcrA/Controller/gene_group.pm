@@ -96,7 +96,7 @@ sub index : Path : Args(0) : Form {
 				$self->path($c) . $figure_file
 			);
 			$c->res->redirect(
-				$c->uri_for("/analyse/re_run/Grouping.$dataset->{GOI}") );
+				$c->uri_for("/analyse/re_run/$dataset->{GOI}&nbsp;1D&nbsp;Group") );
 			$c->detach();
 		}
 
@@ -134,7 +134,7 @@ sub Update_Groups {
 	$dataset->{'path'} = $self->path($c);
 
 	my $script = $c->model('RScript')->create_script($c, 'geneGroup1D', $dataset );
-	$c->model('RScript')->runScript( $c, $c->session_path() , "Grouping.$dataset->{GOI}" , $script, 'NoRun' );
+	$c->model('RScript')->runScript( $c, $c->session_path() , "Grouping.$dataset->{GOI}" , $script );
 
 	return $figure_file;
 }

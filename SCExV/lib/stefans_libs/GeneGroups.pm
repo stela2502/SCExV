@@ -147,17 +147,16 @@ sub export_R {
 	my ( $self, $rObj, $gname ) = @_;
 	my $script =
 "DaTaSeT <- $rObj\@data\nif ( $rObj\@wFACS ) {  DaTaSeT<- cbind( $rObj\@data, $rObj\@facs )}\n";
-	$rObj = 'DaTaSeT';
+	my $nrObj = 'DaTaSeT';
 	$script .=
-"userGroups <- data.frame( cellName = rownames($rObj), userInput = rep.int(1, nrow($rObj)),"
-	  . " groupID = rep.int(1, nrow($rObj)) )\n";
+"userGroups <- data.frame( cellName = rownames($nrObj), userInput = rep.int(1, nrow($nrObj)),"
+	  . " groupID = rep.int(1, nrow($nrObj)) )\n";
 	foreach ( $self->__Sets_in_order() ) {
 		$script .= $_->export_R( $self, $rObj, 2 );
 	}
 	$script .=
 	    "gr <- userGroups <- checkGrouping( userGroups[,3] )\n"
-	  . "$rObj\@samples[,'$gname'] <- gr\n"
-	  . "rm(DaTaSeT)\n";
+	  . "$rObj\@samples[,'$gname'] <- gr\n";
 	return $script;
 }
 

@@ -71,7 +71,7 @@ sub index : Path : Form {
 sub R_remove_genes {
 	my ( $self, $c, $hash ) = @_;
 	my $path = $c->session_path();
-
+	$hash->{'path'} = $path;
 	my $script = $c->model('RScript')->create_script($c, 'remove_genes', $hash );
 	$c->model('RScript')->runScript( $c, $path, 'DropGenes.R', $script, 1 );
 

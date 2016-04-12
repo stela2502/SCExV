@@ -177,16 +177,15 @@ sub update_form {
 		}
 	);
 
-	opendir( DIR, $c->session_path() );
-
+	my @grps = $self->groupings( $c );
+	$hash->{'UG'} = shift( @grps ) if ( ! ( $grps[0] eq "none" ) );
 	push(
 		@{ $self->{'form_array'} },
 		{
 			'comment' => 'Group by: (optional)',
 			'name'    => 'UG',
 			'type'    => 'select',
-			'options' =>
-			  [ 'none', 'Group by plateID', grep( /Grouping/, readdir(DIR) ) ]
+			'options' => [ @grps ]
 			,    ## you will break the R_script changing this text!
 			'value'    => $hash->{'UG'},
 			'required' => 0,
@@ -240,6 +239,15 @@ sub update_form {
 		$c->form->field( %{$_} );
 	}
 	$c->form->submit( ['Run Analysis'] );
+}
+
+sub groupings {
+	my ( $self, $c ) = @_;
+	open( GRPS,File::Spec->catfile( $c->session_path(), 'SCExV_Grps.txt') );
+	my @grps = map { chomp; $_ } <GRPS>;
+	close ( GRPS );
+	return @grps;
+	
 }
 
 sub fileok : Local : Form {
@@ -331,10 +339,17 @@ sub re_run : Local {
 		$self->config_file( $c, 'rscript.Configs.txt' ),
 		$self->init_dataset() );
 	$args[0] ||= '';
-	if ( -f $path . "/" . $args[0] ) {
-		$dataset->{'UG'} = $args[0];
-		$self->config_file( $c, 'rscript.Configs.txt', $dataset );
+	if ( !($args[0] eq "") ){
+		$args[0] =~ s/&nbsp;/ /g;
+		my @grps = $self->groupings($c);
+		foreach ( @grps ) {
+			 if ( $_ eq $args[0] ){
+			 	$dataset->{'UG'} = $args[0];
+			 	$self->config_file( $c, 'rscript.Configs.txt', $dataset );
+			 }
+		}
 	}
+	
 	system("rm -Rf $path/*.svg $path/*.png $path/webGL/ $path/R.error");
 	$self->R_script( $c, $dataset );
 	my $gg   = $c->model('GeneGroups');
@@ -488,6 +503,7 @@ sub index : Path : Form {
 	}
 	if ( -d $path . 'webGL' ) {
 		my $path = $c->session_path();
+		$self->update_form( $c );
 		if ( -f $path . "R.error" ) {
 			open( IN, "<$path" . "R.error" );
 			$c->stash->{'message'} .= join( "", <IN> );
