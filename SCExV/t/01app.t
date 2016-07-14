@@ -56,7 +56,7 @@ $type = 'initial upload';
 open( IN, $plugin_path . "/data/file_list_1.txt" );
 foreach (<IN>) {
 	chomp();
-	unless (ok( -f $path . $_, "file ' $path$_' exists" )){
+	unless (ok( -f $path . $_, "file '$_ in path $path' exists" )){
 		 $drop_path = 0;
 		 $failed->{ $type . "file ' $path$_' exists" } = 1;
 	}
@@ -125,12 +125,13 @@ $mech->get_ok("http://localhost/analyse/run_first/");
 ########################
 $type = 'first run';
 ########################
+#die "why does that break: $path \n";
 open( IN, $plugin_path . "/data/file_list_2.txt" );
 foreach (<IN>) {
 	chomp();
-	unless (ok( -f $path . "/" . $_,"$type ' $path/$_' exists" ) ){
+	unless (ok( -f $path . "/" . $_,"$type file '$_' in path '$path' exists" ) ){
 			$drop_path = 0;
-			$failed->{ "$type ' $path/$_' exists" } = 1;
+			$failed->{ "$type file '$_' in path '$path/' exists" } = 1;
 		}
 }
 close(IN);
@@ -356,10 +357,10 @@ sub test_analysis {
 	my $Sample_Colors = {
 		'normalization none' =>
 		  [ 'Gyxya47eoCxVXOov7tx0Yg', 'Knl9lKwdqht0ZrQlO0MHdQ' ],
-		'first run'                           => ['o8SI0mmsUI8krKgyTApSJQ'],
+		'first run'                           => ['3+Yb0+arjtPwa8G9ZVtt6A'],
 		'After drop samples'                  => ['yEca7AHOZnyIRbL2nMG3Lw'],
 		'After drop genes'                    => ['kU+JSZCyFtObwYgZdY8tEg'],
-		'cluster_on Data values MDS 2 groups' => ['L6TMqw8hAp0dukreAU7z6g'],
+		'cluster_on Data values MDS 2 groups' => [ 'fYSNKAZkzRZQhxBE/3PkwA' ],
 		'cluster_on FACS 2 groups'            => 'no check'
 		, ## FACS data in 6 samples is random and therefore a problem in reproducability!
 		'cluster_on Expression 2 groups kmeans' =>

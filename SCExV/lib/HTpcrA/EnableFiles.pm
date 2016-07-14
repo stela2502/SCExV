@@ -799,6 +799,9 @@ sub Script {
 			my $check = $_;
 			$check =~ s/\(/\\(/g;
 			$check =~ s/\)/\\)/g;
+			$check =~ s/\}/\\}/g;
+			$check =~ s/\{/\\{/g;
+			#warn "EnableFiles::Script:". $check."\n";
 			$c->stash->{'script'} .= $_ . "\n"
 			  unless ( $c->stash->{'script'} =~ m/$check/ );
 		}

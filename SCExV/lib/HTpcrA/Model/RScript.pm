@@ -197,8 +197,8 @@ This function is called from the DropGenes contoller
 
 sub remove_samples {
 	my ( $self, $c, $dataset ) = @_;
-
-	my $script = $self->_add_fileRead( $dataset->{path} );
+	my $path   = $c->session_path();
+	my $script = $self->_add_fileRead( $path );
 
 #Carp::confess ("These are the keys - do we have a 'Samples' one?: ". join(", ", keys %$dataset));
 	if ( defined @{ $dataset->{'Samples'} }[0] ) {
@@ -230,9 +230,9 @@ This function is called from the DropGenes contoller
 
 sub remove_genes {
 	my ( $self, $c, $dataset ) = @_;
-
-	my $script = "load( 'norm_data.RData')\n";
-
+	my $path   = $c->session_path();
+	my $script = $self->_add_fileRead($path);
+	
 	if ( defined @{ $dataset->{'Genes'} }[0] ) {
 		$script .=
 		    "remS <- c ('"
@@ -260,9 +260,10 @@ This script calculates the density 3D plot for the analysis page.
 sub densityPlot {
 	my ( $self, $c, $dataset ) = @_;
 	my $path   = $c->session_path();
-	my $script = $self->file_load($c, $dataset);
+#	my $script = $self->file_load($c, $dataset);
+	my $script = $self->_add_fileRead($path);
 	$script .= "library(ks)\n";
-	$script .= "plotDensity(data)\n";
+	$script .= "plotDensity(data.filtered)\n";
 	return $script;
 }
 
@@ -365,7 +366,7 @@ sub file_load {
 	  "negContrGenes <- c ( '"
 	  . join( "', '", @{ $dataset->{'negControllGenes'} } ) . "')\n"
 	  if ( defined @{ $dataset->{'negControllGenes'} }[0] );
-
+	$dataset->{'controlM'}  ||=[];
 	$script .= "data.filtered <- createDataObj ( PCR= c( "
 	  . join( ", ",
 		map { "'$_->{'filename'}'" } @{ $seesion_hash->{'PCRTable'} } )

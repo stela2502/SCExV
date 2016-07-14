@@ -178,7 +178,7 @@ sub update_form {
 	);
 
 	my @grps = $self->groupings( $c );
-	$hash->{'UG'} = shift( @grps ) if ( ! ( $grps[0] eq "none" ) );
+	$hash->{'UG'} =  $grps[0] if ( ! ( $grps[0] eq "none" ) );
 	push(
 		@{ $self->{'form_array'} },
 		{
@@ -189,11 +189,10 @@ sub update_form {
 			,    ## you will break the R_script changing this text!
 			'value'    => $hash->{'UG'},
 			'required' => 0,
-			'jsclick' =>
-			  "form_fun_match( 'master', 'UG', 'randomForest', 'randomForest')",
+	#		'jsclick' =>
+	#		  "form_fun_match( 'master', 'UG', 'randomForest', 'randomForest')",
 		}
 	);
-	closedir(DIR);
 	my $type = 'hidden';
 
 	push(
@@ -243,11 +242,18 @@ sub update_form {
 
 sub groupings {
 	my ( $self, $c ) = @_;
-	open( GRPS,File::Spec->catfile( $c->session_path(), 'SCExV_Grps.txt') );
-	my @grps = map { chomp; $_ } <GRPS>;
-	close ( GRPS );
+	my $f = File::Spec->catfile( $c->session_path(), 'SCExV_Grps.txt');
+	my @grps;
+	if ( -f $f ){
+		open( GRPS, "<$f" );
+		@grps = map { chomp; $_ } (<GRPS>);
+		close ( GRPS );
+		@grps= grep defined, @grps;
+		
+	}else {
+		Carp::confess ( "No grouping file '$f'\n");
+	}
 	return @grps;
-	
 }
 
 sub fileok : Local : Form {
@@ -417,7 +423,7 @@ sub index : Path : Form {
 "<h1> The analysis section</h1>\n<p>Here you can analyse your uploaded data using the options on the left side.</p>";
 	$self->update_form($c);
 	if ( $c->form->submitted && $c->form->validate ) {
-
+		warn "Button return value = ". $c->form->submitted."\n";
 		my $dataset = $self->__process_returned_form($c);
 		$dataset->{'randomForest'} ||= 10;
 		$self->config_file( $c, 'rscript.Configs.txt', $dataset )
@@ -443,7 +449,7 @@ sub index : Path : Form {
 			);
 		}
 		elsif ( $c->form->submitted() eq "0E0" )
-		{    ## remove samples based on the 2D MDS figure!
+		{    ## this is when the RemoveSamples is pressed in 2D MDS view
 			if ( $dataset->{'x1'} =~ m/\d+/ ) {
 				$self->config_file( $c, 'rscript.Configs.txt', $dataset );
 				my $gg   = $c->model('GeneGroups');
@@ -473,17 +479,18 @@ sub index : Path : Form {
 				);
 
 				## now I need to create a new R script!!!
-				my $script = $c->model('RScript')->create_script().
-				    'mark.mds <- read.table( file="'
+				my $script = $c->model('RScript')->create_script()."\n"
+				  .	$c->model('RScript')->_add_fileRead( $path )
+				  .  'mark.mds <- read.table( file="'
 				  . $path
 				  . '2D_data.xls' . '" )' . "\n";
 
 				$script .=
 				    $gg->export_R_exclude_samples('mark.mds')
-				  . "data.filtered <- remove.samples( data.filtered, match(excludeSamples, rownames(data.filtered\$PCR) ) )\n"
-				  . "data.filtered <- sd.filter(data.filtered)\n"
+				  . "data <- remove.samples( data, match(excludeSamples, rownames(data\@data) ) )\n"
+				  . "data <- sd.filter(data)\n"
 				  . "## write the new data\n"
-				  . "save( data.filtered, file='norm_data.RData' )\n";
+				  . "save( data, file='analysis.RData' )\n";
 				
 				$c->model('RScript')->runScript( $c, $path, "ExcludeSamples.R", $script );
 

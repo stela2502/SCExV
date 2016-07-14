@@ -20,8 +20,9 @@ use Catalyst::Runtime 5.80;
 #	+CatalystX::Profile_SL
 #	-Debug
 
+#  ConfigLoader
+
 use Catalyst qw/
-  ConfigLoader
   Static::Simple
   Session
   Session::State::Cookie
@@ -100,7 +101,8 @@ sub session_path {
 	if (defined $path){
 		return $path if ( $path =~ m!/tmp/[\w\d]! && -d $path );
 	}
-	my $Root = $self->config->{'root'};
+	my $Root = '';
+	$Root = $self->config->{'root'};
 
 	#	my $root = "/var/www/html/HTPCR";
 	$session_id = $self->get_session_id();
