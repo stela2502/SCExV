@@ -121,7 +121,7 @@ sub index : Path : Form {
 			$dataset->{'gy'} );
 
 		$dataset->{'gg'}->read_grouping( $path . "Grouping.$geneA.$geneB" )
-		  if ( -f $self->path($c) . "Grouping.$geneA.$geneB" );
+		  if ( -f $path . "Grouping.$geneA.$geneB" );
 
 		
 		if (   $c->form->submitted() eq "Submit"

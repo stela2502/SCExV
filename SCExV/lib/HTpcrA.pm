@@ -46,7 +46,7 @@ our $VERSION = '1.00';
 # local deployment.
 
 __PACKAGE__->config(
-	root => '/home/slang/git_Projects/SCexV/SCExV/root/',
+	root => '/home/med-sal/git_Projects/SCexV/SCExV/root/',
 	name => 'SCExV',
 	# Disable deprecated behavior needed by old applications
 	#disable_component_resolution_regex_fallback => 1,

@@ -3,3 +3,7 @@
 /t/data/Output/
 /t/data/Outpath/
 BugRreport_rgl*
+/MANIFEST
+/MYMETA.json
+/MYMETA.yml
+/Makefile

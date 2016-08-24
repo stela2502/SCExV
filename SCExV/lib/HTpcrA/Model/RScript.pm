@@ -216,8 +216,8 @@ sub remove_samples {
 
 	$script .=
 	    "data.filtered <- sd.filter(data.filtered)\n"
-	  . "data.filtered <- z.score.PCR.mad(data.filtered)\n"
-	  . "save( data.filtered, file='norm_data.RData' )\n";
+	  . "data <- z.score.PCR.mad(data.filtered)\n"
+	  . "save( data, file='analysis.RData' )\n";
 
 	return $script;
 }
@@ -246,8 +246,8 @@ sub remove_genes {
 
 	$script .=
 	    "data.filtered <- sd.filter(data.filtered)\n"
-	  . "data.filtered <- z.score.PCR.mad(data.filtered)\n"
-	  . "save( data.filtered, file='norm_data.RData' )\n";
+	  . "data <- z.score.PCR.mad(data.filtered)\n"
+	  . "save( data, file='analysis.RData' )\n";
 	return $script;
 }
 

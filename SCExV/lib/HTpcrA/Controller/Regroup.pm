@@ -302,19 +302,19 @@ sub source_groups {
 	my $percent_width = int( 95 / $data_table->Lines() );
 	$c->stash->{'sourceGroups'} = '';
 	$c->stash->{'groups'}       = $data_table->Lines();
-
+	my ( $red, $green, $blue );
 	foreach ( @{ $data_table->GetAll_AsHashArrayRef() } ) {
-		( $_->{'red'}, $_->{'green'}, $_->{'blue'} ) =
-		  split( " ", $_->{'color.[rgb]'} );
+		( $red, $green, $blue ) =
+		  split( " ", $_->{'colors'} );
 		$str2 .=
 		    "<button style=\"width:$percent_width\%;height:70;background-color:"
-		  . $self->rgbToHex( $_->{'red'}, $_->{'green'}, $_->{'blue'} )
+		  . $self->rgbToHex( $red, $green, $blue )
 		  . "\"><b>Group $i</b></button>\n";
 		$str .=
 "<div id='div$i'  class='resizableContainer' ondrop='drop(event)' ondragover='allowDrop(event)'>\n</div>";
 		$c->stash->{'sourceGroups'} .=
 "<canvas id='Group$i' name='Group$i' style='width:$percent_width\%;height:70px;background-color:"
-		  . $self->rgbToHex( $_->{'red'}, $_->{'green'}, $_->{'blue'} )
+		  . $self->rgbToHex( $red, $green, $blue )
 		  . "' draggable='true' ondragstart='drag(event)' >Group $i</canvas>";
 		$i++;
 	}
