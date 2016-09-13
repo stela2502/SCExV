@@ -671,18 +671,18 @@ sub slurp_webGL {
 	  . "<span id='threeD' style='display:inline;'>\n<button onclick='capture3D(\"div\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/webGL/index.html -->\n";
 	my ($fileA, $fileB);
 	
-	($fileA, $onload[0]) = $c->model('java_splicer')->read_webGL( "$path/webGL/index.html" );
+	($fileA, $onload[0]) = $c->model('java_splicer')->getDIV( "$path/webGL/index.html" );
 	$onload[0] = 'webGLStart();' unless ( defined  $onload[0]);
 	if ( -f "$path/densityWebGL/index.html" ) {
-		($fileB, $onload[1]) = $c->model('java_splicer')->read_webGL( "$path/densityWebGL/index.html" );
+		($fileB, $onload[1]) = $c->model('java_splicer')->getDIV( "$path/densityWebGL/index.html" );
 		$onload[1] = 'KwebGLStart();' unless ( defined  $onload[1]);
 	}else {
 		Carp::confess( "Seriouse problem: density wegGL was not produced!" );
 	}
-	my ( $full, $partA, $partB, $rgl_js);
-	( $full, $partB, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileA, $fileB );
-	( $full, $partA, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileB, $fileA );
-	$rgl_js =~ 
+	#my ( $full, $partA, $partB, $rgl_js);
+	#( $full, $partB, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileA, $fileB );
+	#( $full, $partA, $rgl_js ) = $c->model('java_splicer')->drop_duplicates ( $fileB, $fileA );
+	#$rgl_js =~ 
 	#$rgl_js =~ s/this.textureCanvas = document.createElement\("canvas"\);/this.textureCanvas = document.createElement\("canvas"\);\nthis.textureCanvas.getContext("experimental-webgl", {preserveDrawingBuffer: true})/;
 #	open ( OUT , ">$path/densityWebGL/rgl.js" ) or die $!;
 	#print OUT $rgl_js;
@@ -690,10 +690,11 @@ sub slurp_webGL {
 	$self->Script( $c, '<script type="text/javascript" src="'. $c->uri_for( '/scripts/rglClass.src.js' ).'"></script>');
 	$self->Script( $c, '<script type="text/javascript" src="'. $c->uri_for( '/scripts/CanvasMatrix4.js' ).'"></script>');
 	
-	$script .= $partA
+	#$script .= $partA
+	$script .= $fileA
 	."<!-- END READ FROM FILE $path/webGL/index.html -->\n"
 	."</span><span id='kernel'  style='display:none'>\n<button onclick='capture3D(\"Kdiv\")'>To Scrapbook</button>\n<!-- START READ FROM FILE $path/densityWebGL/index.html-->\n"
-	.$partB."<br><b>Known bug - Drag the white area above to make the plot appear</b>";
+	.$fileB."<br><b>Known bug - Drag the white area above to make the plot appear</b>";
 
 	$script .=
 	    "</span><span id='twoD'  style='display:none'>\n"

@@ -68,6 +68,30 @@ sub java_splice_old {
 	return  { functions => \@functions, md5sums=> \@md5sums, rest =>join("\n",@$all) } ; ## the last entry is the plot script
 }
 
+sub classSplitter {
+	my ( $self, $str ) = @_;
+	my (@return, $use, $position);
+	$position = -1;
+	if ( -f $str ) {
+		open ( IN, "<$str" ) or die $!;
+		$str = join("\n", <IN> );
+		close (IN ); 
+	}
+	foreach ( split( "\n", $str ) ){
+		if ( $_ =~ m/^<script>/ ){
+			$position ++;
+			$return[$position] = '';
+			$use = 1;
+			next;
+		}
+		if ( $_ =~ m/^<\/script>/ ) {
+			$use = 0;
+			next;
+		}
+		$return[$position] .= "$_\n" if ( $use );
+	}
+	return @return; 
+}
 
 sub java_splice {
 	my ( $self, $str ) = @_;
@@ -120,6 +144,24 @@ sub read_webGL {
 		$tmp .= $_ if ($use);
 	}
 	close ( IN );
+	return( $tmp, $file );
+}
+
+sub getDIV {
+	my ( $self, $fname ) = @_;
+	open ( IN, "<".$fname) or Carp::confess( "file not found: $fname\n". $!);
+	my $tmp = '';
+	my $file = "";
+	my $use = 0;
+	while ( <IN> ){
+		$file = $1 if ( $_ =~ m/<body onload="(.*;)">/ );
+		$use = 1 if ( $_ =~ m/<div .* class="rglWebGL"/ );
+		$use = 0 if ( $_ =~ m/<p id="K?debug">/ );
+		#next if ( $_ =~ m/CanvasMatrix4=function\(m\)/ );
+		$tmp .= $_ if ($use);
+	}
+	close ( IN );
+	$tmp .= "</div>\n";
 	return( $tmp, $file );
 }
 

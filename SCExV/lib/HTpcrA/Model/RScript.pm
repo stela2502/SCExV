@@ -74,6 +74,7 @@ sub create_script {
 	return $str;
 }
 
+
 sub _add_fileRead {
 	my ( $self, $path ) = @_;
 	if ( -f $path . "analysis.RData" ) {
@@ -304,7 +305,7 @@ sub analyze {
 		  . "source ('Gene_grouping.randomForest.txt')\n";
 	}
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {
-		$script .= "groups.n <- max( data.filtered\@samples[,'ArrayID'])\n"
+		$script .= "groups.n <- max( as.numeric(data.filtered\@samples[,'ArrayID']))\n"
 		  . "useGrouping <- 'ArrayID'\n";
 	}
 	elsif(  $dataset->{'UG'} eq "none" ) {

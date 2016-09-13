@@ -6,10 +6,11 @@ R packages:
 abind, boot, cluster, ggplot2, gplots, Hmisc, MASS, MAST, RDRToolbox, reshape, rgl, RSvgDevice, stringr, survival, vioplot
 Apache or any other supported web server.
 # Install
-<p>The software is tested on Fedora 20 and CentOS 7.0 using apache2, but should install on any other linux distribution.</p>
+<p>The software is tested on Fedora 20 and CentOS 7.0 using apache2, and Ubuntu 16.04. It should install on any other linux distribution, too. Windows is not supported!</p>
 <p>Obtain and install <a hrep="https://github.com/stela2502/Stefans_Lib_Esentials">my Stefans_Lib_Essentials Perl library</a>.</p>
 <p>Download this source and install it using the Perl make procedure: 
 <ol><li>cd &#60;path to the source&#62; </li><li>perl Makefile.PL </li><li>make </li><li>make install </li></ol>
+<p>In addition you will need to install R and my Rscexv package as well as the python ZIFA library.</p>
 To install the server files to your web path you should use the SCexV install.pl script scripts/install.pl. This script will take care of access rights, copy all required files and changes all links inside the server files to support install into a subpath. In other words it is absolutely not recommended to copy the source files to your web path by hand. 
 </p>
 ## install.pl usage
