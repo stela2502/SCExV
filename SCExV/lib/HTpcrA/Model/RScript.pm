@@ -283,6 +283,23 @@ sub coexpression {
 	  . "write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')\n";
 }
 
+=head2 RandomForest
+
+Creates the initial RFcluster script - no bells no whistles.
+
+=cut
+
+sub RandomForest {
+	my ( $self, $c, $dataset ) = @_;
+	my $path = $c->session_path();
+	return
+	    $self->_add_fileRead($path)
+	  . "data <- rfCluster(data,rep=1, SGE=F, email, k= $dataset->{'cluster_amount'},"
+	  . " slice=4, subset=nrow(data\@data}-20, pics=F ,nforest=500, ntree=500, name='RFclust', recover=F)\n"
+	  . "write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')\n"
+	  ."save( data, file='analysis.RData' )\n";
+}
+
 =head2 analyze
 
 Creates the body of the analysis script.

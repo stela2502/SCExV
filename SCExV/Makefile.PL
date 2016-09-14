@@ -18,8 +18,8 @@ requires 'Moose';
 requires 'namespace::autoclean';
 #requires 'Config::General'; # This should reflect the config file format you've chosen
                  # See Catalyst::Plugin::ConfigLoader for supported formats
-requires 'Catalyst::Plugin::SecureCookies';
-requires 'Catalyst::Plugin::RequireSSL';
+#requires 'Catalyst::Plugin::SecureCookies';
+#requires 'Catalyst::Plugin::RequireSSL';
 requires 'Catalyst::Plugin::Session';
 requires 'Catalyst::Plugin::Session::State::Cookie';
 requires 'Catalyst::Plugin::Session::Store::FastMmap';

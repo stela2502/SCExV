@@ -36,3 +36,9 @@ The output from this script should help to pinpoint the missing parts. If this t
 # Example installation
 
 <p>You can access our installation at <a href="http://stemsysbio.bmc.lu.se/SCexV/">stemsysbio.bmc.lu.se/SCexV/</a>. For more help on the usage please check out our instructional videos on <a href="https://www.youtube.com/channel/UC8NmNbIEkMt4sjWxgL8_aEw">our YouTube channel</a>.</p>
+
+# Installation on Ubuntu 16.04 fresh install
+
+
+
+
