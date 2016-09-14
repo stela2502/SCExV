@@ -166,6 +166,7 @@ my ($save, $save_home);
 
 #$patcher -> write_file();
 
+system ( "cp $plugin_path/../lib/HTpcrA.pm $plugin_path/../lib/HTpcrA.save" );
 my $patcher2 = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
 my $options ='';
 for ( my $i = 0; $i < @options; $i += 2 ){
@@ -174,8 +175,8 @@ for ( my $i = 0; $i < @options; $i += 2 ){
 unless ( $options =~ m/ncore/ ) {
 	$options .= "\tncore => 1,\n";
 }
-my $OK2 = $patcher2 -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,", "root => '$install_path',\n$options" );
-$patcher2 -> write_file();
+$patcher -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,", "root => '$install_path',\n$options" );
+$patcher -> write_file();
 
 my $replace = $install_path;
 my @files ;
@@ -229,10 +230,11 @@ foreach ( 'css', 'rte', 'scripts', 'static', 'example_data' ){
 }
 
 warn "Fixing $patcher->{'filename'} back to normal ($save) and ($save_home)\n";
-$patcher -> replace_string( "root .*", "root $save" );
-$patcher -> replace_string( "Home .*", "Home $save_home" );
-$patcher -> replace_string( "\tform_path .*", "\tform_path $save"."src/form/");
-$patcher -> write_file();
+system( "mv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm");
+#$patcher -> replace_string( "root .*", "root $save" );
+#$patcher -> replace_string( "Home .*", "Home $save_home" );
+#$patcher -> replace_string( "\tform_path .*", "\tform_path $save"."src/form/");
+#$patcher -> write_file();
 
 
 
