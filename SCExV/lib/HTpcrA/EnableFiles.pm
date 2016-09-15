@@ -614,6 +614,7 @@ sub _R_source {
 
 sub path {
 	my ( $self, $c ) = @_;
+	Carp::confess ( "you need to give me the application here - not undef!" ) unless ( defined $c);
 	return $c->session_path();
 }
 
@@ -823,6 +824,7 @@ sub create_multi_image_scalable_canvas {
 	$self->{'select_options'} = [];
 	my ( $default, $key, $map, $path, $id );
 	$path = $self->path($c);
+	
 	$id   = 1;
 	$default =
 	    "<td width='100%'><p align='center'>"

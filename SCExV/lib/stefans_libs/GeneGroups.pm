@@ -152,10 +152,10 @@ sub export_R {
 "userGroups <- data.frame( cellName = rownames($nrObj), userInput = rep.int(1, nrow($nrObj)),"
 	  . " groupID = rep.int(1, nrow($nrObj)) )\n";
 	foreach ( $self->__Sets_in_order() ) {
-		$script .= $_->export_R( $self, $rObj, 2 );
+		$script .= $_->export_R( $self, $nrObj, 2 );
 	}
 	$script .=
-	    "gr <- userGroups <- checkGrouping( userGroups[,3] )\n"
+	    "gr <- userGroups <- checkGrouping( userGroups )\n"
 	  . "$rObj\@samples[,'$gname'] <- gr\n";
 	return $script;
 }
