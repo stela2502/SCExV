@@ -94,7 +94,7 @@ sub check_IP{
 sub session_path {
 	my ($self, $session_id ) = @_;
 	if ( defined $session_id ){
-		return $self->config->{'root'}. "/tmp/" . $session_id ."/";
+		return $self->config->{'root'}. "tmp/" . $session_id ."/";
 	}
 	my $path = $self->session->{'path'};
 	
@@ -110,8 +110,8 @@ sub session_path {
 		$self->res->redirect( $self->uri_for("/") );
 		$self->detach();
 	}
-	$path = $Root . "/tmp/" . $self->get_session_id() . "/";
-	$path = $Root . "/tmp/" . $self->get_session_id() . "/" if ($path =~ m!//$! );
+	$path = $Root . "tmp/" . $self->get_session_id() . "/";
+	$path = $Root . "tmp/" . $self->get_session_id() . "/" if ($path =~ m!//$! );
 	unless ( -d $path ) {
 		mkdir($path)
 		  or Carp::confess("I could not create the session path $path\n$!\n");

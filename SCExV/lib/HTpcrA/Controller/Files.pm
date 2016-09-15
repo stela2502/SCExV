@@ -532,7 +532,8 @@ sub index : Local {
 	my $filename = '/' . join( "/", @filename );
 	my $fn       = @filename[ @filename - 1 ];
 	my $allowed  = $c->session_path();
-
+	
+	$fn =~ s!//+!/!g;
 	unless ( $filename =~ m/^\/?$allowed/ ) {
 		$c->response->body(
 "No way you are allowed to access the file $filename - sorry! ($allowed)"
@@ -542,15 +543,15 @@ sub index : Local {
 	open( OUT, "<$filename" )
 	  or Carp::confess(
 "Sorry, but I could not access the file '$filename' on the server!\n$!\n"
-	  );
-	$c->res->content_type('image/svg+xml') if ( $filename =~ m/svg$/ );
-	$c->res->header( 'Content-Disposition', qq[attachment; filename="$fn"] );
+	  );	
+	
 	while ( defined( my $line = <OUT> ) ) {
 		$c->res->write($line);
 	}
-	close(OUT);
-
-	$c->res->code(204);
+	close(OUT);	
+	$c->res->header( 'Content-Disposition', qq[attachment; filename="$fn"] );
+	$c->res->content_type('image/svg+xml') if ( $filename =~ m/svg$/ );
+	$c->res->code(204);	
 }
 
 sub message_form {
