@@ -223,6 +223,97 @@ sub remove_samples {
 	return $script;
 }
 
+=head2 regroup
+
+Creates the script to re-order a grouping. Called by the Regroup controller.
+
+=cut
+
+sub regroup {
+	my ( $self, $c, $dataset ) = @_;
+	
+	my $path   = $c->session_path();
+	my $Rscript = $self->_add_fileRead($path);
+	
+	my $data_table =
+	  data_table->new( { 'filename' => $path . 'Sample_Colors.xls' } );
+	my ( $old_ids,  $OK );
+	## R dataset: group2sample = list ( '1' = c( 'Sample1', 'Sample2' ) )
+	$Rscript .= "userGroups <-regroup ( data.filtered, list (";
+	$OK = 0;
+	for ( my $i = 1 ; $i <= scalar( keys %$dataset ) ; $i++ )
+	{    ## scale from 1 to n
+		next unless ( defined $dataset->{ 'g' . $i } );
+		$old_ids = { map { $_ => 1 } $dataset->{ 'g' . $i } =~ m/Group(\d+)/g };
+		next if ( keys %$old_ids == 0 );
+		$OK++;
+		$Rscript .= " \n\t'$i' = c('" . join(
+			"', '",
+			@{
+				$data_table->select_where(
+					'grouping',
+					sub {
+						my $v = shift;
+						return 1 if ( $old_ids->{$v} );
+						return 0;
+					}
+				)->GetAsArray('SampleName')
+			}
+		) . "'),";
+	}
+	if ( $OK < 2 ) {
+		$c->stash->{'ERROR'} = [
+'Sorry - you have not created enough groups! Min 2 groups are required!'
+		];
+	}
+	chop($Rscript);
+	$Rscript .= " )\n, name='$dataset->{GroupingName}')\n"
+	  . "saveObj(userGroups)\n";
+	
+	
+	return $Rscript;
+
+}
+
+=head2 userGroups
+
+Create a grouping based on user input pattern match. Called from the Regroups controller.
+=cut
+
+
+sub userGroups {
+	my ( $self, $c, $dataset ) = @_;
+	my $path = $c->session_path();
+
+	unlink( $path . "Grouping_R_Error.txt" )
+	  if ( -f $path . "Grouping_R_Error.txt" );
+	
+	my @groupsnames = split( /\s+/, $dataset->{'Group Names'} );
+	my $data_table =
+	  data_table->new( { 'filename' => $path . 'Sample_Colors.xls' } );
+
+	my $Rscript = $self->_add_fileRead($path);
+	
+	$Rscript .= "data.filtered <-group_on_strings ( data.filtered, c( '"
+	  . join( "', '", @groupsnames )
+	  . "' ) )\n" . "saveObj( data.filtered)\n";
+	return $Rscript;
+}
+
+=head2 fixPath
+
+This short R script fixes the path in an uploaded zip file R object!
+
+=cut
+sub fixPath {
+	my ( $self, $c, $dataset ) = @_;
+	my $path   = $c->session_path();
+	my $script = $self->_add_fileRead($path);
+	$script .= "data\@outpath <- pwd()\n"
+	  . "save( data, file='analysis.RData' )\n";
+	return $script;
+}
+ 
 =head2 remove_genes
 
 This function is called from the DropGenes contoller
@@ -330,7 +421,7 @@ sub analyze {
 	}
 	elsif ( $dataset->{'UG'} =~ m/\w/ ) {    ## an expression based grouping!
 		$script .= "useGrouping <-  '$dataset->{'UG'}'\n"
-		  . "groups.n <- max( data.filtered\@samples[,useGrouping])\n ";
+		  . "groups.n <- max( as.numeric(data.filtered\@samples[,useGrouping]))\n ";
 	}
 	else {
 		$script .= "groups.n <-$dataset->{'cluster_amount'}\n";
@@ -383,7 +474,7 @@ sub file_load {
 	$script .=
 	  "negContrGenes <- c ( '"
 	  . join( "', '", @{ $dataset->{'negControllGenes'} } ) . "')\n"
-	  if ( defined @{ $dataset->{'negControllGenes'} }[0] );
+	  if ( defined @{ $dataset->{'negControllGenes'} }[0] and ! @{ $dataset->{'negControllGenes'} }[0] eq "linux" );
 	$dataset->{'controlM'}  ||=[];
 	$script .= "data.filtered <- createDataObj ( PCR= c( "
 	  . join( ", ",

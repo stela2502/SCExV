@@ -823,6 +823,8 @@ sub start_from_zip_file : Local : Form {
 "cd $path && unzip -o '@{$dataset->{ 'zipfile' }}[0]->{'filename'}'"
 			);
 			$self->session_file( $c, 'load' );
+			my $script = $c->model('RScript')->create_script($c, 'fixPath', {} );
+			$c->model('RScript')->runScript( $c, $path, 'FixPath.R', $script, 1 );
 			$c->res->redirect( $c->uri_for("/analyse/index/") );
 			$c->detach();
 		}
