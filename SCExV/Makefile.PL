@@ -10,30 +10,22 @@ name 'HTpcrA';
 all_from 'lib/HTpcrA.pm';
 
 requires 'Catalyst::Runtime' => '5.90019';
-requires 'Catalyst::Plugin::ConfigLoader';
+#requires 'Catalyst::Plugin::ConfigLoader';
 requires 'Catalyst::Plugin::Static::Simple';
 requires 'Catalyst::Plugin::ErrorCatcher';
-
 requires 'Catalyst::Action::RenderView';
-
 requires 'Moose';
 requires 'namespace::autoclean';
-requires 'Config::General'; # This should reflect the config file format you've chosen
+#requires 'Config::General'; # This should reflect the config file format you've chosen
                  # See Catalyst::Plugin::ConfigLoader for supported formats
-requires 'Catalyst::Plugin::SecureCookies';
-requires 'Catalyst::Plugin::RequireSSL';
+requires 'Daemon::Control';
+#requires 'Catalyst::Plugin::RequireSSL';
 requires 'Catalyst::Plugin::Session';
 requires 'Catalyst::Plugin::Session::State::Cookie';
 requires 'Catalyst::Plugin::Session::Store::FastMmap';
 requires 'HTML::Template';
 requires 'Catalyst::Model::Factory::PerRequest';
-requires 'Date::Simple';
-requires 'Statistics::Descriptive';
-requires 'GD::SVG';
-requires 'Number::Format';
-requires 'Catalyst::Plugin::FormBuilder';
-requires 'Catalyst::View::TT';
-requires 'DateTime::Format::MySQL';
+requires 'Stefans_Libs_Essentials';
 #requires 'Stefans_Lib_Essentials' => '1.01';
 
 requires_external_bin('dos2unix');

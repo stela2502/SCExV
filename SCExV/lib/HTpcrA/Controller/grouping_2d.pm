@@ -105,6 +105,7 @@ sub index : Path : Form {
 		my $use_data_table_obj = 1 );
 	if ( $c->form->submitted && $c->form->validate ) {
 		my $dataset = $self->__process_returned_form($c);
+		$dataset->{'gg'} = $c->model('GeneGroups');
 		unless (
 			join( ' ', $geneA,           $geneB ) eq
 			join( " ", $dataset->{'gx'}, $dataset->{'gy'} ) )
@@ -119,10 +120,10 @@ sub index : Path : Form {
 		  $self->check_local( $c, $geneA, $geneB, $dataset->{'gx'},
 			$dataset->{'gy'} );
 
-		$gg = $c->model('GeneGroups');
-		$gg->read_grouping( $self->path($c) . "Grouping.$geneA.$geneB" )
-		  if ( -f $self->path($c) . "Grouping.$geneA.$geneB" );
+		$dataset->{'gg'}->read_grouping( $path . "Grouping.$geneA.$geneB" )
+		  if ( -f $path . "Grouping.$geneA.$geneB" );
 
+		
 		if (   $c->form->submitted() eq "Submit"
 			|| $c->form->submitted() eq 'Analyze using this grooping' )
 		{
@@ -149,14 +150,17 @@ sub index : Path : Form {
 					foreach ( 'y1', 'y2' ) {
 						$dataset->{$_} = $yaxis->pix2value( $dataset->{$_} );
 					}
-
+					$dataset->{'groupname'} = "Grouping.$geneA.$geneB";
 					##Store the group!
-					$gg->AddGroup( $geneA, $geneB, map { $dataset->{$_} } 'x1',
+					$dataset->{'gg'}->AddGroup( $geneA, $geneB, map { $dataset->{$_} } 'x1',
 						'x2', 'y2', 'y1' );
-					$gg->write_R( $c->session_path() . "Grouping.$geneA.$geneB",
-						'data.filtered' );
-					$gg->write_grouping(
-						$self->path($c) . "Grouping.$geneA.$geneB" );
+					
+					$dataset->{'gg'}->write_grouping ( join("/",$path,"Grouping.$geneA.$geneB" ));
+					
+					my $script = $c->model('RScript')-> create_script($c,'geneGroup2D',$dataset);
+					$c->model('RScript')->runScript( $c, $c->session_path(), "$dataset->{'groupname'}.R", $script, 1 );
+					
+					
 					$c->model('scrapbook')->init( $c->scrapbook() )
 					  ->Add(
 "<h3>Create Grouing based on two genes</h3>\n<i>options:"

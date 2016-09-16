@@ -35,8 +35,7 @@ my $plugin_path = "$FindBin::Bin";
 
 my $VERSION = 'v1.0';
 
-my ( $install_path,$help,$server_user,$debug, @options, 
-	$capture_rgl_libs, $web_root );
+my ( $install_path,$help,$server_user,$debug, @options, $web_root );
 
 #my $root_path = "/var/www/html/HTPCR/";
 
@@ -45,7 +44,6 @@ Getopt::Long::GetOptions(
 	"-server_user=s" => \$server_user,
 	"-web_root=s" => \$web_root,
 	"-options=s{,}" => \@options,
-	"-capture_rgl_libs" => \$capture_rgl_libs, 
 
 	"-help"  => \$help,
 	"-debug" => \$debug
@@ -87,10 +85,7 @@ sub helpString {
    -web_root      :the root of the web server - css and jscript files are installed there
                    default to '/var/www/html/'
    -options       :additional option for the SCExV server like
-                   randomForest 1 ncore 4
-                   
-   -capture_rgl_libs  :if unsure do not use! local modifications to the rglClass.src.js will be lost!
-   
+                   randomForest 1 ncore 4 
    -help   :print this help
    -debug  :verbose output
    
@@ -143,23 +138,14 @@ sub copy_files {
 }
 
 
-system ( "$plugin_path/capture_rgl_javascript.pl" ) if ( $capture_rgl_libs );
-
 
 
 ## patch the main function to include the new root path
 
 ## this is a horrible hack, but I have not found where the config would be loaded from!
 my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
-my $OK = $patcher -> replace_string( "\\sroot =\\> '[\\/\\w]*'," , " root => '$install_path',\nhome => '$install_path'," );
-my $options ='';
-for ( my $i = 0; $i < @options; $i += 2 ){
-	$options .= "\t$options[$i] => '$options[$i+1]',\n" if ( defined $options[$i+1] );
-}
-unless ( $options =~ m/ncore/ ) {
-	$options .= "\tncore => 1,\n";
-}
-my $OK2 = $patcher -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,","$options" );
+
+my $OK = $patcher -> replace_string( "root =\\>.*,?\\n" , "root => '$install_path',\n" );
 $patcher -> write_file();
 
 #$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
@@ -181,6 +167,18 @@ my ($save, $save_home);
 
 #$patcher -> write_file();
 
+system ( "cp $plugin_path/../lib/HTpcrA.pm $plugin_path/../lib/HTpcrA.save" );
+my $patcher2 = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
+my $options ='';
+for ( my $i = 0; $i < @options; $i += 2 ){
+	$options .= "\t$options[$i] => '$options[$i+1]',\n" if ( defined $options[$i+1] );
+}
+unless ( $options =~ m/ncore/ ) {
+	$options .= "\tncore => 1,\n";
+}
+$patcher -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,", "root => '$install_path',\n$options" );
+$patcher -> write_file();
+
 my $replace = $install_path;
 my @files ;
 if ( $replace =~ s/$web_root// ){	
@@ -199,6 +197,7 @@ if ( $replace =~ s/$web_root// ){
 		&patch_files( '/scrapbook/imageadd/', "/$replace".'scrapbook/imageadd/', "$plugin_path/../root/scripts/scrapbook.js");
 		&patch_files( '/scrapbook/screenshotadd', "/$replace".'scrapbook/screenshotadd', "$plugin_path/../root/scripts/scrapbook.js");
 	}
+	
 }
 
 system ( 'cat '.$patcher->{'filename'} ) ;
@@ -219,6 +218,11 @@ unless ( -d $install_path ) {
 	die "Sorry - I could not create the path '$install_path'\n$!\n";
 }
 system ( "sed -e's!plugin_path!/$install_path!' $plugin_path/../htpcra.psgi >$install_path/htpcra.psgi ");
+my $patcher3 = stefans_libs::install_helper::Patcher->new($plugin_path."/../SCExV.starman.initd" );
+$patcher3->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
+$patcher3->{'filename'} = "$install_path/SCExV.starman.initd";
+$patcher3-> write_file();
+
 
 # no longer necessary - I expect you to intall the libs in a global position!
 #&copy_files($plugin_path."/..", $install_path, "lib/" );
@@ -232,10 +236,11 @@ foreach ( 'css', 'rte', 'scripts', 'static', 'example_data' ){
 }
 
 warn "Fixing $patcher->{'filename'} back to normal ($save) and ($save_home)\n";
-$patcher -> replace_string( "root .*", "root $save" );
-$patcher -> replace_string( "Home .*", "Home $save_home" );
-$patcher -> replace_string( "\tform_path .*", "\tform_path $save"."src/form/");
-$patcher -> write_file();
+system( "mv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm");
+#$patcher -> replace_string( "root .*", "root $save" );
+#$patcher -> replace_string( "Home .*", "Home $save_home" );
+#$patcher -> replace_string( "\tform_path .*", "\tform_path $save"."src/form/");
+#$patcher -> write_file();
 
 
 
@@ -337,7 +342,7 @@ sub patch_files {
 		my $patcher = stefans_libs::install_helper::Patcher->new( $file );
 		$OK = 0;
 		$OK = $patcher -> replace_string( $pattern, $replace );
-		print "Replaced '$pattern' with '$replace' at $OK position(s) of file $file\n";
+		print "Replaced '$pattern' with '$replace' at $OK position(s) of file $file\n" if ( $OK > 0);
 		$patcher -> write_file() if ( $OK );
 	}
 }

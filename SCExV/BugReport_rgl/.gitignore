@@ -1,11 +1,4 @@
 /.RData
-/OrigDensityWebGL.html
-/OrigDensityWebGL_mod.html
-/OrigDensityWebGL_mod.html.log
-/OrigPointsWebGL.html
-/OrigPointsWebGL_mod.html
-/OrigPointsWebGL_mod.html.log
-/add_md5.pl
 /analysis.RData
 /create_3d_source_files.R
 /create_3d_source_files.Rout
@@ -13,7 +6,13 @@
 /difference_md5.txt
 /differences_md5_sums.txt
 /index.html
-/rgl.js
-/points.html
 /md5_Density.txt
 /md5_Points.txt
+/OrigDensityWebGL.html
+/OrigDensityWebGL_mod.html
+/OrigDensityWebGL_mod.html.log
+/OrigPointsWebGL.html
+/OrigPointsWebGL_mod.html
+/OrigPointsWebGL_mod.html.log
+/points.html
+/rgl.js

@@ -23,7 +23,6 @@
 /preprocess/Cbx7.png
 /preprocess/cKit.APC.Cy7.A.png
 /preprocess/Fos.png
-/preprocess/R.pre.run.log
 /preprocess/Ccnd1.png
 /preprocess/Il7r.png
 /preprocess/Ikzf1.png
@@ -41,7 +40,6 @@
 /preprocess/Klf1.png
 /preprocess/CD105.PE.Cy7.A.png
 /preprocess/Gfi1.png
-/preprocess/Preprocess.Rout
 /preprocess/CD55.PE.A.png
 /preprocess/pbx3.png
 /preprocess/Myc.png
@@ -134,7 +132,5 @@
 /preprocess/Hoxb5.png
 /preprocess/Zfpm1.png
 /preprocess/Dnmt3a.png
-/preprocess/boxplot_filtered_zscored_samples.svg
-/preprocess/.RData
 /preprocess/IKZF2.png
 /Index sort Array3.csv

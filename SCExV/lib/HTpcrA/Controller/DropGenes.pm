@@ -71,33 +71,10 @@ sub index : Path : Form {
 sub R_remove_genes {
 	my ( $self, $c, $hash ) = @_;
 	my $path = $c->session_path();
+	$hash->{'path'} = $path;
+	my $script = $c->model('RScript')->create_script($c, 'remove_genes', $hash );
+	$c->model('RScript')->runScript( $c, $path, 'DropGenes.R', $script, 1 );
 
-	my $script = "source ('libs/Tool_Pipe.R')\n" . "load( 'norm_data.RData')\n";
-
-	#$hash->{'Samples'} |= [];
-	if ( defined @{ $hash->{'Genes'} }[0] ) {
-		$script .=
-		    "remS <- c ('"
-		  . join( "', '", @{ $hash->{'Genes'} } )
-		  . "')\n"
-		  . "kill <- match( remS,colnames(data.filtered\$PCR))\n"
-		  ."data.filtered = remove.genes(data.filtered, kill[which(is.na(kill) == F )] )\n"
-		  . "kill <- match( remS,colnames(data.filtered\$FACS))\n"
-		  ."data.filtered = remove.FACS.genes(data.filtered, kill[which(is.na(kill) == F )] )\n"
-		  if ( @{ $hash->{'Genes'} }[0] =~ m/[\w\d_]+/ );
-	}
-
-	$script .=
-"data.filtered <- sd.filter(data.filtered)\n"."data.filtered <- z.score.PCR.mad(data.filtered)\n"."save( data.filtered, file='norm_data.RData' )\n";
-
-	open( RSCRIPT, ">$path/DropGenes.R" )
-	  or Carp::confess(
-		"I could not create the R script '$path/DropGenes.R'\n$!\n");
-	print RSCRIPT $script;
-	chdir($path);
-	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-readline -- DropGenes.R > R.pre.run.log"'
-	);
 	$c->model('scrapbook')->init( $c->scrapbook() )
 	  ->Add("<h3>Drop Genes</h3>\n<i>options:"
 		  . $self->options_to_HTML_table($hash)

@@ -20,8 +20,9 @@ use Catalyst::Runtime 5.80;
 #	+CatalystX::Profile_SL
 #	-Debug
 
+#  ConfigLoader
+
 use Catalyst qw/
-  ConfigLoader
   Static::Simple
   Session
   Session::State::Cookie
@@ -33,7 +34,7 @@ use Catalyst qw/
 
 extends 'Catalyst';
 
-our $VERSION = '0.90';
+our $VERSION = '1.00';
 
 # Configure the application.
 #
@@ -45,8 +46,8 @@ our $VERSION = '0.90';
 # local deployment.
 
 __PACKAGE__->config(
-	root => '/home/slang/git_Projects/SCexV/SCExV/root/',
-	name => 'HTpcrA',
+	root => '/home/med-sal/git_Projects/SCexV/SCExV/root/',
+	name => 'SCExV',
 	# Disable deprecated behavior needed by old applications
 	#disable_component_resolution_regex_fallback => 1,
 	calcserver => {'ip' => '130.235.249.196', 'subpage' => '/NGS_pipeline/fluidigm/index/', 'ncore' => 32 },
@@ -93,14 +94,15 @@ sub check_IP{
 sub session_path {
 	my ($self, $session_id ) = @_;
 	if ( defined $session_id ){
-		return $self->config->{'root'}. "/tmp/" . $session_id ."/";
+		return $self->config->{'root'}. "tmp/" . $session_id ."/";
 	}
 	my $path = $self->session->{'path'};
 	
 	if (defined $path){
 		return $path if ( $path =~ m!/tmp/[\w\d]! && -d $path );
 	}
-	my $Root = $self->config->{'root'};
+	my $Root = '';
+	$Root = $self->config->{'root'};
 
 	#	my $root = "/var/www/html/HTPCR";
 	$session_id = $self->get_session_id();
@@ -108,8 +110,8 @@ sub session_path {
 		$self->res->redirect( $self->uri_for("/") );
 		$self->detach();
 	}
-	$path = $Root . "/tmp/" . $self->get_session_id() . "/";
-	$path = $Root . "/tmp/" . $self->get_session_id() . "/" if ($path =~ m!//$! );
+	$path = $Root . "tmp/" . $self->get_session_id() . "/";
+	$path = $Root . "tmp/" . $self->get_session_id() . "/" if ($path =~ m!//$! );
 	unless ( -d $path ) {
 		mkdir($path)
 		  or Carp::confess("I could not create the session path $path\n$!\n");

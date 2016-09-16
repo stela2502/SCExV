@@ -144,8 +144,8 @@ read.PCR <- function(fname,use_pass_fail=T){
 	}
 	ftab
 }
-
-read.PCR.heatmap <- function (fname,use_pass_fail=T){
+		
+read.PCR.heatmap<- function (fname,use_pass_fail=T){
 	
 	top20 <- readLines(fname)
 	
@@ -158,7 +158,7 @@ read.PCR.heatmap <- function (fname,use_pass_fail=T){
 	}
 	else{
 		tmp <- read.delim(fname,sep=',')
-		line.end <- grep("Quality Results,,,,,,,",top20)-1[1]
+		line.end <- grep("Quality Results,,,,,",top20)-1[1]
 		while (tmp[line.end,2] == '' ){
 			line.end = line.end -1 
 		}
@@ -184,6 +184,8 @@ read.PCR.heatmap <- function (fname,use_pass_fail=T){
 		as.matrix(ftab)
 	}
 }
+
+
 
 read.FACS <- function(fname,use_pass_fail=T) {
 	browser()
@@ -724,6 +726,7 @@ plot.histograms <- function ( dataObj, cuts=vector('list',1) ) {
 	n.cuts <- names(cuts)
 	for ( i in 1:nrow(ma) ) {
 		png( file=paste(n[i],'.png',sep=''),width=800, height=800 )
+		print ( paste( "Plotting histogram 4 gene",n[i]))
 		temp <- vector('list',arrays)
 		m <- NULL
 		for (a in 1:arrays ) {
@@ -743,7 +746,7 @@ plot.histograms <- function ( dataObj, cuts=vector('list',1) ) {
 				abline( v= cuts[[pos]][c], col='black', lwd = 3, lty = 2 )
 			}
 		}
-		
+		print ( "Plot done" )
 		dev.off()
 	}
 	

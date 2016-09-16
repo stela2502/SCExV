@@ -392,7 +392,8 @@ sub upload : Local : Form {
 			$self->config_file( $c, 'Preprocess.Configs.txt', $dataset );
 			$self->file_upload( $c, $dataset );
 			$self->R_script( $c, $dataset );
-			unless ( -f $path . "../norm_data.RData" ) {
+			unless ( -f $c->session_path(). "norm_data.RData" ) {
+				Carp::confess("File ".$c->session_path(). "norm_data.RData". " Not found"  );
 				if ( defined @{ $dataset->{'negControllGenes'} }[0] && length(@{ $dataset->{'negControllGenes'} }[0]) > 0 ) {
 					my $spath = $c->session_path();
 					open( OUT, ">" . $spath . "Error_system_message.txt" );
@@ -508,105 +509,22 @@ sub R_script {
 	  [ map { $_ =~ m/preprocess\/(.+).png/; $1; }
 		  @{ $dataset->{'negContr'} } ];
 
-	my $seesion_hash = $c->session();
 	$dataset->{'maxGenes'} = 0 if ( $dataset->{'maxGenes'} eq "any" );
 	$dataset->{'maxGenes'} = 3 if ( $dataset->{'maxGenes'} eq "all 4" );
 	$dataset->{'maxGenes'} = $1
 	  if ( $dataset->{'maxGenes'} =~ m/more than (\d)/ );
 
 	#Carp::confess ( root->print_perl_var_def( $seesion_hash->{'PCR'} ) );
-
-	my $script =
-	    "source ('../libs/Tool_Pipe.R')\n"
-	  . "source ('../libs/Tool_Plot.R')\n"
-	  . "negContrGenes <- NULL\n"
-	  . "plotsvg = 0\n";
-	$script .=
-	  "negContrGenes <- c ( '"
-	  . join( "', '", @{ $dataset->{'negControllGenes'} } ) . "')\n"
-	  if ( defined @{ $dataset->{'negControllGenes'} }[0] );
-	$script .= "data.filtered <- createDataObj ( PCR= c( '../"
-	  . join( "', '../",
-		map { $_->{'filename'}.".mod" } @{ $seesion_hash->{'PCRTable'} } )
-	  . "' ), "
-	  . " PCR2= c( '../"
-	  . join( "', '../",
-		map { $_->{'filename'}.".mod" } @{ $seesion_hash->{'PCRTable2'} } )
-	  . "' ), "
-	  . "FACS= c( '../"
-	  . join( "','../",
-		map { $_->{'filename'}.".mod" } @{ $seesion_hash->{'facsTable'} } )
-	  . "' ), "
-	  . "ref.genes= c( '"
-	  . join( "', '", @{ $dataset->{'controlM'} } ) . "' ),"
-	  . " use_pass_fail = '$dataset->{'use_pass_fail'}', "
-	  . "max.value=40, max.ct= $dataset->{'maxCT'} , max.control=$dataset->{'maxGenes'},  norm.function='$dataset->{'normalize2'}', negContrGenes=negContrGenes )\n"
-	  . "save( data.filtered, file='../norm_data.RData' )\n"
-	  ;
-	$script =~ s/c\( '.?.?\/?' \)/NULL/g;
-
-	open( RSCRIPT, ">$path/Preprocess.R" )
-	  or Carp::confess(
-		"I could not create the R script '$path/Preprocess.R'\n$!\n");
-	print RSCRIPT $script;
-	chdir($path);
-	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-readline -- Preprocess.R > R.pre.run.log"'
-	);
+	
+	my $script = $c->model('RScript')->create_script($c,'file_load', $dataset);
+	
+	$c->model('RScript')->runScript( $c, $c->session_path(), 'Preprocess.R', $script, 1 );
+	
 	$c->model('scrapbook')->init( $c->scrapbook() )
 	  ->Add("<h3>File Upload</h3>\n<i>options:"
 		  . $self->options_to_HTML_table($dataset)
 		  . "</i>\n" );
-	if ( -f $path."Preprocess.R.log" ){
-		open ( IN , "<".$path."Preprocess.R.log");
-		$c->model('scrapbook')->init( $c->scrapbook() )
-	  		->Add( '<p>'. join("", <IN>)."</p>" );
-	  	close ( IN );
-	}
 	return 1;
-}
-
-sub normalize_flui_R {
-	my ( $self, $dataset ) = @_;
-	my $script = '';
-	if ( $dataset->{'normalize2'} eq "max expression" ) {
-		$script .= "#normalize to the max expression value in each cell\n"
-		  . "PCRTable.d.red.norm <- ( apply(PCRTable.d.red,1,min) - PCRTable.d.red )\n";
-	}
-	elsif ( $dataset->{'normalize2'} eq "mean control genes" ) {
-		if ( @{ $dataset->{'controlM'} } > 0 ) {
-			$script .=
-			  "#normalize to the mean expression value of the control genes \""
-			  . join( '", "', @{ $dataset->{'controlM'} } ) . "\"\n"
-			  . "mean.control <- function (x) {mean(x[is.na(match(colnames(PCRTable.d.red), c('"
-			  . join( "','", @{ $dataset->{'controlM'} } )
-			  . "') ))==F] ) }\n"
-			  . "PCRTable.d.red.norm <- ( apply(PCRTable.d.red,1,mean.control) - PCRTable.d.red )\n";
-		}
-		if ( @{ $dataset->{'controlM'} } == 1 ) {
-			$script .=
-"#NOT normalized(!) just invert the values so that high values == high expression\n"
-			  . "PCRTable.d.red.norm <- PCRTable.d.red.norm[,is.na(match(colnames(PCRTable.d.red.norm),'@{$dataset->{'controlM'}}[0]' ) )==T]\n"
-			  . "system ( 'echo \"I have removed the control gene @{$dataset->{'controlM'}}[0] from the analysis as it has been used to normalize and therefore does not contain any more data.\" >> R.error')\n";
-		}
-	}
-	elsif ( $dataset->{'normalize2'} eq "quantile" ) {
-		$script .=
-		    "##Quantil norm on samples\n"
-		  . $self->R_functs()
-		  . "PCRTable.d.red.norm <- t(rank.normalize(t(PCRTable.d.red)))\n"
-		  . "colnames(PCRTable.d.red.norm) <- colnames(PCRTable.d.red)\n"
-		  . "rownames(PCRTable.d.red.norm) <- rownames(PCRTable.d.red)\n"
-		  . "PCRTable.d.red.norm <- ( max(PCRTable.d.red) - PCRTable.d.red )\n";
-	}
-	if ( $script eq "" ) {
-		## default to (global max) - value
-		$script .=
-		  "PCRTable.d.red.norm <- ( max(PCRTable.d.red) - PCRTable.d.red )\n";
-	}
-	return $script;
-
-	#sdbaegbreg
 }
 
 sub index : Local {
@@ -614,7 +532,8 @@ sub index : Local {
 	my $filename = '/' . join( "/", @filename );
 	my $fn       = @filename[ @filename - 1 ];
 	my $allowed  = $c->session_path();
-
+	
+	$fn =~ s!//+!/!g;
 	unless ( $filename =~ m/^\/?$allowed/ ) {
 		$c->response->body(
 "No way you are allowed to access the file $filename - sorry! ($allowed)"
@@ -624,15 +543,15 @@ sub index : Local {
 	open( OUT, "<$filename" )
 	  or Carp::confess(
 "Sorry, but I could not access the file '$filename' on the server!\n$!\n"
-	  );
-	$c->res->content_type('image/svg+xml') if ( $filename =~ m/svg$/ );
-	$c->res->header( 'Content-Disposition', qq[attachment; filename="$fn"] );
+	  );	
+	
 	while ( defined( my $line = <OUT> ) ) {
 		$c->res->write($line);
 	}
-	close(OUT);
-
-	$c->res->code(204);
+	close(OUT);	
+	$c->res->header( 'Content-Disposition', qq[attachment; filename="$fn"] );
+	$c->res->content_type('image/svg+xml') if ( $filename =~ m/svg$/ );
+	$c->res->code(204);	
 }
 
 sub message_form {
@@ -904,7 +823,9 @@ sub start_from_zip_file : Local : Form {
 "cd $path && unzip -o '@{$dataset->{ 'zipfile' }}[0]->{'filename'}'"
 			);
 			$self->session_file( $c, 'load' );
-			$c->res->redirect( $c->uri_for("/files/renew_rlib/") );
+			my $script = $c->model('RScript')->create_script($c, 'fixPath', {} );
+			$c->model('RScript')->runScript( $c, $path, 'FixPath.R', $script, 1 );
+			$c->res->redirect( $c->uri_for("/analyse/index/") );
 			$c->detach();
 		}
 		else {
