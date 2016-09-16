@@ -1,6 +1,7 @@
 package HTpcrA::Model::RScript;
 use Moose;
 use namespace::autoclean;
+use File::Copy "mv";
 
 extends 'Catalyst::Model';
 
@@ -470,6 +471,10 @@ file_load will create the script used for the file upload.
 sub file_load {
 	my ( $self, $c, $dataset ) = @_;
 	my $seesion_hash = $c->session();
+	my $path = $c->session_path();
+	if ( -f $path."/analysis.RData" ){
+		mv( $path."/analysis.RData" ,$path."/analysis.old.RData" );
+	}
 	my $script       = "negContrGenes <- NULL\n";
 	$script .=
 	  "negContrGenes <- c ( '"
