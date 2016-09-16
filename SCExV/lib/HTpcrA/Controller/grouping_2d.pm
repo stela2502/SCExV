@@ -155,7 +155,7 @@ sub index : Path : Form {
 					$dataset->{'gg'}->AddGroup( $geneA, $geneB, map { $dataset->{$_} } 'x1',
 						'x2', 'y2', 'y1' );
 					
-					$dataset->{'gg'}->write_grouping ( join($path,"Grouping.$geneA.$geneB" ));
+					$dataset->{'gg'}->write_grouping ( join("/",$path,"Grouping.$geneA.$geneB" ));
 					
 					my $script = $c->model('RScript')-> create_script($c,'geneGroup2D',$dataset);
 					$c->model('RScript')->runScript( $c, $c->session_path(), "$dataset->{'groupname'}.R", $script, 1 );

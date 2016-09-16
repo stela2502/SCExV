@@ -163,7 +163,7 @@ sub export_R {
 sub write_R {
 	my ( $self, $filename, $rObj, $gname ) = @_;
 	open( OUT, ">$filename" )
-	  or Carp::confess("I could not create the file '$filename'\n");
+	  or Carp::confess("I could not create the file '$filename':\n".$!);
 	print OUT $self->export_R( $rObj, $gname );
 	close(OUT);
 }
@@ -171,7 +171,7 @@ sub write_R {
 sub write_grouping {
 	my ( $self, $filename ) = @_;
 	open( OUT, ">$filename" )
-	  or Carp::confess("I could not create the file '$filename'\n");
+	  or Carp::confess("I could not create the file '$filename':\n".$!);
 	$self->{'group_file'} = $filename;
 	print OUT $self->AsString();
 	close(OUT);
