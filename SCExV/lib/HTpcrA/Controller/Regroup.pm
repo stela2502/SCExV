@@ -227,6 +227,7 @@ sub source_groups {
 
 sub JavaScript {
 	my ( $self, $c ) = @_;
+	
 	$self->Script(
 		$c,
 		'<script>' . "\n" . 'function transferData(form) {' . "\n" . join(

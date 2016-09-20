@@ -96,12 +96,14 @@ sub Reinit {
 
 		],
 		[
-			[ "Re-group",                   '/regroup/reorder/' ],
-			[ "Sample Name based grouping", '/regroup/samplenames/' ],
-			[ '1D groups by expression',    '/gene_group/' ],
+			[ "Sample Re-group",                   '/regroup/reorder/' ],
+			[ "Sample Name Based Grouping", '/regroup/samplenames/' ],
+			[ '1D Groups by Expression',    '/gene_group/' ],
 			[
-				"2D groups by expression (analysis run needed)", '/grouping_2d/'
+				"2D Groups by Expression (analysis run needed)", '/grouping_2d/'
 			],
+			[ "Gene Custom Order", '/complex_grouping/geneorder/' ],
+			[ "Group Color Picker", '/complex_grouping/colorpicker/' ]
 		],
 		[], ## Download
 		[

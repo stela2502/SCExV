@@ -7,6 +7,13 @@
 </BR>
 <span id="formField" class="formField_UG" ><tmpl_var field-UG></span></BR>
 
+<span id="formName"><tmpl_var comment-GeneUG></span>
+<a href="#" onClick="MyWindow=window.open( '/help/index/analyse/index/GeneUG/' ,'MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField" class="formField_UG" ><tmpl_var field-GeneUG></span></BR>
+
 <div id='randomForest' diplay='none'>
 <!-- this is the randomForest specific part-->
 <span id="formName"><tmpl_var comment-randomForest></span>

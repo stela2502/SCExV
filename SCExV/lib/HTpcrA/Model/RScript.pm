@@ -79,7 +79,7 @@ sub create_script {
 sub _add_fileRead {
 	my ( $self, $path ) = @_;
 	if ( -f $path . "analysis.RData" ) {
-		return "load('analysis.RData')\ndata.filtered <- data\n";
+		return "load('analysis.RData')\ndata <- data\n";
 	}
 	if ( -f $path . "norm_data.RData" ) {
 		return "load('norm_data.RData')\n";
@@ -121,8 +121,8 @@ sub geneGroup2D {
 	my ( $self, $c, $dataset ) = @_;
 		
 	my $script = $self-> _add_fileRead ( $c->session_path() );
-	$script .= $dataset->{'gg'}->export_R(  'data.filtered', $dataset->{'groupname'} );
-	$script .= "saveObj(data.filtered)\n";
+	$script .= $dataset->{'gg'}->export_R(  'data', $dataset->{'groupname'} );
+	$script .= "saveObj(data)\n";
 	
 	return $script;
 }
@@ -157,14 +157,14 @@ sub geneGroup1D_backend {
 
 	## plot all the expression as histogram
 	$script .=
-"plot.histograms ( data.filtered, cuts, subpath='$dataset->{'subpath'}' )\n";
+"plot.histograms ( data, cuts, subpath='$dataset->{'subpath'}' )\n";
 
 	$script .=
 	    "## export all gene names for the web frontend\n"
-	  . "n <- rownames(data.filtered\@data )\n"
-	  . "if ( data.filtered\@wFACS ) {\n"
-	  . "  n <- c( n , colnames(data.filtered\@facs) )\n}\n"
-	  . "write( n, file.path( data.filtered\@outpath, '$dataset->{'subpath'}', 'Genes.txt'), ncolumns=1 ) \n";
+	  . "n <- rownames(data\@data )\n"
+	  . "if ( data\@wFACS ) {\n"
+	  . "  n <- c( n , colnames(data\@facs) )\n}\n"
+	  . "write( n, file.path( data\@outpath, '$dataset->{'subpath'}', 'Genes.txt'), ncolumns=1 ) \n";
 	return $script;
 }
 
@@ -184,7 +184,7 @@ sub geneGroup1D {
 	close(OUT);
 	my $script =
 	    $self->_add_fileRead( $dataset->{'path'} . "../" )
-	  . "data <- group_1D (data.filtered, '$dataset->{'GOI'}', c("
+	  . "data <- group_1D (data, '$dataset->{'GOI'}', c("
 	  . join( ", ", @values )
 	  . " ) )\n"
 	  . "saveObj( data )\n";
@@ -207,18 +207,18 @@ sub remove_samples {
 		$script .=
 		    "remS <- c ('"
 		  . join( "', '", @{ $dataset->{'Samples'} } )
-		  . "')\ndata.filtered = remove.samples(data.filtered, match( remS,rownames(data.filtered\@data)) )\n"
+		  . "')\ndata = remove.samples(data, match( remS,rownames(data\@data)) )\n"
 		  if ( @{ $dataset->{'Samples'} }[0] =~ m/[\w\d_]+/ );
 	}
 	if ( defined $dataset->{'RegExp'} ) {
 		$script .=
-"data.filtered = remove.samples(data.filtered, grep( \"$dataset->{'RegExp'}\" ,rownames(data.filtered\@data)) )\n"
+"data = remove.samples(data, grep( \"$dataset->{'RegExp'}\" ,rownames(data\@data)) )\n"
 		  if ( $dataset->{'RegExp'} =~ m/[\w\d_]+/ );
 	}
 
 	$script .=
 	    "data.filtered <- sd.filter(data.filtered)\n"
-	  . "data <- z.score.PCR.mad(data.filtered)\n"
+	  . "data <- z.score.PCR.mad(data)\n"
 	  . "save( data, file='analysis.RData' )\n";
 
 	return $script;
@@ -240,7 +240,7 @@ sub regroup {
 	  data_table->new( { 'filename' => $path . 'Sample_Colors.xls' } );
 	my ( $old_ids,  $OK );
 	## R dataset: group2sample = list ( '1' = c( 'Sample1', 'Sample2' ) )
-	$Rscript .= "userGroups <-regroup ( data.filtered, list (";
+	$Rscript .= "userGroups <-regroup ( data, list (";
 	$OK = 0;
 	for ( my $i = 1 ; $i <= scalar( keys %$dataset ) ; $i++ )
 	{    ## scale from 1 to n
@@ -276,6 +276,50 @@ sub regroup {
 
 }
 
+
+=head2 recolor
+
+Here I get group 1 to n and have to change the color of the existing color sheme to the required color.
+
+=cut
+
+sub recolor {
+	my ( $self, $c, $dataset ) = @_;
+	my $path = $c->session_path();
+	
+	my $Rscript = $self->_add_fileRead($path);
+	
+	$Rscript .= "if ( is.null( data\@usedObj\$colorRange)) {data\@usedObj\$colorRange <- list() }\nnewCol = c(";
+	foreach ( 1..$dataset->{'groups'} ) {
+		$Rscript .= " '".$dataset->{"g$_"}."',";
+	}
+	chop ( $Rscript);
+	$Rscript .= " )\n";
+	$dataset->{'UG'} = $c->usedSampleGrouping();
+	
+	$Rscript .= "data\@usedObj\$colorRange[['$dataset->{UG}']] = newCol\n"
+		. "saveObj( data )\n";
+	
+	return $Rscript;
+}
+
+=head2 geneorder
+
+Allow the user to reorder the genes the way he wants.
+
+=cut
+
+sub geneorder {
+	my ( $self, $c, $dataset ) = @_;
+	my $path = $c->session_path();
+	
+	my $Rscript = $self->_add_fileRead($path);
+	
+	$Rscript .= "";
+	
+	return $Rscript;
+}
+
 =head2 userGroups
 
 Create a grouping based on user input pattern match. Called from the Regroups controller.
@@ -295,9 +339,9 @@ sub userGroups {
 
 	my $Rscript = $self->_add_fileRead($path);
 	
-	$Rscript .= "data.filtered <-group_on_strings ( data.filtered, c( '"
+	$Rscript .= "data <-group_on_strings ( data, c( '"
 	  . join( "', '", @groupsnames )
-	  . "' ) )\n" . "saveObj( data.filtered)\n";
+	  . "' ) )\n" . "saveObj( data)\n";
 	return $Rscript;
 }
 
@@ -330,16 +374,16 @@ sub remove_genes {
 		$script .=
 		    "remS <- c ('"
 		  . join( "', '", @{ $dataset->{'Genes'} } ) . "')\n"
-		  . "kill <- match( remS,colnames(data.filtered\@data))\n"
-		  . "data.filtered = remove.genes(data.filtered, kill[which(is.na(kill) == F )] )\n"
-		  . "kill <- match( remS,colnames(data.filtered\@facs))\n"
-		  . "data.filtered = remove.FACS.genes(data.filtered, kill[which(is.na(kill) == F )] )\n"
+		  . "kill <- match( remS,colnames(data\@data))\n"
+		  . "data = remove.genes(data, kill[which(is.na(kill) == F )] )\n"
+		  . "kill <- match( remS,colnames(data\@facs))\n"
+		  . "data = remove.FACS.genes(data, kill[which(is.na(kill) == F )] )\n"
 		  if ( @{ $dataset->{'Genes'} }[0] =~ m/[\w\d_]+/ );
 	}
 
 	$script .=
-	    "data.filtered <- sd.filter(data.filtered)\n"
-	  . "data <- z.score.PCR.mad(data.filtered)\n"
+	    "data <- sd.filter(data)\n"
+	  . "data <- z.score.PCR.mad(data)\n"
 	  . "save( data, file='analysis.RData' )\n";
 	return $script;
 }
@@ -356,7 +400,7 @@ sub densityPlot {
 #	my $script = $self->file_load($c, $dataset);
 	my $script = $self->_add_fileRead($path);
 	$script .= "library(ks)\n";
-	$script .= "plotDensity(data.filtered)\n";
+	$script .= "plotDensity(data)\n";
 	return $script;
 }
 
@@ -410,11 +454,11 @@ sub analyze {
 		$script .=
 		    "source ('libs/Tool_RandomForest.R')\n"
 		  . "load('RandomForestdistRFobject_genes.RData')\n"
-		  . "createGeneGroups_randomForest (data.filtered, $dataset->{'randomForest'})\n"
+		  . "createGeneGroups_randomForest (data, $dataset->{'randomForest'})\n"
 		  . "source ('Gene_grouping.randomForest.txt')\n";
 	}
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {
-		$script .= "groups.n <- max( as.numeric(data.filtered\@samples[,'ArrayID']))\n"
+		$script .= "groups.n <- max( as.numeric(data\@samples[,'ArrayID']))\n"
 		  . "useGrouping <- 'ArrayID'\n";
 	}
 	elsif(  $dataset->{'UG'} eq "none" ) {
@@ -422,7 +466,7 @@ sub analyze {
 	}
 	elsif ( $dataset->{'UG'} =~ m/\w/ ) {    ## an expression based grouping!
 		$script .= "useGrouping <-  '$dataset->{'UG'}'\n"
-		  . "groups.n <- max( as.numeric(data.filtered\@samples[,useGrouping]))\n ";
+		  . "groups.n <- max( as.numeric(data\@samples[,useGrouping]))\n ";
 	}
 	else {
 		$script .= "groups.n <-$dataset->{'cluster_amount'}\n";
@@ -449,15 +493,13 @@ sub analyze {
 	    "plotsvg = $dataset->{'plotsvg'}\n"
 	  . "zscoredVioplot = $dataset->{'zscoredVioplot'}\n"
 	  . "onwhat='$dataset->{'cluster_by'}'\n"
-	  . "data <- analyse.data ( data.filtered, groups.n=groups.n, "
+	  . "data <- analyse.data ( data, groups.n=groups.n, "
 	  . "onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
 	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "
 	  . "ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot"
 	  . ", move.neg = move.neg, plot.neg=plot.neg, beanplots=beanplots, plotsvg =plotsvg, useGrouping=useGrouping)\n"
 	  . "\n"
-	  . " save( data, file='analysis.RData' )\n"
-	  . "write.table( cbind(data\@samples[,c(1,2)], 'grouping' = data\@usedObj[['clusters']], colors=data\@usedObj[['colors']]),
-					file='Sample_Colors.xls' , row.names=F, sep='\\t',quote=F )\n";
+	  . "saveObj( data )\n";
 
 	unlink("$path/Summary_Stat_Outfile.xls")
 	  if ( -f "$path/Summary_Stat_Outfile.xls" );
@@ -494,7 +536,7 @@ sub file_load {
 	  . " use_pass_fail = '$dataset->{'use_pass_fail'}', "
 	  . "max.value=40, max.ct= $dataset->{'maxCT'} , max.control=$dataset->{'maxGenes'}, "
 	  . "norm.function='$dataset->{'normalize2'}', negContrGenes=negContrGenes )\n"
-	  . "save( data.filtered, file=file.path(data.filtered\@outpath,'norm_data.RData') )\n";
+	  . "saveObj( data.filtered, file='norm_data.RData' )\n";
 	$script =~ s/c\( '.?.?\/?' \)/NULL/g;
 	return $script;
 }

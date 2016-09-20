@@ -182,12 +182,28 @@ sub update_form {
 	push(
 		@{ $self->{'form_array'} },
 		{
-			'comment' => 'Group by: (optional)',
+			'comment' => 'Sample Group by: (optional)',
 			'name'    => 'UG',
 			'type'    => 'select',
 			'options' => [ @grps ]
 			,    ## you will break the R_script changing this text!
 			'value'    => $hash->{'UG'},
+			'required' => 0,
+	#		'jsclick' =>
+	#		  "form_fun_match( 'master', 'UG', 'randomForest', 'randomForest')",
+		}
+	);
+	
+	my @Ggrps = $self->groupings( $c, 'GeneGroupings.txt' );
+	push(
+		@{ $self->{'form_array'} },
+		{
+			'comment' => 'Gene Group by: (optional)',
+			'name'    => 'GeneUG',
+			'type'    => 'select',
+			'options' => [ @Ggrps ]
+			,    ## you will break the R_script changing this text!
+			'value'    => $hash->{'GeneUG'},
 			'required' => 0,
 	#		'jsclick' =>
 	#		  "form_fun_match( 'master', 'UG', 'randomForest', 'randomForest')",
@@ -241,8 +257,9 @@ sub update_form {
 }
 
 sub groupings {
-	my ( $self, $c ) = @_;
-	my $f = File::Spec->catfile( $c->session_path(), 'SCExV_Grps.txt');
+	my ( $self, $c, $file ) = @_;
+	$file ||= 'SCExV_Grps.txt';
+	my $f = File::Spec->catfile( $c->session_path(), $file);
 	my @grps;
 	if ( -f $f ){
 		open( GRPS, "<$f" );
@@ -353,6 +370,12 @@ sub re_run : Local {
 			 	$dataset->{'UG'} = $args[0];
 			 	$self->config_file( $c, 'rscript.Configs.txt', $dataset );
 			 }
+		}
+	}
+	if ( !($args[1] eq "") ){
+		my $available = { map { $_ => 1 } $self->groupings( $c, 'GeneGroupings.txt' ) };
+		if ( $available->{$args[1]} ) {
+			$dataset->{'GeneUG'} = $args[1];
 		}
 	}
 	

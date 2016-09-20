@@ -16,7 +16,7 @@
 
 <h2>Regroup your data</h2>
 <p>Here you can merge your actual groups by drawing the existing groups from one field to an other.</p>
-<p>Empty group fields will be removed from the analysis. The coloring of your groups will change!</p>
+<p>Empty group fields will be removed from the analysis. <b>The coloring of your groups will change!</b></p>
 
 [% IF sourceGroups %]
 <h3> The actual grouping </h3>

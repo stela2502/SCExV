@@ -91,6 +91,22 @@ sub check_IP{
 	$self->detach();
 }
 
+sub usedSampleGrouping {
+	my ( $self ) = @_;
+	my $sampleGrouping = 'none';
+	my $path = $self->session_path();
+	if ( -f "$path/usedGrouping.txt" ){
+		open ( IN, "<$path/usedGrouping.txt");
+		while ( <IN> ) {
+			chomp();
+			$sampleGrouping = $_;
+			last;
+		}
+		close ( IN );
+	}
+	return $sampleGrouping;
+}
+
 sub session_path {
 	my ($self, $session_id ) = @_;
 	if ( defined $session_id ){
