@@ -220,8 +220,9 @@ unless ( -d $install_path ) {
 system ( "sed -e's!plugin_path!/$install_path!' $plugin_path/../htpcra.psgi >$install_path/htpcra.psgi ");
 my $patcher3 = stefans_libs::install_helper::Patcher->new($plugin_path."/../SCExV.starman.initd" );
 $patcher3->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
-$patcher3->{'filename'} = "$install_path/SCExV.starman.initd";
+#$patcher3->{'filename'} = "$install_path/SCExV.starman.initd";
 $patcher3-> write_file();
+system( "cp $plugin_path/../SCExV.starman.initd $install_path/SCExV.starman.initd" );
 
 
 # no longer necessary - I expect you to intall the libs in a global position!
