@@ -103,6 +103,7 @@ sub Reinit {
 				"2D Groups by Expression (analysis run needed)", '/grouping_2d/'
 			],
 			[ "Gene Custom Order", '/complex_grouping/geneorder/' ],
+			[ "Gene User Defined Grouping", '/complex_grouping/genegroup/' ],
 			[ "Group Color Picker", '/complex_grouping/colorpicker/' ]
 		],
 		[], ## Download

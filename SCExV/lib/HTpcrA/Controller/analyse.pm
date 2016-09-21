@@ -313,6 +313,7 @@ sub init_dataset {
 		'cluster_amount' => 3,
 		'cluster_alg'    => 'ward.D',
 		'K'              => 2,
+		'GeneUG'         => 'none',
 		'cluster_by'     => 'Expression',
 		'mds_alg'        => 'PCA',
 		'cluster_on'     => 'MDS',

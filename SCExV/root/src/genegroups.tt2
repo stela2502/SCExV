@@ -1,0 +1,34 @@
+
+
+<td id='tab20100', rowspan="5", valign='top' >
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<div id='message'> [% message | html %] </div>
+
+
+
+
+</td></tr><tr>
+
+<td >
+
+<h2>Add an user defined gene grouping</h2>
+<p>This page provides you with an option to define a gene grouping. 
+Each group has to consist of the gene names for this group. You can add up to 20 gene groups using this page.
+</p>
+<p>Please make sure, that you use all genes on the fluidigm chip exactly once.</p>
+
+<p>[% text %]</p>
+
+[% form.render %]
+
+</td></tr>
+
+<tr> <td colspan="2" >
+
+[% HeatmapStatic %]
+
+</td></tr>
+</table>

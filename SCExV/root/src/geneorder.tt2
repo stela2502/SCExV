@@ -1,0 +1,40 @@
+
+
+<td id='tab20100', rowspan="5", valign='top' >
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<div id='message'> [% message | html %] </div>
+
+
+
+
+</td></tr><tr>
+
+<td >
+
+<h2>Add an imperative gene order</h2>
+<p>This page provides you with an option to define a gene order. 
+The new gene grouping can then be used to enforce this order in the heatmaps.</p>
+
+<p>[% text %]</p>
+
+<table><tr><td>Please reorder these genes:</BR> [% genes %] </td><td> 
+ <button type="button" onclick="clearTextArea('Ordered Genes')">Clear genes</button> 
+[% form.render %] 
+ <button type="button" onclick="clearTextArea('Ordered Genes')">Clear genes</button> 
+
+</td><tr></table>
+
+
+</td></tr>
+
+<tr> <td colspan="2" >
+
+[% HeatmapStatic %]
+
+</td></tr>
+</table>
+
+

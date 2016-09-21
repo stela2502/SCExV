@@ -1,0 +1,26 @@
+<tmpl_var form-start>
+
+<div id="GeneGroups">
+<span id="formName"><tmpl_var comment-GeneGroup[]></span>
+<a href="#" onClick="MyWindow=window.open( '/help/index/genegroups/index/GeneGroup/' ,'MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField" ><tmpl_var field-GeneGroup[]></span></BR>
+</div>
+
+<img style="border:0px;visibility:visible" src="/static/images/Add.gif"/ height=40px onclick="addInput('GeneGroups',limit=20,name='GeneGroup')">
+
+<span id="formField"  class="formField"><tmpl_var field-GeneGroup_counter></span></BR>
+
+<span id="formName"><tmpl_var comment-GroupingName></span>
+<a href="#" onClick="MyWindow=window.open( '/help/index/genegroups/index/GroupingName/' ,'MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+</BR>
+<span id="formField"><tmpl_var field-GroupingName></span></BR>
+
+
+
+<tmpl_var form-submit>
+<tmpl_var form-end>

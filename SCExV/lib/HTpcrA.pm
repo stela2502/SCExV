@@ -107,6 +107,28 @@ sub usedSampleGrouping {
 	return $sampleGrouping;
 }
 
+=head2 genenames
+
+This returns an array of gene names that have been defined in the fluidigm data.
+
+=cut
+
+sub genenames {
+	my ( $self ) = @_;
+	my $path = $self->session_path();
+	my @genes;
+	open( IN, "<$path/GeneNames.txt" )
+	  or Carp::confess(
+"The analysis file 'GeneNames.txt' could not be opened!\n$!\n"
+	  );
+	while (<IN>) {
+		chomp();
+		push(@genes,$_);
+	}
+	close(IN);
+	return @genes;
+}
+
 sub session_path {
 	my ($self, $session_id ) = @_;
 	if ( defined $session_id ){

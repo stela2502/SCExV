@@ -75,11 +75,10 @@ sub create_script {
 	return $str;
 }
 
-
 sub _add_fileRead {
 	my ( $self, $path ) = @_;
 	if ( -f $path . "analysis.RData" ) {
-		return "load('analysis.RData')\ndata <- data\n";
+		return "load('analysis.RData')\n";
 	}
 	if ( -f $path . "norm_data.RData" ) {
 		return "load('norm_data.RData')\n";
@@ -109,7 +108,6 @@ sub pValues {
 	return $script;
 }
 
-
 =head2 geneGroup2D
 
 This creates th R script from the grouping_2d controller.
@@ -119,14 +117,13 @@ This is dependant on the GeneGroups class that is provided in the dataset->{'gg'
 
 sub geneGroup2D {
 	my ( $self, $c, $dataset ) = @_;
-		
-	my $script = $self-> _add_fileRead ( $c->session_path() );
-	$script .= $dataset->{'gg'}->export_R(  'data', $dataset->{'groupname'} );
+
+	my $script = $self->_add_fileRead( $c->session_path() );
+	$script .= $dataset->{'gg'}->export_R( 'data', $dataset->{'groupname'} );
 	$script .= "saveObj(data)\n";
-	
+
 	return $script;
 }
-
 
 =head2 geneGroup1D_backend
 
@@ -141,7 +138,7 @@ sub geneGroup1D_backend {
 	## load the previousely defined cut regions
 	opendir( DIR, $dataset->{'path'} );
 	$script .=
-	    "cuts <- list()\n"
+	    "cuts <- list()\n" 
 	  . "files <- c( '"
 	  . join( "', '",
 		map { $dataset->{'subpath'} . "/$_" } grep /.cut$/,
@@ -157,7 +154,7 @@ sub geneGroup1D_backend {
 
 	## plot all the expression as histogram
 	$script .=
-"plot.histograms ( data, cuts, subpath='$dataset->{'subpath'}' )\n";
+	  "plot.histograms ( data, cuts, subpath='$dataset->{'subpath'}' )\n";
 
 	$script .=
 	    "## export all gene names for the web frontend\n"
@@ -200,7 +197,7 @@ This function is called from the DropGenes contoller
 sub remove_samples {
 	my ( $self, $c, $dataset ) = @_;
 	my $path   = $c->session_path();
-	my $script = $self->_add_fileRead( $path );
+	my $script = $self->_add_fileRead($path);
 
 #Carp::confess ("These are the keys - do we have a 'Samples' one?: ". join(", ", keys %$dataset));
 	if ( defined @{ $dataset->{'Samples'} }[0] ) {
@@ -232,13 +229,13 @@ Creates the script to re-order a grouping. Called by the Regroup controller.
 
 sub regroup {
 	my ( $self, $c, $dataset ) = @_;
-	
-	my $path   = $c->session_path();
+
+	my $path    = $c->session_path();
 	my $Rscript = $self->_add_fileRead($path);
-	
+
 	my $data_table =
 	  data_table->new( { 'filename' => $path . 'Sample_Colors.xls' } );
-	my ( $old_ids,  $OK );
+	my ( $old_ids, $OK );
 	## R dataset: group2sample = list ( '1' = c( 'Sample1', 'Sample2' ) )
 	$Rscript .= "userGroups <-regroup ( data, list (";
 	$OK = 0;
@@ -258,8 +255,8 @@ sub regroup {
 						return 1 if ( $old_ids->{$v} );
 						return 0;
 					}
-				)->GetAsArray('SampleName')
-			}
+				  )->GetAsArray('SampleName')
+			  }
 		) . "'),";
 	}
 	if ( $OK < 2 ) {
@@ -268,14 +265,12 @@ sub regroup {
 		];
 	}
 	chop($Rscript);
-	$Rscript .= " )\n, name='$dataset->{GroupingName}')\n"
-	  . "saveObj(userGroups)\n";
-	
-	
+	$Rscript .=
+	  " )\n, name='$dataset->{GroupingName}')\n" . "saveObj(userGroups)\n";
+
 	return $Rscript;
 
 }
-
 
 =head2 recolor
 
@@ -286,20 +281,21 @@ Here I get group 1 to n and have to change the color of the existing color sheme
 sub recolor {
 	my ( $self, $c, $dataset ) = @_;
 	my $path = $c->session_path();
-	
+
 	my $Rscript = $self->_add_fileRead($path);
-	
-	$Rscript .= "if ( is.null( data\@usedObj\$colorRange)) {data\@usedObj\$colorRange <- list() }\nnewCol = c(";
-	foreach ( 1..$dataset->{'groups'} ) {
-		$Rscript .= " '".$dataset->{"g$_"}."',";
+
+	$Rscript .=
+"if ( is.null( data\@usedObj\$colorRange)) {data\@usedObj\$colorRange <- list() }\nnewCol = c(";
+	foreach ( 1 .. $dataset->{'groups'} ) {
+		$Rscript .= " '" . $dataset->{"g$_"} . "',";
 	}
-	chop ( $Rscript);
+	chop($Rscript);
 	$Rscript .= " )\n";
 	$dataset->{'UG'} = $c->usedSampleGrouping();
-	
+
 	$Rscript .= "data\@usedObj\$colorRange[['$dataset->{UG}']] = newCol\n"
-		. "saveObj( data )\n";
-	
+	  . "saveObj( data )\n";
+
 	return $Rscript;
 }
 
@@ -312,11 +308,37 @@ Allow the user to reorder the genes the way he wants.
 sub geneorder {
 	my ( $self, $c, $dataset ) = @_;
 	my $path = $c->session_path();
-	
+
 	my $Rscript = $self->_add_fileRead($path);
-	
-	$Rscript .= "";
-	
+
+	$Rscript .=
+"data\@annotation\$'$dataset->{'GroupingName'}' = factor(data\@annotation[,1], levels= c( '"
+	  . join( "', '", @{ $dataset->{gOrder} } ) . "'))\n"
+	  . "saveObj(data)\n";
+
+	return $Rscript;
+}
+
+=head2 genegrouping
+
+Allow the user to define a own gene grouping.
+
+=cut
+
+sub genegrouping{
+	my ( $self, $c, $dataset ) = @_;
+	my $path = $c->session_path();
+
+	my $Rscript = $self->_add_fileRead($path);
+
+	$Rscript .= "group <- rep( 0 ,nrow(data\@annotation))\n";
+	my $i = 1;
+	foreach ( @{$dataset->{'GeneGroup[]'}}) {
+		$Rscript .= "group[match( c('".join("', '",split(/\s+/, $_ ))."'), data\@annotation[,1])] = ".$i++."\n"
+	}
+	$Rscript .= "data\@annotation\$'$dataset->{'GroupingName'}' = group\n"
+	  . "saveObj(data)\n";
+
 	return $Rscript;
 }
 
@@ -325,23 +347,24 @@ sub geneorder {
 Create a grouping based on user input pattern match. Called from the Regroups controller.
 =cut
 
-
 sub userGroups {
 	my ( $self, $c, $dataset ) = @_;
 	my $path = $c->session_path();
 
 	unlink( $path . "Grouping_R_Error.txt" )
 	  if ( -f $path . "Grouping_R_Error.txt" );
-	
+
 	my @groupsnames = split( /\s+/, $dataset->{'Group Names'} );
 	my $data_table =
 	  data_table->new( { 'filename' => $path . 'Sample_Colors.xls' } );
 
 	my $Rscript = $self->_add_fileRead($path);
-	
-	$Rscript .= "data <-group_on_strings ( data, c( '"
+
+	$Rscript .=
+	    "data <-group_on_strings ( data, c( '"
 	  . join( "', '", @groupsnames )
-	  . "' ) )\n" . "saveObj( data)\n";
+	  . "' ) )\n"
+	  . "saveObj( data)\n";
 	return $Rscript;
 }
 
@@ -350,15 +373,16 @@ sub userGroups {
 This short R script fixes the path in an uploaded zip file R object!
 
 =cut
+
 sub fixPath {
 	my ( $self, $c, $dataset ) = @_;
 	my $path   = $c->session_path();
 	my $script = $self->_add_fileRead($path);
-	$script .= "data\@outpath <- pwd()\n"
-	  . "save( data, file='analysis.RData' )\n";
+	$script .=
+	  "data\@outpath <- pwd()\n" . "save( data, file='analysis.RData' )\n";
 	return $script;
 }
- 
+
 =head2 remove_genes
 
 This function is called from the DropGenes contoller
@@ -369,7 +393,7 @@ sub remove_genes {
 	my ( $self, $c, $dataset ) = @_;
 	my $path   = $c->session_path();
 	my $script = $self->_add_fileRead($path);
-	
+
 	if ( defined @{ $dataset->{'Genes'} }[0] ) {
 		$script .=
 		    "remS <- c ('"
@@ -396,8 +420,9 @@ This script calculates the density 3D plot for the analysis page.
 
 sub densityPlot {
 	my ( $self, $c, $dataset ) = @_;
-	my $path   = $c->session_path();
-#	my $script = $self->file_load($c, $dataset);
+	my $path = $c->session_path();
+
+	#	my $script = $self->file_load($c, $dataset);
 	my $script = $self->_add_fileRead($path);
 	$script .= "library(ks)\n";
 	$script .= "plotDensity(data)\n";
@@ -433,7 +458,7 @@ sub RandomForest {
 	  . "data <- rfCluster(data,rep=1, SGE=F, email, k= $dataset->{'cluster_amount'},"
 	  . " slice=4, subset=nrow(data\@data}-20, pics=F ,nforest=500, ntree=500, name='RFclust', recover=F)\n"
 	  . "write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')\n"
-	  ."save( data, file='analysis.RData' )\n";
+	  . "save( data, file='analysis.RData' )\n";
 }
 
 =head2 analyze
@@ -444,9 +469,8 @@ Creates the body of the analysis script.
 
 sub analyze {
 	my ( $self, $c, $dataset ) = @_;
-	my $path = $c->session_path();
-	my $script =
-	    $self->_add_fileRead($path);
+	my $path   = $c->session_path();
+	my $script = $self->_add_fileRead($path);
 
 	if ( -f $path . "Gene_grouping.randomForest.txt" ) {
 		Carp::confess(
@@ -461,7 +485,7 @@ sub analyze {
 		$script .= "groups.n <- max( as.numeric(data\@samples[,'ArrayID']))\n"
 		  . "useGrouping <- 'ArrayID'\n";
 	}
-	elsif(  $dataset->{'UG'} eq "none" ) {
+	elsif ( $dataset->{'UG'} eq "none" ) {
 		$script .= "groups.n <- $dataset->{'cluster_amount'}\n";
 	}
 	elsif ( $dataset->{'UG'} =~ m/\w/ ) {    ## an expression based grouping!
@@ -489,6 +513,12 @@ sub analyze {
 	else {
 		$script .= "beanplots = FALSE\n";
 	}
+	if ( $dataset->{'GeneUG'} eq "none" or $dataset->{'GeneUG'} eq "" )  {
+		$dataset->{'GeneUG'} = '';
+	}else {
+		$dataset->{'GeneUG'} = ", geneGroups = '$dataset->{'GeneUG'}'";
+	}
+	
 	$script .=
 	    "plotsvg = $dataset->{'plotsvg'}\n"
 	  . "zscoredVioplot = $dataset->{'zscoredVioplot'}\n"
@@ -497,7 +527,7 @@ sub analyze {
 	  . "onwhat='$dataset->{'cluster_by'}', clusterby='$dataset->{'cluster_on'}', "
 	  . "mds.type='$dataset->{'mds_alg'}', cmethod='$dataset->{'cluster_alg'}', LLEK='$dataset->{'K'}', "
 	  . "ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot"
-	  . ", move.neg = move.neg, plot.neg=plot.neg, beanplots=beanplots, plotsvg =plotsvg, useGrouping=useGrouping)\n"
+	  . ", move.neg = move.neg, plot.neg=plot.neg, beanplots=beanplots, plotsvg =plotsvg, useGrouping=useGrouping $dataset->{'GeneUG'})\n"
 	  . "\n"
 	  . "saveObj( data )\n";
 
@@ -513,16 +543,17 @@ file_load will create the script used for the file upload.
 sub file_load {
 	my ( $self, $c, $dataset ) = @_;
 	my $seesion_hash = $c->session();
-	my $path = $c->session_path();
-	if ( -f $path."/analysis.RData" ){
-		mv( $path."/analysis.RData" ,$path."/analysis.old.RData" );
+	my $path         = $c->session_path();
+	if ( -f $path . "/analysis.RData" ) {
+		mv( $path . "/analysis.RData", $path . "/analysis.old.RData" );
 	}
-	my $script       = "negContrGenes <- NULL\n";
+	my $script = "negContrGenes <- NULL\n";
 	$script .=
 	  "negContrGenes <- c ( '"
 	  . join( "', '", @{ $dataset->{'negControllGenes'} } ) . "')\n"
-	  if ( defined @{ $dataset->{'negControllGenes'} }[0] and ! @{ $dataset->{'negControllGenes'} }[0] eq "linux" );
-	$dataset->{'controlM'}  ||=[];
+	  if ( defined @{ $dataset->{'negControllGenes'} }[0]
+		and !@{ $dataset->{'negControllGenes'} }[0] eq "linux" );
+	$dataset->{'controlM'} ||= [];
 	$script .= "data.filtered <- createDataObj ( PCR= c( "
 	  . join( ", ",
 		map { "'$_->{'filename'}'" } @{ $seesion_hash->{'PCRTable'} } )
@@ -540,6 +571,7 @@ sub file_load {
 	$script =~ s/c\( '.?.?\/?' \)/NULL/g;
 	return $script;
 }
+
 
 __PACKAGE__->meta->make_immutable;
 

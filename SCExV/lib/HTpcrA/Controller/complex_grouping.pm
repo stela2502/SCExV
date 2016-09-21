@@ -33,6 +33,7 @@ sub index : Path : Form {
 	$c->stash->{'template'} = 'complexHeatmap.tt2';
 }
 
+
 sub geneorder : Local : Form {
 	my ( $self, $c, $group ) = @_;
 	my $path = $self->check($c);
@@ -40,26 +41,22 @@ sub geneorder : Local : Form {
 	$c->stash->{'text'} =
 "Please copy the gene names from the left side to the right side in the correct order.\n"
 	  . "The new order will become available at the analysis page and a press on the submitt will re-run the analysis using the gene order.\n";
-	my @genes;
-	open( IN, "<$path/mean_expression_per_groups.xls" )
-	  or Carp::confess(
-"The analysis file 'mean_expression_per_groups.xls' could not be opened!\n$!\n"
-	  );
-	while (<IN>) {
-		chomp();
-		@genes = split( "\t", $_ );
-		shift(@genes);    #the first is 'groups'
-		last;
-	}
-	close(IN);
+	
+	$self->Script(
+		$c,  "<script>"
+		. "function clearTextArea( name ) {\n"
+		. "   var form = document.forms[0];\n"
+		. "   form[name].value = '';\n"
+		. "}\n</script>\n");
+	my @genes = $c->genenames();
 
-	$c->stash->{'genes'}   = join( "\n", sort @genes );
+	$c->stash->{'genes'}   = join( "<BR>", sort @genes );
 	$c->stash->{'columns'} = 20;
 	$c->stash->{'rows'}    = scalar(@genes);
 
 	$c->form->field(
 		'id'       => "gOrder",
-		'name'     => "Available Genes",
+		'name'     => "Ordered Genes",
 		'value'    => join( "\n", sort(@genes) ),
 		'required' => 1,
 		'type'     => 'textarea',
@@ -77,12 +74,13 @@ sub geneorder : Local : Form {
 
 	if ( $c->form->submitted && $c->form->validate ) {
 		my $dataset = $self->__process_returned_form($c);
-		$dataset->{'gOrder'} = [ split( /\s+/, $dataset->{'gOrder'} ) ];
+		#Carp::confess( root::get_hashEntries_as_string( $dataset , 3, "The return form") );
+		$dataset->{'gOrder'} = [ split( /\s+/, $dataset->{'Ordered Genes'} ) ];
 		unless ( $c->stash->{'genes'} eq
-			join( "\n", sort ( @{ $dataset->{'gOrder'} } ) ) )
+			join( "<BR>", sort ( @{ $dataset->{'gOrder'} } ) ) )
 		{
 			$c->stash->{'ERROR'} =
-"Sorry, but I need that you give me each gene from the left list exactly one time.";
+"Sorry, but I need that you give me each gene from the left list exactly one time.</BR>".$c->stash->{'genes'}." vs ".join( "<BR>", sort ( @{ $dataset->{'gOrder'} } ) ) ;
 		}
 		else {
 			my $script =
@@ -94,30 +92,84 @@ sub geneorder : Local : Form {
 			  ->Add("<h3>Add a user defined gene order</h3>\n<i>options:"
 				  . $self->options_to_HTML_table($dataset)
 				  . "</i>\n" );
-			open( IN ,"<$path/usedGrouping.txt") or Carp::confess ( "the analysis file usedGrouping.txt has not been created - old Rscexv version?");
-			my $sampleGroup;
-			while( <IN> ) {
-				chomp();
-				$sampleGroup = $_;
-				last;
-			}
-			close ( IN );
+			
 			$c->res->redirect(
-				$c->uri_for("/analyse/re_run/$sampleGroup/$dataset->{GroupingName}/") );
+				$c->uri_for("/analyse/re_run/".$c->usedSampleGrouping()."/$dataset->{'GroupingName'}/") );
 			$c->detach();
 		}
 	}
 
 	$c->form->type('TT2');
-	$c->stash->{'template'} = 'complexHeatmap.tt2';
+	$c->stash->{'template'} = 'geneorder.tt2';
 }
 
 sub genegroup : Local : Form {
 	my ( $self, $c, $group ) = @_;
 	my $path = $self->check($c);
+	
+	$self->Script(
+		$c,  '<script type="text/javascript" src="'
+		  . $c->uri_for('/scripts/dynamicFormAdd.js') . '"'
+		  . "></script>\n");
+	
+	$self->{'form_array'} = [];
+	$c->form->field(
+		'id'   => "GeneGroup_counter",
+		'name' => "GeneGroup_counter" ,
+		'value'    => 1,
+		'required' => 1,
+		'type'     => 'hidden',
+	);
+	$c->form->field(
+		'id'   => "GeneGroup[]",
+		'name' => "GeneGroup[]" ,
+		'value'    => "",
+		'required' => 1,
+		'multiple' => 1,
+		'type'     => 'textarea',
+	);
+	$c->form->field(
 
+		'id'       => 'GroupingName',
+		'name'     => 'GroupingName',
+		'value'    => 'UserGeneOrder',
+		'required' => 1,
+
+	);
+	
+	if ( $c->form->submitted && $c->form->validate ) {
+		my $analysis_conf = $self->config_file( $c, 'rscript.Configs.txt' );
+		
+		my $dataset = $self->__process_returned_form($c);
+		
+		my @genes = sort $c->genenames();
+		my @userG = sort map{ chomp; split(/\s+/, $_) } @{$dataset->{'GeneGroup[]'}};
+		
+		unless ( join(" ",@genes) eq
+			join( " ", @userG ) )
+		{
+			$c->stash->{'ERROR'} =
+"Sorry, but I need that you give me each gene from the left list exactly one time.</BR>".join(" ",@genes)."</BR>".join(" ",@userG) ;
+		}
+		else {
+			my $script =
+			  $c->model('RScript')->create_script( $c, 'genegrouping', $dataset );
+			$c->model('RScript')
+			  ->runScript( $c, $path, 'add_genegroup.R', $script, 'wait' );
+
+			$c->model('scrapbook')->init( $c->scrapbook() )
+			  ->Add("<h3>Add a user defined gene grouping</h3>\n<i>options:"
+				  . $self->options_to_HTML_table($dataset)
+				  . "</i>\n" );
+				  
+			$c->res->redirect(
+				$c->uri_for("/analyse/re_run/".$c->usedSampleGrouping()."/$dataset->{'GroupingName'}/") );
+			$c->detach();
+		}
+	}
 	$c->form->type('TT2');
-	$c->stash->{'template'} = 'complexHeatmap.tt2';
+	$c->form->template( $c->config->{'root'} . 'src' . '/form/genegroups.tt2' );
+	$c->stash->{'template'} = 'genegroups.tt2';
 }
 
 sub colorpicker : Local : Form {
