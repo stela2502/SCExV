@@ -24,6 +24,13 @@ Catalyst Controller.
 
 sub index : Local : Form  {
     my ( $self, $c, @args ) = @_;
+    Carp::confess ('broken as not updated lately! incompatible with the S4 object');
+    # all I need to do here is this:
+    #  data <- rfCluster(data, rep = 1, SGE = F, email='none@nowhere.de', k = 12, slice = 2 )
+    # wait long enough (e.g. 15 min)
+    #  data <- rfCluster(data, rep = 1, SGE = F, email='none@nowhere.de', k = 12, slice = 2 )
+    # reanalyze with grouping 'RFgrouping RFclust 1'
+    
 	$self->{'form_array'} = [];
 	$c->form->method('post');
 	$c->form->field(

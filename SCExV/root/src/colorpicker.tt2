@@ -1,0 +1,42 @@
+
+
+<td id='tab20100', rowspan="5", valign='top' >
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+<div id='message'> [% message | html %] </div>
+
+
+
+
+</td></tr><tr>
+
+<td >
+
+<h2>Change the colors of the used grouping</h2>
+<p>Simply click on the group color to change it.</p>
+
+[% IF sourceGroups %]
+<h3> The actual grouping </h3>
+ [% sourceGroups %]
+[% END %]
+
+</td></tr><tr>
+
+<td >
+
+<p>Submit the form to store the new grouping</p>
+
+
+[% form.render %]
+
+</td></tr>
+<tr> <td colspan="2" >
+
+[% HeatmapStatic %]
+
+</td></tr>
+</table>
+
+
