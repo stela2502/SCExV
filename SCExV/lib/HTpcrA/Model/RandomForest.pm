@@ -2,6 +2,7 @@ package HTpcrA::Model::RandomForest;
 use Moose;
 use namespace::autoclean;
 use POSIX;
+use LWP::Simple;
 
 extends 'Catalyst::Model';
 
@@ -51,6 +52,11 @@ $config->{'calcserver' => {
 sub RandomForest {
 	my ( $self, $c, $dataset, $redo ) = @_;
 	my $path = $c->session_path();
+	if ( defined $c->config->{'calcserver'}->{'ip'} && get('http://'.$c->config->{'calcserver'}->{'ip'}.%c->config->{'subpage'})  ){
+		Carp::confess ( "To send the random forest calculation to a web server is not implemented!" );
+	}
+	$c->stash->{'ERROR'} = ""
+	
 	$dataset->{'procs'} ||= $c->config->{'ncore'};
 	$dataset->{'geneGroups'} ||= 10;
 	$dataset->{'procs'} = $c->config->{'calcserver'}->{'ncore'}

@@ -26,6 +26,7 @@ requires 'Catalyst::Plugin::Session::Store::FastMmap';
 requires 'HTML::Template';
 requires 'Catalyst::Model::Factory::PerRequest';
 requires 'Stefans_Libs_Essentials';
+requires 'Sys::Info';
 #requires 'Stefans_Lib_Essentials' => '1.01';
 
 requires_external_bin('dos2unix');
