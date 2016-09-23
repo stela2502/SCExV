@@ -177,7 +177,7 @@ sub update_form {
 		}
 	);
 
-	my @grps = $self->groupings( $c );
+	my @grps = $c->all_groupings();
 	$hash->{'UG'} =  $grps[0] if ( ! ( $grps[0] eq "none" ) );
 	push(
 		@{ $self->{'form_array'} },
@@ -194,7 +194,7 @@ sub update_form {
 		}
 	);
 	
-	my @Ggrps = $self->groupings( $c, 'GeneGroupings.txt' );
+	my @Ggrps = $c->all_groupings( 'GeneGroupings.txt' );
 	push(
 		@{ $self->{'form_array'} },
 		{
@@ -256,22 +256,7 @@ sub update_form {
 	$c->form->submit( ['Run Analysis'] );
 }
 
-sub groupings {
-	my ( $self, $c, $file ) = @_;
-	$file ||= 'SCExV_Grps.txt';
-	my $f = File::Spec->catfile( $c->session_path(), $file);
-	my @grps;
-	if ( -f $f ){
-		open( GRPS, "<$f" );
-		@grps = map { chomp; $_ } (<GRPS>);
-		close ( GRPS );
-		@grps= grep defined, @grps;
-		
-	}else {
-		Carp::confess ( "No grouping file '$f'\n");
-	}
-	return @grps;
-}
+
 
 sub fileok : Local : Form {
 	my ( $self, $c, $key ) = @_;

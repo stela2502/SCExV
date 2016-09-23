@@ -48,6 +48,7 @@ our $VERSION = '1.00';
 __PACKAGE__->config(
 	root => '/home/med-sal/git_Projects/SCexV/SCExV/root/',
 	name => 'SCExV',
+	production => 1,
 	# Disable deprecated behavior needed by old applications
 	#disable_component_resolution_regex_fallback => 1,
 	#calcserver => {'ip' => '130.235.249.196', 'subpage' => '/NGS_pipeline/fluidigm/index/', 'ncore' => 32 },
@@ -107,6 +108,22 @@ sub usedSampleGrouping {
 	return $sampleGrouping;
 }
 
+sub all_groupings {
+	my ( $self, $file ) = @_;
+	$file ||= 'SCExV_Grps.txt';
+	my $f = File::Spec->catfile( $self->session_path(), $file);
+	my @grps;
+	if ( -f $f ){
+		open( GRPS, "<$f" );
+		@grps = map { chomp; $_ } (<GRPS>);
+		close ( GRPS );
+		@grps= grep defined, @grps;
+		
+	}else {
+		Carp::confess ( "No grouping file '$f'\n");
+	}
+	return @grps;
+}
 =head2 genenames
 
 This returns an array of gene names that have been defined in the fluidigm data.

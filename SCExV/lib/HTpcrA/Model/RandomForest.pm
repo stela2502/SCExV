@@ -70,6 +70,14 @@ sub RandomForest {
 
 sub localRFcluster {
 	my ( $self, $c, $dataset ) = @_;
+	
+	if ( $c->config->{production} ){
+		Carp::confess ("The random forest is unavailable in a production setting. "
+		."Please use href='http://bone.bmc.lu.se/Public/med-sal/SCExV/SCexV_Ubuntu.ova'"
+		." target='blank'>the virtual machine</a> on a local system.");
+		
+	}
+	else {
 	my $path = $c->session_path();
 	$c->stash->{'ERROR'} =
 "Only local random forest clustering available - this will block the server for about 15 min."
@@ -90,6 +98,7 @@ sub localRFcluster {
 	);
 	
 	$c->detach();
+	}
 }
 
 
