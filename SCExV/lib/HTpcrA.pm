@@ -50,7 +50,7 @@ __PACKAGE__->config(
 	name => 'SCExV',
 	# Disable deprecated behavior needed by old applications
 	#disable_component_resolution_regex_fallback => 1,
-	calcserver => {'ip' => '130.235.249.196', 'subpage' => '/NGS_pipeline/fluidigm/index/', 'ncore' => 32 },
+	#calcserver => {'ip' => '130.235.249.196', 'subpage' => '/NGS_pipeline/fluidigm/index/', 'ncore' => 32 },
 	'Plugin::ErrorCatcher' => {
 		enable => 1,
 		emit_module => 'HTpcrA::Controller::Error',

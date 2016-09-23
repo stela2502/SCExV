@@ -75,29 +75,35 @@ sub index : Local : Form  {
 	$c->stash->{'template'} = 'message.tt2';
 }
 
-sub recalculate : Local : Form {
+sub calculate : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	$self->check($c,'upload');
 	$self->{'form_array'} = [];
 	$c->form->field(
 			'comment'  => 'total tree count (more is better and slower)',
-			'name'     => 'total_trees',
+			'name'     => 'Numer of Trees',
 			'type' => 'text',
-			'value' => 6e+6,
+			'value' => 500,
+			'required' => 1,
+	);
+	$c->form->field(
+			'comment'  => 'total amount of random forest calculations (more is better and slower)',
+			'name'     => 'Numer of Forests',
+			'type' => 'text',
+			'value' => 500,
 			'required' => 1,
 	);
 	$c->form->field(
 			'comment'  => 'number of Gene Groups',
-			'name'     => 'gene_groups',
+			'name'     => 'k',
 			'type' => 'text',
 			'value' => 10,
 			'required' => 1,
 	);
 	$c->form->field(
-			'comment'  => 'Cluster ON',
-			'name'     => 'cluster_on',
-			'options' => ['Expression', 'FACS', 'both'],
-			'value' => 'Expression',
+			'comment'  => 'total subset of cells (max total -20)',
+			'name'     => 'Number of Used Cells',
+			'value' => '200',
 			'required' => 1,
 	);
 	foreach ( @{ $self->{'form_array'} } ) {
@@ -105,12 +111,58 @@ sub recalculate : Local : Form {
 	}
 	if ( $c->form->submitted && $c->form->validate ) {
 		my $dataset = $self->__process_returned_form( $c );
+		
+		$c->model('scrapbook')->init( $c->scrapbook() )
+	  ->Add("<h3>Local RFcluster run will be started</h3>\n<p>Time of finish: "
+		  . $self->NOW()
+		  . "</p><i>options:"
+		  . $self->options_to_HTML_table($dataset)
+		  . "</i>\n" );
+		  
+
+		
+		$c->model('RandomForest') -> RandomForest ($c,  $dataset , 1); ## takes care of deployment (local/server)
+		$c->res->redirect( $c->uri_for("/analyse/index/") );
+		$c->detach();
+	}
+	$c->stash->{'template'} = 'message.tt2';
+}
+
+sub newgrouping : Local : Form {
+	my ( $self, $c, @args ) = @_;
+	my $path = $self->check($c,'upload');
+	$self->{'form_array'} = [];
+	
+	$c->form->field(
+			'comment'  => 'number of Gene Groups',
+			'name'     => 'k',
+			'type' => 'text',
+			'value' => 10,
+			'required' => 1,
+	);
+	$c->form->field(
+			'comment'  => 'the new group name',
+			'name'     => 'Group Name',
+			'value' => 'random forest regroup 1',
+			'required' => 1,
+	);
+	foreach ( @{ $self->{'form_array'} } ) {
+		$c->form->field( %{$_} );
+	}
+	if ( $c->form->submitted && $c->form->validate ) {
+		my $dataset = $self->__process_returned_form( $c );
+		my $analysis_conf = $self->config_file( $c, 'rscript.Configs.txt' );
+		
 		$c->model('scrapbook')->init( $c->scrapbook() )
 	  ->Add("<h3>RandomForest calculation</h3>\n<p>I send the data to the calculation server!</p><i>"
 		  . $self->options_to_HTML_table($dataset)
 		  . "</i>\n" );
-		$c->model('RandomForest') -> RandomForest ($c,  $dataset , 1);
-		$c->res->redirect( $c->uri_for("/analyse/index/") );
+		my $script =
+		  $c->model('RScript')->create_script( $c, 'recluster_RF_data', $dataset );
+		$c->model('RScript')
+		  ->runScript( $c, $path, 'recluster_RF_data.R', $script, 'wait' );
+		  
+		$c->res->redirect( $c->uri_for("/analyse/re_run/".$dataset->{'Group Name'}."/$analysis_conf->{'GeneUG'}/") );
 		$c->detach();
 	}
 	$c->stash->{'template'} = 'message.tt2';

@@ -104,12 +104,14 @@ sub Reinit {
 			],
 			[ "Gene Custom Order", '/complex_grouping/geneorder/' ],
 			[ "Gene User Defined Grouping", '/complex_grouping/genegroup/' ],
-			[ "Group Color Picker", '/complex_grouping/colorpicker/' ]
+			[ "Group Color Picker", '/complex_grouping/colorpicker/' ],
 		],
 		[], ## Download
 		[
 			[ "File Merger", '/filemerger/' ],
 			[ 'Scrapbook',   '/scrapbook/index/' ],
+			[ 'Random Forest start grouping', '/randomforest/calculate/'],
+			[ 'Random Forest re-cluster', '/randomforest/newgrouping/'],
 		],
 		[	
 			[ "renew R lib files", '/files/renew_rlib/' ],

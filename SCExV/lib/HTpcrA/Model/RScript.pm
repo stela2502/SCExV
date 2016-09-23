@@ -2,6 +2,7 @@ package HTpcrA::Model::RScript;
 use Moose;
 use namespace::autoclean;
 use File::Copy "mv";
+use Sys::Info;
 
 extends 'Catalyst::Model';
 
@@ -214,7 +215,7 @@ sub remove_samples {
 	}
 
 	$script .=
-	    "data.filtered <- sd.filter(data.filtered)\n"
+	    "data <- sd.filter(data)\n"
 	  . "data <- z.score.PCR.mad(data)\n"
 	  . "save( data, file='analysis.RData' )\n";
 
@@ -299,6 +300,63 @@ sub recolor {
 	return $Rscript;
 }
 
+=head2 run_RF_local 
+
+Calculates the random forest clusters on the local computer. NOT recommended for a production server!
+
+=cut
+
+sub run_RF_local {
+	my ( $self, $c, $dataset ) = @_;
+	my $path    = $c->session_path();
+	my $Rscript = $self->_add_fileRead($path);
+
+	my $info = Sys::Info->new;
+	my $cpu = $info->device( CPU => {} );
+
+	my $cmd =
+	    "data <- rfCluster(data, rep = 1, SGE = F, email='none\@nowhere.de', "
+	  . " subset = subset, k = $dataset->{'k'}, nforest = $dataset->{'Number of Forests'},"
+	  . " ntree = $dataset->{'Number of Trees'},"
+	  . " slice = "
+	  . ( $cpu->count || 1 )
+	  . " )";
+	$Rscript .=
+	    "subset = $dataset->{'Number of Used Cells'}\n"
+	  . "if ( subset + 20 > nrow(data\@data)) {subset = nrow(data\@data) - 20}\n"
+	  . "$cmd\n"
+	  . "run = 1\n"
+	  . "while ( run ) {\n"
+	  . "   try( { $cmd } )\n"
+	  . "   if ( length(data\@usedObj\$rfObj[['Rscexv_RFclust_1']]\@distRF) != 0 ) {\n"
+	  . "      run = 0\n"
+	  . "   }\n"
+	  . "   else {\n"
+	  . "      Sys.sleep(20)\n"
+	  . "   }\n" . "}\n"
+	  . "data <- implyCloseOrder( data, groupName = 'Rscexv_RFclust_1')\n"
+	  . "saveObj( data )\n";
+
+	return $Rscript;
+}
+
+=head2 recluster_RF_data 
+
+Reuse the rf distribution to create a new grouping.
+
+=cut
+
+sub recluster_RF_data {
+	my ( $self, $c, $dataset ) = @_;
+	my $path    = $c->session_path();
+	my $Rscript = $self->_add_fileRead($path);
+	$Rscript .=
+	    "data <- createRFgrouping_samples( data, "
+	  . "RFname = 'Rscexv_RFclust_1', k=$dataset->{'k'}, single_res_col='$dataset->{'Group Name'}' )\n"
+	  . "saveObj(data)\n";
+	return $Rscript;
+}
+
 =head2 geneorder
 
 Allow the user to reorder the genes the way he wants.
@@ -325,7 +383,7 @@ Allow the user to define a own gene grouping.
 
 =cut
 
-sub genegrouping{
+sub genegrouping {
 	my ( $self, $c, $dataset ) = @_;
 	my $path = $c->session_path();
 
@@ -333,8 +391,12 @@ sub genegrouping{
 
 	$Rscript .= "group <- rep( 0 ,nrow(data\@annotation))\n";
 	my $i = 1;
-	foreach ( @{$dataset->{'GeneGroup[]'}}) {
-		$Rscript .= "group[match( c('".join("', '",split(/\s+/, $_ ))."'), data\@annotation[,1])] = ".$i++."\n"
+	foreach ( @{ $dataset->{'GeneGroup[]'} } ) {
+		$Rscript .=
+		    "group[match( c('"
+		  . join( "', '", split( /\s+/, $_ ) )
+		  . "'), data\@annotation[,1])] = "
+		  . $i++ . "\n";
 	}
 	$Rscript .= "data\@annotation\$'$dataset->{'GroupingName'}' = group\n"
 	  . "saveObj(data)\n";
@@ -513,12 +575,13 @@ sub analyze {
 	else {
 		$script .= "beanplots = FALSE\n";
 	}
-	if ( $dataset->{'GeneUG'} eq "none" or $dataset->{'GeneUG'} eq "" )  {
+	if ( $dataset->{'GeneUG'} eq "none" or $dataset->{'GeneUG'} eq "" ) {
 		$dataset->{'GeneUG'} = '';
-	}else {
+	}
+	else {
 		$dataset->{'GeneUG'} = ", geneGroups = '$dataset->{'GeneUG'}'";
 	}
-	
+
 	$script .=
 	    "plotsvg = $dataset->{'plotsvg'}\n"
 	  . "zscoredVioplot = $dataset->{'zscoredVioplot'}\n"
@@ -554,7 +617,7 @@ sub file_load {
 	  if ( defined @{ $dataset->{'negControllGenes'} }[0]
 		and !@{ $dataset->{'negControllGenes'} }[0] eq "linux" );
 	$dataset->{'controlM'} ||= [];
-	$script .= "data.filtered <- createDataObj ( PCR= c( "
+	$script .= "data <- createDataObj ( PCR= c( "
 	  . join( ", ",
 		map { "'$_->{'filename'}'" } @{ $seesion_hash->{'PCRTable'} } )
 	  . " ), "
@@ -567,11 +630,10 @@ sub file_load {
 	  . " use_pass_fail = '$dataset->{'use_pass_fail'}', "
 	  . "max.value=40, max.ct= $dataset->{'maxCT'} , max.control=$dataset->{'maxGenes'}, "
 	  . "norm.function='$dataset->{'normalize2'}', negContrGenes=negContrGenes )\n"
-	  . "saveObj( data.filtered, file='norm_data.RData' )\n";
+	  . "saveObj( data, file='norm_data.RData' )\n";
 	$script =~ s/c\( '.?.?\/?' \)/NULL/g;
 	return $script;
 }
-
 
 __PACKAGE__->meta->make_immutable;
 

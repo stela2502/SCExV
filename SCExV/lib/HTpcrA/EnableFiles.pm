@@ -1,4 +1,5 @@
 package HTpcrA::EnableFiles;
+use DateTime::Format::MySQL;
 
 use Moose::Role;
 
@@ -42,6 +43,11 @@ sub colors_rgb {
 			  . "2D_data_color.xls does not exist!" );
 	}
 	return @colors;
+}
+
+sub NOW {
+	return DateTime::Format::MySQL->format_datetime(
+		DateTime->now( time_zone => 'Europe/Berlin' ) );
 }
 
 sub check {
