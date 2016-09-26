@@ -350,7 +350,7 @@ sub re_run : Local {
 	$args[0] ||= '';
 	if ( !($args[0] eq "") ){
 		$args[0] =~ s/&nbsp;/ /g;
-		my @grps = $self->groupings($c);
+		my @grps = $c->all_groupings();
 		foreach ( @grps ) {
 			 if ( $_ eq $args[0] ){
 			 	$dataset->{'UG'} = $args[0];
@@ -359,7 +359,7 @@ sub re_run : Local {
 		}
 	}
 	if ( !($args[1] eq "") ){
-		my $available = { map { $_ => 1 } $self->groupings( $c, 'GeneGroupings.txt' ) };
+		my $available = { map { $_ => 1 } $c->all_groupings( 'GeneGroupings.txt' ) };
 		if ( $available->{$args[1]} ) {
 			$dataset->{'GeneUG'} = $args[1];
 		}

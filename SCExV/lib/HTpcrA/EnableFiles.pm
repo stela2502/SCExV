@@ -468,9 +468,8 @@ sub parse_path {
 
 sub __process_returned_form {
 	my ( $self, $c ) = @_;
-	my ( $dataset, @data, $str );
+	my ( $dataset, @data );
 	## check the temp path and store that in the cookie
-  #$c->session->{'path'} = undef unless ( $c->session->{'path'} =~m/\/tmp\/?/ );
 	$c->session_path();    #unless ( defined $c->session->{'path'} );
 	unless ( -d $c->session->{'path'} ) {
 		mkdir( $c->session->{'path'} )
@@ -479,8 +478,6 @@ sub __process_returned_form {
 			  . "'\n$!\n" );
 	}
 	for my $field ( $c->req->uploads ) {
-
-#		Carp::confess ( root->print_perl_var_def ( {'$field' =>  $field, 'all' => [$c->form->fields] } ) );
 		if ( ref($field) eq "HASH" ) {
 			foreach my $type ( keys %$field ) {    ## multiple file options
 				$dataset->{$type} = [];
@@ -517,21 +514,16 @@ sub __process_returned_form {
 		}
 	}
 	foreach my $field ( $c->form->fields ) {
-		$str .= "$field; ";
 		if ( defined( $field->{'type'} ) && $field->{'type'} eq "file" ) {
-			unless ( defined $dataset->{$field} ) {
-
-#			Carp::confess( "Internal file upload error - A frequent cause of this error is to not use the 'post' methood for the page (missing the line '$c->form->method('post');')\n" );
-			}
 			next;
 		}
 		elsif ( $field->{'multiple'} ) {
 			@data = $c->form->field($field);
-			$dataset->{$field} = [@data];
+			$dataset->{$field} = [map { $self->input_sec_check($_) } @data];
 		}
 		else {
 			@data = $c->form->field($field);
-			$dataset->{$field} = $data[0];
+			$dataset->{$field} = $self->input_sec_check($data[0]);
 		}
 	}
 	unless ( keys %$dataset > 0 ) {
@@ -542,6 +534,17 @@ sub __process_returned_form {
 	}
 	$self->{'form_store'} = { map { $_ => $dataset->{$_} } keys %$dataset };
 	return $dataset;
+}
+
+sub input_sec_check {
+	my ( $self, $str ) = @_;
+	## all " and ' have to be removed unless in a regexp
+	## script html entries have to be blocked
+	$str =~ s/(?<!\\)["']//g;
+    $str =~ s/<script .*<\/script>//g;
+    $str =~ s/[\n\r]/ /g;
+    $str =~ s/;/ /g;
+    return $str;
 }
 
 sub print_hashEntries {
