@@ -35,7 +35,7 @@ my $plugin_path = "$FindBin::Bin";
 
 my $VERSION = 'v1.0';
 
-my ( $install_path,$help,$server_user,$debug, @options, $web_root );
+my ( $install_path,$help,$server_user,$debug, @options, $web_root, $perlLibPath );
 
 #my $root_path = "/var/www/html/HTPCR/";
 
@@ -44,6 +44,7 @@ Getopt::Long::GetOptions(
 	"-server_user=s" => \$server_user,
 	"-web_root=s" => \$web_root,
 	"-options=s{,}" => \@options,
+	"-perlLibPath=s" => \$perlLibPath,
 
 	"-help"  => \$help,
 	"-debug" => \$debug
@@ -86,6 +87,8 @@ sub helpString {
                    default to '/var/www/html/'
    -options       :additional option for the SCExV server like
                    randomForest 1 ncore 4 
+   -perlLibPath   :an optional perl lib path to run two separate SCExV server on one system
+   
    -help   :print this help
    -debug  :verbose output
    
@@ -203,34 +206,49 @@ if ( $replace =~ s/$web_root// ){
 	
 }
 
-system ( 'cat '.$patcher->{'filename'} ) ;
-system ( "make -C $plugin_path/../" );
-system ( "make -C $plugin_path/../ install" );
-
-
 my $username = $ENV{LOGNAME} || $ENV{USER} || getpwuid($<);
 unless ( $username eq "root" ){
 	die"Please run this script as root to make all the steps work!\n";
 }
-print "Installing R modules\n";
-warn "Please start a R session and paste call:\nsource('$install_path/Install.R')\nto make sure you have the required R packages.\n";
-#system ( "sudo R CMD BATCH $plugin_path/Install.R");
+
+system ( 'cat '.$patcher->{'filename'} ) ;
+my $cmd = "cd $plugin_path/../ ; perl Makefile.PL";
+if ( defined $perlLibPath ) {
+	unless ( -d $perlLibPath ) {
+		system( "mkdir -p $perlLibPath ");
+	}
+	$cmd .= " PREFIX=$perlLibPath INSTALLDIRS=site";
+}
+system( $cmd );
+
+system ( "make -C $plugin_path/../" );
+system ( "make -C $plugin_path/../ install" );
+
 
 mkdir( $install_path ) unless ( -p $install_path );
 unless ( -d $install_path ) {
 	die "Sorry - I could not create the path '$install_path'\n$!\n";
 }
-system ( "sed -e's!plugin_path!/$install_path!' $plugin_path/../htpcra.psgi >$install_path/htpcra.psgi ");
-my $patcher3 = stefans_libs::install_helper::Patcher->new($plugin_path."/../SCExV.starman.initd" );
-$patcher3->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
-#$patcher3->{'filename'} = "$install_path/SCExV.starman.initd";
-$patcher3-> write_file();
+
+## create the PCGI file
+open ( PSGI, ">$install_path/htpcra.psgi" ) or die "I could not create the PSGI file\n";
+
+print PSGI "use strict;\n"."use warnings;\n";
+if ( defined  $perlLibPath ){
+	print PSGI "use lib '$perlLibPath';\n";
+}
+print PSGI "use HTpcrA;\n\n"."my \$app = HTpcrA->apply_default_middlewares(HTpcrA->psgi_app(\@_));\n"."\n\$app\n";
+
+close ( PSGI );
+
+
 system( "cp $plugin_path/../SCExV.starman.initd $install_path/SCExV.starman.initd" );
 
+my $patcher3 = stefans_libs::install_helper::Patcher->new("$install_path/SCExV.starman.initd" );
+$patcher3->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
+$patcher3-> write_file();
 
-# no longer necessary - I expect you to intall the libs in a global position!
-#&copy_files($plugin_path."/..", $install_path, "lib/" );
-#&copy_files($plugin_path."/../root/", $install_path );
+
 my $do_not_copy = { 'lib' => { 'site' => { 'piwik' => 1 }, 'tmp' => 1 } };
 &copy_files($plugin_path."/../root/", $install_path, '', $do_not_copy);
 mkdir ( $install_path."tmp/" ) unless ( -d $install_path."tmp/"  );
@@ -241,11 +259,6 @@ foreach ( 'css', 'rte', 'scripts', 'static', 'example_data' ){
 
 warn "Fixing $patcher->{'filename'} back to normal ($save) and ($save_home)\n";
 system( "mv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm");
-#$patcher -> replace_string( "root .*", "root $save" );
-#$patcher -> replace_string( "Home .*", "Home $save_home" );
-#$patcher -> replace_string( "\tform_path .*", "\tform_path $save"."src/form/");
-#$patcher -> write_file();
-
 
 
 my $tmp = $install_path;
@@ -311,7 +324,7 @@ unless ( -d "$install_path/tmp/"){
 
 ## modif the htpcra script
 #print "sed -e's!plugin_path!$plugin_path!' $plugin_path/../htpcra.psgi >$root_path/htpcra.psgi \n";
-system( "cp $plugin_path/../htpcra.psgi $install_path"."htpcra.psgi" );
+
 system( "chmod +x $install_path"."htpcra.psgi" );
 system ( "chown -R $server_user:root $install_path");
 
