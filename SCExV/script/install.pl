@@ -174,12 +174,12 @@ if ( defined $perlLibPath ) {
 }
 
 #&cleanup();
-die "This is the command to install the Perl source:\n$cmd\nand\nmv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm\n";
+#die "This is the command to install the Perl source:\n$cmd\nand\nmv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm\n";
 
-system( $cmd );
+#system( $cmd );
 
-system ( "make -C $plugin_path/../" );
-system ( "make -C $plugin_path/../ install" );
+#system ( "make -C $plugin_path/../" );
+#system ( "make -C $plugin_path/../ install" );
 
 
 mkdir( $install_path ) unless ( -p $install_path );
@@ -205,6 +205,8 @@ my $patcher3 = stefans_libs::install_helper::Patcher->new("$install_path/SCExV.s
 $patcher3->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
 $patcher3-> write_file();
 
+&cleanup();
+die "now you need to check the two file\n$install_path/SCExV.starman.initd\n$install_path/htpcra.psgi\n";
 
 my $do_not_copy = { 'lib' => { 'site' => { 'piwik' => 1 }, 'tmp' => 1 } };
 &copy_files($plugin_path."/../root/", $install_path, '', $do_not_copy);
