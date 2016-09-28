@@ -57,7 +57,7 @@ __PACKAGE__->config(
 	},
 	'Plugin::Session' => {
             expires => 3600,
-            storage => '/tmp/session_testing'
+            storage => '/tmp/session_develop'
     },
 	randomForest => 0,
 	ncore => 4,

@@ -96,15 +96,18 @@ sub helpString {
 ";
 }
 
-## I have changed the logics of the server - all served files /root/ will get located in the /var/www/http/HTPCR/ folder
 
+my $username = $ENV{LOGNAME} || $ENV{USER} || getpwuid($<);
+unless ( $username eq "root" ){
+	die"Please run this script as root to make all the steps work!\n";
+}
 
+## Change the HTpcrA.pm file to include the right config! Not the best way, but workable!
+# patch the main function to include the new root path
 
-
-## patch the main function to include the new root path
-
-## this is a horrible hack, but I have not found where the config would be loaded from!
 my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
+
+system ( "cp $plugin_path/../lib/HTpcrA.pm $plugin_path/../lib/HTpcrA.save" );
 
 my $OK = $patcher -> replace_string( "root =\\>.*,?\\n" , "root => '$install_path',\n" );
 my $add = '';
@@ -113,33 +116,11 @@ if ( defined $perlLibPath) {
 	$add = pop( @tmp );
 }
 
-$OK = $patcher -> replace_string( "'/tmp/session_testing'", "'/tmp/session$add'");
-$patcher -> write_file();
+# replace the tmp file for the session::filemap plugin so that we can use multiple servers
+$OK = $patcher -> replace_string( "'/tmp/session_develop'", "'/tmp/session_$add'");
 
+# add all options
 
-
-die "Please check the file $plugin_path/../lib/HTpcrA.pm\nand\nmv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm\n";
-#$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
-#print "Before:".$patcher->print();
-my ($save, $save_home);
-#$patcher -> {'str_rep'} =~ m/root (.*)/;
-#$save = $1;
-#$patcher -> {'str_rep'} =~ m/Home (.*)/;
-#$save_home = $1;
-#Carp::confess ($patcher->{'filename'}. "  root_save = $save; Home save = $save_home\n" );
-
-#$OK = $patcher -> replace_string( "root .*", "root $install_path" );
-#$OK += $patcher -> replace_string( "Home .*", "Home $install_path" );
-#$OK += $patcher -> replace_string( "\tform_path .*", "\tform_path $install_path"."src/form/");
-#
-##Carp::confess ( $patcher->{'str_rep'}. "written to file ".$patcher ->{'filename'}  );
-#Carp::confess ( "I could not patch the config file!\n" ) unless ( $OK==3);
-#print $patcher;
-
-#$patcher -> write_file();
-
-system ( "cp $plugin_path/../lib/HTpcrA.pm $plugin_path/../lib/HTpcrA.save" );
-my $patcher2 = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
 my $options ='';
 for ( my $i = 0; $i < @options; $i += 2 ){
 	$options .= "\t$options[$i] => '$options[$i+1]',\n" if ( defined $options[$i+1] );
@@ -151,7 +132,16 @@ unless ( $options =~ m/production/ ){
 	$options .= "\tproduction => 1,\n";
 }
 $patcher -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,", "root => '$install_path',\n$options" );
+
 $patcher -> write_file();
+
+## almost done HTpcrA.pm
+
+
+
+## change all tt2-, form- and java script files
+
+my ($save, $save_home);
 
 my $replace = $install_path;
 my @files ;
@@ -174,12 +164,7 @@ if ( $replace =~ s/$web_root// ){
 	
 }
 
-my $username = $ENV{LOGNAME} || $ENV{USER} || getpwuid($<);
-unless ( $username eq "root" ){
-	die"Please run this script as root to make all the steps work!\n";
-}
 
-system ( 'cat '.$patcher->{'filename'} ) ;
 my $cmd = "cd $plugin_path/../ ; perl Makefile.PL";
 if ( defined $perlLibPath ) {
 	unless ( -d $perlLibPath ) {
@@ -187,6 +172,10 @@ if ( defined $perlLibPath ) {
 	}
 	$cmd .= " PREFIX=$perlLibPath INSTALLDIRS=site INSTALLSITELIB=$perlLibPath";
 }
+
+&cleanup();
+die "This is the command to install the Perl source:\n$cmd\n";
+
 system( $cmd );
 
 system ( "make -C $plugin_path/../" );
@@ -318,6 +307,15 @@ print "IN case the server does not work as expected (fedora):\n"
 ."chcon -R system_u:object_r:httpd_sys_rw_content_t:s0 $install_path/R_lib/\n"
 ;
 
+&cleanup();
+
+sub cleanup {
+	print "Cleaning up ...\n";
+	
+	system( "mv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm");
+	
+	print "Done\n";
+}
 
 sub patch_files {
 	my ( $pattern, $replace, @files ) = @_;
