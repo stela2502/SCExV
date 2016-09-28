@@ -173,8 +173,8 @@ if ( defined $perlLibPath ) {
 	$cmd .= " PREFIX=$perlLibPath INSTALLDIRS=site INSTALLSITELIB=$perlLibPath";
 }
 
-&cleanup();
-die "This is the command to install the Perl source:\n$cmd\n";
+#&cleanup();
+die "This is the command to install the Perl source:\n$cmd\nand\nmv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm\n";
 
 system( $cmd );
 
