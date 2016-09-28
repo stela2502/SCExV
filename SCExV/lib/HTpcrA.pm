@@ -25,8 +25,8 @@ use Catalyst::Runtime 5.80;
 use Catalyst qw/
   Static::Simple
   Session
-  Session::State::Cookie
   Session::Store::FastMmap
+  Session::State::Cookie
   FormBuilder
   StackTrace
   ErrorCatcher
@@ -55,6 +55,10 @@ __PACKAGE__->config(
 		enable => 1,
 		emit_module => 'HTpcrA::Controller::Error',
 	},
+	'Plugin::Session' => {
+            expires => 3600,
+            storage => '/tmp/session_testing'
+    },
 	randomForest => 0,
 	ncore => 4,
 	enable_catalyst_header => 1,                        # Send X-Catalyst header

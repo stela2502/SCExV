@@ -97,48 +97,6 @@ sub helpString {
 }
 
 ## I have changed the logics of the server - all served files /root/ will get located in the /var/www/http/HTPCR/ folder
-sub copy_files {
-	my ( $source_path, $target_path, $subpath, $test_hash) = @_;
-	$test_hash ||= {};
-	$subpath = '' unless ( defined $subpath );
-	my (@return);
-	$source_path = "$source_path/" unless ( $source_path =~m/\/$/ );
-	$target_path = "$target_path/" unless ( $target_path =~m/\/$/ );
-
-	opendir( DIR, "$source_path/$subpath" )
-	  or Carp::confess( "could not open path '$source_path/$subpath'\n$!\n");
-	my @contents = readdir(DIR);
-	closedir(DIR);
-	foreach my $file (@contents) {
-		next if ( $file =~ m/^\./);
-		if ( defined $test_hash->{$file} ){
-				unless( ref($test_hash->{$file}) eq "HASH") {
-					next if ( -r $target_path . $subpath . "/$file" ) ;
-				}
-		}
-		if ( -d $source_path . $subpath . "/$file" ) {
-			push(
-				@return,
-				&copy_files(
-					$source_path.$subpath, $target_path.$subpath,
-					 "/$file", $test_hash->{$file}
-				)
-			);
-		}
-		else {
-			unless ( -d $target_path . $subpath ) {
-				system( "mkdir -p " . $target_path . $subpath );
-			}
-	#		print "I copy the file '".$source_path . $subpath . "/$file' to '$target_path" . "$subpath/$file'\n";
-			copy(
-				$source_path . $subpath . "/$file",
-				$target_path . $subpath . "/$file"
-			);
-			push( @return, $subpath . "/$file" );
-		}
-	}
-	return @return;
-}
 
 
 
@@ -149,8 +107,18 @@ sub copy_files {
 my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
 
 my $OK = $patcher -> replace_string( "root =\\>.*,?\\n" , "root => '$install_path',\n" );
+my $add = '';
+if ( defined $perlLibPath) {
+	my @tmp = split("/", "$perlLibPath");
+	$add = pop( @tmp );
+}
+
+$OK = $patcher -> replace_string( "'/tmp/session_testing'", "'/tmp/session$add'");
 $patcher -> write_file();
 
+
+
+die "Please check the file $plugin_path/../lib/HTpcrA.pm\nand\nmv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm\n";
 #$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
 #print "Before:".$patcher->print();
 my ($save, $save_home);
@@ -217,7 +185,7 @@ if ( defined $perlLibPath ) {
 	unless ( -d $perlLibPath ) {
 		system( "mkdir -p $perlLibPath ");
 	}
-	$cmd .= " PREFIX=$perlLibPath INSTALLDIRS=site";
+	$cmd .= " PREFIX=$perlLibPath INSTALLDIRS=site INSTALLSITELIB=$perlLibPath";
 }
 system( $cmd );
 
@@ -363,3 +331,47 @@ sub patch_files {
 		$patcher -> write_file() if ( $OK );
 	}
 }
+
+sub copy_files {
+	my ( $source_path, $target_path, $subpath, $test_hash) = @_;
+	$test_hash ||= {};
+	$subpath = '' unless ( defined $subpath );
+	my (@return);
+	$source_path = "$source_path/" unless ( $source_path =~m/\/$/ );
+	$target_path = "$target_path/" unless ( $target_path =~m/\/$/ );
+
+	opendir( DIR, "$source_path/$subpath" )
+	  or Carp::confess( "could not open path '$source_path/$subpath'\n$!\n");
+	my @contents = readdir(DIR);
+	closedir(DIR);
+	foreach my $file (@contents) {
+		next if ( $file =~ m/^\./);
+		if ( defined $test_hash->{$file} ){
+				unless( ref($test_hash->{$file}) eq "HASH") {
+					next if ( -r $target_path . $subpath . "/$file" ) ;
+				}
+		}
+		if ( -d $source_path . $subpath . "/$file" ) {
+			push(
+				@return,
+				&copy_files(
+					$source_path.$subpath, $target_path.$subpath,
+					 "/$file", $test_hash->{$file}
+				)
+			);
+		}
+		else {
+			unless ( -d $target_path . $subpath ) {
+				system( "mkdir -p " . $target_path . $subpath );
+			}
+	#		print "I copy the file '".$source_path . $subpath . "/$file' to '$target_path" . "$subpath/$file'\n";
+			copy(
+				$source_path . $subpath . "/$file",
+				$target_path . $subpath . "/$file"
+			);
+			push( @return, $subpath . "/$file" );
+		}
+	}
+	return @return;
+}
+

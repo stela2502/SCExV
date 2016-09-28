@@ -82,11 +82,19 @@ sudo system cat-SCExV start
 
 sudo mkdir -p /HTpcrA/testing/
 In the SCexV path:
-sudo perl -I lib script/install.pl -install_path /var/www/html/SCexV_testing/ -server_user www-data -web_root /var/www/html/SCexV/ -perlLibPath /HTpcrA/testing/
+sudo perl -I lib script/install.pl -install_path /var/www/html/SCexV_testing/ -server_user www-data -web_root /var/www/html/ -perlLibPath /HTpcrA/testing/
 sudo ./SCExV.starman.initd get_init_file > /etc/init.d/cat-SCExV-testing
+chmod +x /etc/init.d/cat-SCExV-testing
 sudo update-rc.d cat-SCExV-testing defaults
 
 
+Switch to the master branch
+
+git checkout master
+sudo perl -I lib script/install.pl -install_path /var/www/html/SCexV_master/ -server_user www-data -web_root /var/www/html/ -perlLibPath /HTpcrA/master/
+sudo ./SCExV.starman.initd get_init_file > /etc/init.d/cat-SCExV-master
+chmod +x /etc/init.d/cat-SCExV-master
+sudo update-rc.d cat-SCExV-master defaults
 
 create the nginx server information (/etc/nginx/sites-enabled/001_SCExV) to contain:
 
