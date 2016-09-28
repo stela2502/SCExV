@@ -199,6 +199,12 @@ print PSGI "use HTpcrA;\n\n"."my \$app = HTpcrA->apply_default_middlewares(HTpcr
 close ( PSGI );
 
 
+system( "cp $plugin_path/htpcra_fastcgi.pl $install_path/" );
+
+my $patcher31 = stefans_libs::install_helper::Patcher->new("$install_path/htpcra_fastcgi.pl" );
+$patcher31->replace_string( "use Catalyst::ScriptRunner;", "use Catalyst::ScriptRunner;\nuse lib '$perlLibPath';");
+$patcher31-> write_file();
+
 system( "cp $plugin_path/../SCExV.starman.initd $install_path/SCExV.starman.initd" );
 
 my $patcher3 = stefans_libs::install_helper::Patcher->new("$install_path/SCExV.starman.initd" );
@@ -206,6 +212,12 @@ $patcher3->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$instal
 $patcher3->replace_string( "name\\s+= '\\w+';", "name    = 'SCExV_$add';" );
 $patcher3-> write_file();
 
+system( "cp $plugin_path/../SCExV.fastcgi.initd $install_path/SCExV.fastcgi.initd" );
+
+my $patcher4 = stefans_libs::install_helper::Patcher->new("$install_path/SCExV.starman.initd" );
+$patcher4->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
+$patcher4->replace_string( "name\\s+= '\\w+';", "name    = 'SCExV_$add';" );
+$patcher4-> write_file();
 
 ## copy all files that are required for the server.
 

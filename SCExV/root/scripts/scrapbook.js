@@ -1,9 +1,11 @@
 
 function capture3D( cid ) {
 	  var canvas  = document.getElementById(cid);
-	  var data = canvas.toDataURL();
-	  var err = "Error";
-	 
+	 // alert( lastImage );
+	 // canvas= canvas.childNodes[0]; 
+	  
+	  //var data = canvas.toDataURL();
+	  var data = lastImage.src;
 	  if (window.XMLHttpRequest){
 	        var xhReq = new XMLHttpRequest();
 	  }
