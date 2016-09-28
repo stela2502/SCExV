@@ -176,10 +176,10 @@ if ( defined $perlLibPath ) {
 #&cleanup();
 #die "This is the command to install the Perl source:\n$cmd\nand\nmv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm\n";
 
-#system( $cmd );
+system( $cmd );
 
-#system ( "make -C $plugin_path/../" );
-#system ( "make -C $plugin_path/../ install" );
+system ( "make -C $plugin_path/../" );
+system ( "make -C $plugin_path/../ install" );
 
 
 mkdir( $install_path ) unless ( -p $install_path );
@@ -203,11 +203,11 @@ system( "cp $plugin_path/../SCExV.starman.initd $install_path/SCExV.starman.init
 
 my $patcher3 = stefans_libs::install_helper::Patcher->new("$install_path/SCExV.starman.initd" );
 $patcher3->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
-$patcher3->replace_string( "name(\\s+)= '\\w+';", "name\$1= 'SCExV_$add';" );
+$patcher3->replace_string( "name\\s+= '\\w+';", "name    = 'SCExV_$add';" );
 $patcher3-> write_file();
 
-&cleanup();
-die "now you need to check the two file\n$install_path/SCExV.starman.initd\n$install_path/htpcra.psgi\n";
+
+## copy all files that are required for the server.
 
 my $do_not_copy = { 'lib' => { 'site' => { 'piwik' => 1 }, 'tmp' => 1 } };
 &copy_files($plugin_path."/../root/", $install_path, '', $do_not_copy);
@@ -216,10 +216,6 @@ foreach ( 'css', 'rte', 'scripts', 'static', 'example_data' ){
 	#die "I wold copy the files from '$plugin_path/../root/$_/' to '$web_root$_/'\n";
 	&copy_files($plugin_path."/../root/$_/", $web_root."$_/" );
 }
-
-warn "Fixing $patcher->{'filename'} back to normal ($save) and ($save_home)\n";
-system( "mv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm");
-
 
 my $tmp = $install_path;
 $tmp =~ s/$web_root/\//;
@@ -254,26 +250,24 @@ unless ( -f "/usr/local/bin/CleanTemp.pl" ){
 	system ( "chmod +x /usr/local/bin/CleanTemp.pl" );
 }
 
-system ( "crontab -l > crontab" );
-open ( IN ,"<crontab" ) or die "crontab info file has not been created?\$!\n";
-my $add2crontab = 0;
-while ( <IN> ) {
-	$add2crontab =1 if ( $_ =~m/CleanUpCronTab/ );
+mkdir ( "/etc/SCExV/" ) unless ( -d "/etx/SCExV/" );
+my $f = "/etc/SCExV/tmpPaths.txt";
+if  (-f $f  ) {
+	open ( PATHS, "<$f" ) or die "Could not open the file '$f'\n$!\n";
+	$tmp = {map {chomp; $_ => 1 } <PATHS>};
+	close ( PATHS );
+}else {
+	system( "touch $f");
+	$tmp = {};
 }
-close ( IN );
-if ( $add2crontab ){
-	$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../CleanUpCronTab.txt" );
-	$save = '';
-	$save = $1 if ($patcher->{'str_rep'} =~ m!/usr/local/bin/CleanTemp.pl -check_path (.*)! ) ;
-	Carp::confess ( "I could not identify the important clean area in the old crontab!\n" ) unless ( $save );
-	$patcher -> replace_string( $save, $install_path."tmp/" );
-	$patcher ->  write_file();
-	system( "cat crontab $plugin_path/../CleanUpCronTab.txt > crontab.used" );
-	system ( 'crontab crontab.used' );
-	$patcher -> replace_string( $install_path."root/tmp/", $save );
-	$patcher ->  write_file();
+unless ( $tmp ->{ $install_path."tmp/" } ) {
+	open ( PATHS, ">>$f") or die $!;
+	print PATHS $install_path."tmp/\n";
+	close ( PATHS );
 }
-### crontab fixed
+
+print "Please add to the root crontab the a ourly check of the tmp path using the /usr/local/bin/CleanTemp.pl script.\n"
+."0\t*\t*\t*\t*\t/usr/local/bin/CleanTemp.pl\n";
 
 
 unless ( -d "$install_path/tmp/"){
@@ -282,27 +276,22 @@ unless ( -d "$install_path/tmp/"){
 	."chcon -R system_u:object_r:httpd_sys_rw_content_t:s0 $install_path/tmp/\n";
 }
 
-## modif the htpcra script
-#print "sed -e's!plugin_path!$plugin_path!' $plugin_path/../htpcra.psgi >$root_path/htpcra.psgi \n";
-
 system( "chmod +x $install_path"."htpcra.psgi" );
 system ( "chown -R $server_user:root $install_path");
 
-
-
-print "\nAll server files stored in '$install_path'\n\n"."If you want to set up a apache server\nyou should modify your apache2 configuration like that:\n".
-"<VirtualHost *:80>
-        ServerName localhost
-        ServerAdmin email\@host
-        HostnameLookups Off
-        UseCanonicalName Off
-        <Location $tmp>
-                SetHandler modperl
-                PerlResponseHandler Plack::Handler::Apache2
-                PerlSetVar psgi_app \"$install_path"."htpcra.psgi\"
-        </Location>
-</VirtualHost>
-\nPlease see this only as a hint on how to set up apache to work with this server!\n";
+#print "\nAll server files stored in '$install_path'\n\n"."If you want to set up a apache server\nyou should modify your apache2 configuration like that:\n".
+#"<VirtualHost *:80>
+#        ServerName localhost
+#        ServerAdmin email\@host
+#        HostnameLookups Off
+#        UseCanonicalName Off
+#        <Location $tmp>
+#                SetHandler modperl
+#                PerlResponseHandler Plack::Handler::Apache2
+#                PerlSetVar psgi_app \"$install_path"."htpcra.psgi\"
+#        </Location>
+#</VirtualHost>
+#\nPlease see this only as a hint on how to set up apache to work with this server!\n";
 
 print "IN case the server does not work as expected (fedora):\n"
 ."chcon -R system_u:object_r:httpd_sys_content_t:s0 $install_path\n"
