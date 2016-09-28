@@ -203,7 +203,7 @@ system( "cp $plugin_path/../SCExV.starman.initd $install_path/SCExV.starman.init
 
 my $patcher3 = stefans_libs::install_helper::Patcher->new("$install_path/SCExV.starman.initd" );
 $patcher3->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
-$patcher3->replace_string( "name(\s+)= '\w+';", "name$1= 'SCExV_$add';" );
+$patcher3->replace_string( "name(\\s+)= '\\w+';", "name\$1= 'SCExV_$add';" );
 $patcher3-> write_file();
 
 &cleanup();
