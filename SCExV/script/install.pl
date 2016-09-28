@@ -214,7 +214,7 @@ $patcher3-> write_file();
 
 system( "cp $plugin_path/../SCExV.fastcgi.initd $install_path/SCExV.fastcgi.initd" );
 
-my $patcher4 = stefans_libs::install_helper::Patcher->new("$install_path/SCExV.starman.initd" );
+my $patcher4 = stefans_libs::install_helper::Patcher->new("$install_path/SCExV.fastcgi.initd" );
 $patcher4->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
 $patcher4->replace_string( "name\\s+= '\\w+';", "name    = 'SCExV_$add';" );
 $patcher4-> write_file();
