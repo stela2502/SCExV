@@ -45,23 +45,28 @@ our $VERSION = '0.80';
 # local deployment.
 
 __PACKAGE__->config(
-	name => 'HTpcrA',
-	# Disable deprecated behavior needed by old applications
-	#disable_component_resolution_regex_fallback => 1,
-	calcserver => {'ip' => '130.235.249.196', 'subpage' => '/NGS_pipeline/fluidigm/index/', 'ncore' => 32 },
+
+	root => '/home/med-sal/git_Projects/SCexV/SCExV/root/',
+	name => 'SCExV',
+# Disable deprecated behavior needed by old applications
+#disable_component_resolution_regex_fallback => 1,
+#calcserver => {'ip' => '130.235.249.196', 'subpage' => '/NGS_pipeline/fluidigm/index/', 'ncore' => 32 },
 	'Plugin::ErrorCatcher' => {
-		enable => 1,
+		enable      => 1,
 		emit_module => 'HTpcrA::Controller::Error',
 	},
-	randomForest => 0,
-	ncore => 4,
+	'Plugin::Session' => {
+		expires => 3600,
+		storage => '/tmp/session_develop'
+	},
+	randomForest           => 0,
+	ncore                  => 4,
 	enable_catalyst_header => 1,                        # Send X-Catalyst header
 	'View::HTML'           => { 'CATALYST_VAR' => 'c' },
 	default_view           => 'HTML',
-	session                => { 'flash_to_stash' => 1 },
+	session => { 'flash_to_stash' => 1 },
 
 );
-
 
 # Start the application
 __PACKAGE__->setup();
@@ -69,20 +74,27 @@ __PACKAGE__->setup();
 
 ##Carp::confess ( "The optional path values to find the config file:\n".join("\n",__PACKAGE__->find_files(), "root path:",  __PACKAGE__->config->{'root'} ). "\n" );
 
-sub cookie_check{
-	my ( $self ) = @_;
-	return 1 if ( $self->session->{'known'} == 1);
-	unless ( defined $self->session->{'known'} ){
+sub cookie_check {
+	my ($self) = @_;
+	return 1 if ( $self->session->{'known'} == 1 );
+	unless ( defined $self->session->{'known'} ) {
 		$self->session->{'known'} = 0;
-	}elsif ( $self->session->{'known'} == 0 ){
+	}
+	elsif ( $self->session->{'known'} == 0 ) {
 		$self->session->{'known'} = 1;
 	}
 	return 1;
 }
 
-sub check_IP{
-	my ( $self ) = @_;
-	foreach ( map{ if ( ref($_) eq "ARRAY"){@$_} else { $_ } } $self->config->{'calcserver'}->{'ip'} ){
+sub check_IP {
+	my ($self) = @_;
+	foreach (
+		map {
+			if   ( ref($_) eq "ARRAY" ) { @$_ }
+			else                        { $_ }
+		} $self->config->{'calcserver'}->{'ip'}
+	  )
+	{
 		return 1 if ( $self->req->address() eq $_ );
 	}
 	$self->res->redirect('/access_denied');
@@ -90,13 +102,13 @@ sub check_IP{
 }
 
 sub session_path {
-	my ($self, $session_id ) = @_;
-	if ( defined $session_id ){
-		return $self->config->{'root'}. "/tmp/" . $session_id ."/";
+	my ( $self, $session_id ) = @_;
+	if ( defined $session_id ) {
+		return $self->config->{'root'} . "/tmp/" . $session_id . "/";
 	}
 	my $path = $self->session->{'path'};
-	
-	if (defined $path){
+
+	if ( defined $path ) {
 		return $path if ( $path =~ m!/tmp/[\w\d]! && -d $path );
 	}
 	my $root = $self->config->{'root'};
@@ -108,7 +120,8 @@ sub session_path {
 		$self->detach();
 	}
 	$path = $root . "/tmp/" . $self->get_session_id() . "/";
-	$path = $root . "/tmp/" . $self->get_session_id() . "/" if ($path =~ m!//$! );
+	$path = $root . "/tmp/" . $self->get_session_id() . "/"
+	  if ( $path =~ m!//$! );
 	unless ( -d $path ) {
 		mkdir($path)
 		  or Carp::confess("I could not create the session path $path\n$!\n");
@@ -123,9 +136,10 @@ sub session_path {
 }
 
 sub scrapbook {
-	my ( $self ) = @_;
-	return $self->session->{'path'}."/Scrapbook/Scrapbook.html" ;
+	my ($self) = @_;
+	return $self->session->{'path'} . "/Scrapbook/Scrapbook.html";
 }
+
 =head1 NAME
 
 HTpcrA - Catalyst based application
