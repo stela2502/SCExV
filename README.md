@@ -99,4 +99,70 @@ service restart apache2
 
 You now can access the server under http://localhost/SCexV/
 
+## Multiple versions on one server
+
+Go to the SCExV path in the git account
+
+All as root!
+
+git checkout testing
+mkdir -p /HTpcrA/testing/
+perl -I lib script/install.pl -install_path /var/www/html/SCexV_testing/ -server_user www-data -web_root /var/www/html/SCexV/ -perlLibPath /HTpcrA/testing/
+/var/www/html/SCexV_testing/SCExV.fastcgi.initd get_init_file > /etc/init.d/cat-SCExV-testing
+chmod +x /etc/init.d/cat-SCExV-testing
+update-rc.d cat-SCExV-testing defaults
+
+
+
+git checkout master
+mkdir -p /HTpcrA/master/
+perl -I lib script/install.pl -install_path /var/www/html/SCexV_master/ -server_user www-data -web_root /var/www/html/SCexV/ -perlLibPath /HTpcrA/master/
+/var/www/html/SCexV_master/SCExV.fastcgi.initd get_init_file > /etc/init.d/cat-SCExV-master
+chmod +x /etc/init.d/cat-SCExV-master
+update-rc.d cat-SCExV-master defaults
+
+
+
+git checkout OldVersion
+mkdir -p /HTpcrA/OldVersion/
+perl -I lib script/install.pl -install_path /var/www/html/SCexV_OldVersion/ -server_user www-data -web_root /var/www/html/SCexV/ -perlLibPath /HTpcrA/OldVersion/
+/var/www/html/SCexV_OldVersion/SCExV.fastcgi.initd get_init_file > /etc/init.d/cat-SCExV-OldVersion
+chmod +x /etc/init.d/cat-SCExV-OldVersion
+update-rc.d cat-SCExV-OldVersion defaults
+
+
+## nginx configuration multiple versions
+
+server {
+    listen 80;
+    server_name localhost;
+    root /var/www/html/;
+    client_max_body_size 40M;
+
+    rewrite ^/SCexV_testing$ /SCexV_testing/ permanent;
+    location /SCexV_testing {
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_NAME /SCexV_testing/;
+      fastcgi_param PATH_INFO   $fastcgi_script_name;
+      fastcgi_pass unix:/var/www/html/SCexV_testing/SCExV.socket;
+    }
+
+    rewrite ^/SCexV_master$ /SCexV_master/ permanent;
+    location /SCexV_master/ {
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_NAME /SCexV_master/;
+      fastcgi_param PATH_INFO   $fastcgi_script_name;
+      fastcgi_pass unix:/var/www/html/SCexV_master/SCExV.socket;
+    }
+
+    rewrite ^/SCexV_OldVersion$ /SCexV_OldVersion/ permanent;
+    location /SCexV_OldVersion/ {
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_NAME /SCexV_OldVersion/;
+      fastcgi_param PATH_INFO   $fastcgi_script_name;
+      fastcgi_pass unix:/var/www/html/SCexV_OldVersion/SCExV.socket;
+    }
+
+}
+
 
