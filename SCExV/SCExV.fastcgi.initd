@@ -1,0 +1,37 @@
+#!/usr/bin/env perl
+
+
+## obtained from http://blogs.perl.org/users/davewood/2012/12/moving-my-catalyst-apps-from-apachefcgi-to-nginxstarman.html
+
+use warnings;
+use strict;
+use Daemon::Control;
+
+my $app_home = '/var/www/html/SCexV/';
+my $perl  = '/usr/bin/perl';
+my $program = $app_home . '/htpcra_fastcgi.pl';
+
+my $name     = 'SCExV';
+my $workers  = 5;
+my $pid_file = $app_home . '/SCExV.pid';
+my $socket   = $app_home . '/SCExV.socket';
+
+Daemon::Control->new({
+    name        => $name,
+    lsb_start   => '$nginx',
+    lsb_stop    => '$nginx',
+    lsb_sdesc   => $name,
+    lsb_desc    => $name,
+    path        => $app_home . '/SCExV.fastcgi.initd',
+
+    user        => 'www-data',
+    group       => 'www-data',
+    directory   => $app_home,
+    program     => "$perl $program --nproc $workers --listen $socket",
+
+    pid_file    => $pid_file,
+    stderr_file => $app_home . '/SCExV.err',
+    stdout_file => $app_home . '/SCExV.out',
+
+    fork        => 2,
+})->run;
