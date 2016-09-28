@@ -518,11 +518,11 @@ sub __process_returned_form {
 		}
 		elsif ( $field->{'multiple'} ) {
 			@data = $c->form->field($field);
-			$dataset->{$field} = [@data];
+			$dataset->{$field} = [map { $self->input_sec_check($_) } @data];
 		}
 		else {
 			@data = $c->form->field($field);
-			$dataset->{$field} = $data[0];
+			$dataset->{$field} = $self->input_sec_check($data[0]);
 		}
 	}
 	unless ( keys %$dataset > 0 ) {
@@ -533,6 +533,17 @@ sub __process_returned_form {
 	}
 	$self->{'form_store'} = { map { $_ => $dataset->{$_} } keys %$dataset };
 	return $dataset;
+}
+
+sub input_sec_check {
+	my ( $self, $str ) = @_;
+	## all " and ' have to be removed unless in a regexp
+	## script html entries have to be blocked
+	$str =~ s/(?<!\\)["']//g;
+    $str =~ s/<script .*<\/script>//g;
+    $str =~ s/[\n\r]/ /g;
+    $str =~ s/;/ /g;
+    return $str;
 }
 
 sub print_hashEntries {

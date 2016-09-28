@@ -21,7 +21,6 @@ use Catalyst::Runtime 5.80;
 #	-Debug
 
 use Catalyst qw/
-  ConfigLoader
   Static::Simple
   Session
   Session::State::Cookie
@@ -45,7 +44,6 @@ our $VERSION = '0.80';
 # local deployment.
 
 __PACKAGE__->config(
-
 	root => '/home/med-sal/git_Projects/SCexV/SCExV/root/',
 	name => 'SCExV',
 # Disable deprecated behavior needed by old applications
