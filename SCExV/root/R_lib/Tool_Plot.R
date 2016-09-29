@@ -117,7 +117,9 @@ PCR.heatmap <- function ( dataObj, ofile, title='Heatmap', nmax=500, hc.row=NA, 
 		stop (paste('No plooting for file ',ofile,'- too many genes selected (',nrow(dataObj$data),')' ))
 	}
 	if( nrow(dataObj$data) > 2 ){
-		brks <- as.vector(c(-20,quantile(dataObj$data[which(dataObj$data!= -20)],seq(0,1,by=0.1)),max(dataObj$data)))
+
+		brks <- unique(as.vector(c(-20,quantile(dataObj$data[which(dataObj$data!= -20)],seq(0,1,by=0.1)),max(dataObj$data))))
+		
 		#rownames( dataObj$data ) <- paste( dataObj$genes, dataObj$names)
 		if ( is.na(hc.row) ){
 			hc.row <- hclustfun(distfun(dataObj$data)) #hclust( as.dist( 1- cor(t(dataObj$data), method='spearman')), method='ward')

@@ -186,7 +186,6 @@ read.PCR.heatmap <- function (fname,use_pass_fail=T){
 }
 
 read.FACS <- function(fname,use_pass_fail=T) {
-	browser()
 	ftab <- matrix(ncol=0, nrow=1)
 	try( ftab <- read.PCR  ( fname, use_pass_fail ), silent=T )
 	if ( ncol(ftab) == 0 ){
