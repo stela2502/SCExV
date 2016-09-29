@@ -165,4 +165,10 @@ server {
 
 }
 
+## last start it all
+
+service SCExV_OldVersion start
+service cat-SCExV-testing start
+service cat-SCExV-master start
+service nginx start
 

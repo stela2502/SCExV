@@ -55,6 +55,10 @@ __PACKAGE__->config(
 		enable => 1,
 		emit_module => 'HTpcrA::Controller::Error',
 	},
+	'Plugin::Session' => {
+            expires => 3600,
+            storage => '/tmp/session_develop'
+    },
 	randomForest => 0,
 	ncore => 4,
 	enable_catalyst_header => 1,                        # Send X-Catalyst header

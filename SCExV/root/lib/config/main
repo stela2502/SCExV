@@ -12,7 +12,7 @@
 
    # define a data structure to hold sitewide data
    site = {
-     title     => 'HTpcrA',
+     title     => 'SCExV',
      copyright => '2014 Dr. Stefan Lang',
    };
 
