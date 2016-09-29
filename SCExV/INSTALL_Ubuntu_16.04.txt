@@ -1,0 +1,146 @@
+sudo apt-get install make libcatalyst-view-tt-perl libcatalyst-plugin-session-store-fastmmap-perl libcatalyst-plugin-session-store-cache-perl libcatalyst-plugin-redirect-perl libcatalyst-plugin-configloader-perl libcatalyst-perl libcatalyst-modules-perl libcatalyst-modules-extra-perl libcatalyst-action-rest-perl dos2unix libhtml-template-perl libnet-ssh2-perl libdatetime-format-mysql-perl libgd-svg-perl libdate-simple-perl pdl
+
+mkdir ~/SRC
+cd ~/SRC
+
+git clone https://github.com/stela2502/Stefans_Lib_Esentials.git
+cd Stefans_Lib_Esentials/Stefans_Libs_Essentials/
+make
+sudo make install
+
+cd ~/SRC/
+
+git clone https://github.com/stela2502/SCExV.git
+cd SCExV/
+
+
+## R
+
+sudo echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee -a /etc/apt/sources.list
+gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
+gpg -a --export E084DAB9 | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install r-base r-base-html r-base-core libcurl4-openssl-dev libssl-dev libssh2-1-dev libx11-dev libglu1-mesa-dev libfreetype6-dev
+
+
+## within R
+install.packages(c('httr','git2r', 'devtools','Rcpp', 'vioplot', 'sm' ) )
+
+source("http://bioconductor.org/biocLite.R")
+biocLite(c("RDRToolbox","Biobase", 'BiocGenerics'))
+
+library(devtools)
+install_github('stela2502/RFclust.SGE')
+install_github('RGLab/MAST')
+install_github('stela2502/Rscexv')
+
+## python ZIFA
+sudo apt-get install python-numpy python-matplotlib python-scipy scikits.learn
+
+cd ~/SRC
+git clone https://github.com/epierson9/ZIFA
+cd ZIFA
+sudo python setup.py install
+
+## nginx + staman
+
+apt-get install nginx-full libdaemon-control-perl starman
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!
+
+##Single install 
+
+!!!!!!!!!!!!!!!!!!!!!!!!
+
+In the SCexV path:
+git ceckout OldVersion
+sudo perl -I lib script/install.pl -install_path /var/www/html/SCexV/ -server_user www-data -web_root /var/www/html/SCexV/
+sudo ./SCExV.starman.initd get_init_file > /etc/init.d/cat-SCExV
+sudo update-rc.d cat-SCExV defaults
+
+create the nginx server information (/etc/nginx/sites-enabled/001_SCExV) to contain:
+
+server {
+    listen 80;
+    server_name localhost;
+    root /var/www/html/SCexV/;
+
+    location / {
+      client_max_body_size 40M;
+      include /etc/nginx/proxy_params;
+      proxy_pass http://unix:/var/www/html/SCexV/SCExV.socket:/;
+    }
+
+}
+
+sudo system nginx restart
+sudo system cat-SCExV start
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!
+
+##Multi install
+
+!!!!!!!!!!!!!!!!!!!!!!!!!
+
+sudo mkdir -p /HTpcrA/OldVersion/
+cd ~/SRC/SCExV/SCExV/
+git checkout OldVersion
+sudo perl -I lib script/install.pl -install_path /var/www/html/SCexV_OldVersion/ -server_user www-data -web_root /var/www/html/ -perlLibPath /HTpcrA/OldVersion/
+sudo /var/www/html/SCexV_OldVersion/SCExV.fastcgi.initd get_init_file > /etc/init.d/cat-SCExV-OldVersion
+chmod +x /etc/init.d/cat-SCExV-OldVersion
+sudo update-rc.d cat-SCExV-OldVersion defaults
+
+
+Switch to the master branch
+
+git checkout master
+sudo perl -I lib script/install.pl -install_path /var/www/html/SCexV_master/ -server_user www-data -web_root /var/www/html/ -perlLibPath /HTpcrA/master/
+sudo /var/www/html/SCexV_master/SCExV.fastcgi.initd get_init_file > /etc/init.d/cat-SCExV-master
+chmod +x /etc/init.d/cat-SCExV-master
+sudo update-rc.d cat-SCExV-master defaults
+
+
+
+#create the nginx server information (/etc/nginx/sites-enabled/001_SCExV) to contain:
+
+server {
+    listen 80;
+    server_name localhost;
+    root /var/www/html/;
+    client_max_body_size 40M;
+
+    rewrite ^/SCexV_testing$ /SCexV_testing/ permanent;
+    location /SCexV_testing {
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_NAME /SCexV_testing/;
+      fastcgi_param PATH_INFO   $fastcgi_script_name;
+      fastcgi_pass unix:/var/www/html/SCexV_testing/SCExV.socket;
+    }
+
+    rewrite ^/SCexV_master$ /SCexV_master/ permanent;
+    location /SCexV_master/ {
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_NAME /SCexV_master/;
+      fastcgi_param PATH_INFO   $fastcgi_script_name;
+      fastcgi_pass unix:/var/www/html/SCexV_master/SCExV.socket;
+    }
+
+    rewrite ^/SCexV_OldVersion$ /SCexV_OldVersion/ permanent;
+    location /SCexV_OldVersion/ {
+      include /etc/nginx/fastcgi_params;
+      fastcgi_param SCRIPT_NAME /SCexV_OldVersion/;
+      fastcgi_param PATH_INFO   $fastcgi_script_name;
+      fastcgi_pass unix:/var/www/html/SCexV_OldVersion/SCExV.socket;
+    }
+
+}
+
+
+sudo service nginx restart
+sudo service cat-SCExV-testing start
+sudo service cat-SCExV-master start
+
+
+
