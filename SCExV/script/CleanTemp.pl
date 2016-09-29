@@ -35,8 +35,6 @@ my $VERSION = 'v1.0';
 my ( $help, $debug, $database, $check_path );
 
 Getopt::Long::GetOptions(
-	"-check_path=s" => \$check_path,
-
 	"-help"  => \$help,
 	"-debug" => \$debug
 );
@@ -44,9 +42,7 @@ Getopt::Long::GetOptions(
 my $warn  = '';
 my $error = '';
 
-unless ( defined $check_path ) {
-	$error .= "the cmd line switch -check_path is undefined!\n";
-}
+
 
 if ($help) {
 	print helpString();
@@ -65,57 +61,59 @@ sub helpString {
  $errorMessage
  command line switches for CleanTemp.pl
 
-   -check_path       :<please add some info!>
-
    -help           :print this help
    -debug          :verbose output
    
-
+   The script will read the file/etc/SCExV/tmpPaths.txt and 
+   remove all folders that have not been changed for over an hour.
+   
 ";
 }
 use stefans_libs::root;
 
-die "Path $check_path not accessable: $!\n" unless ( -d $check_path );
-my @tmp;
+open ( PATHS, "</etc/SCExV/tmp_path.txt" ) or die "No accessible tmp path config file '/etc/SCExV/tmp_path.txt'\n$!\n"; 
 
-my $killable;
-opendir( DIR, $check_path ) or die "could not open path $check_path\n$!\n";
-$check_path .= "/" unless ( $check_path =~ m!/$! );
-foreach ( grep(!/^\./, readdir(DIR)) ){
-	if ( -d "$check_path$_" ) {
-		$killable->{"$check_path$_"} = 1;
+my (@tmp, $killable, $master_level);
+
+while ( <PATHS> ) {
+	chomp();
+	$check_path = $_;
+	unless ( -d $check_path ){
+		warn "Path $check_path not accessable: $!\n";
+		next;
 	}
-}
+	$killable = undef;
+	
+	opendir( DIR, $check_path ) or die "could not open path $check_path\n$!\n";
+	$check_path .= "/" unless ( $check_path =~ m!/$! );
+	foreach ( grep(!/^\./, readdir(DIR)) ){
+		if ( -d "$check_path$_" ) {
+			$killable->{"$check_path$_"} = 1;
+		}
+	}
+	close(DIR);
 
-close(DIR);
+	$master_level = scalar( split("/", $check_path)) +1;
 
-#print "\$exp = ".root->print_perl_var_def( $killable ).";\n";
+	open( SAVE, "find $check_path* -type f -amin -61 |" )
+  		or die "Could not fork!\n";
 
-
-my $master_level = scalar( split("/", $check_path)) +1;
-
-open( SAVE, "find $check_path* -type f -amin -61 |" )
-  or die "Could not fork!\n";
-
-foreach my $save (<SAVE>) {
-	@tmp = split("/",$save );
-	pop(@tmp);
-	while ( scalar(@tmp) > $master_level ) {
+	foreach my $save (<SAVE>) {
+		@tmp = split("/",$save );
 		pop(@tmp);
+		while ( scalar(@tmp) > $master_level ) {
+			pop(@tmp);
+		}
+		$killable->{join("/",@tmp)} = 0;
 	}
-	$killable->{join("/",@tmp)} = 0;
-}
-close(SAVE);
+	close(SAVE);
 
-#print "\$exp = ".root->print_perl_var_def( $killable ).";\n";
-
-foreach ( keys %$killable ) {
-	print "rm -Rf $_\n" if ( $killable->{$_} );
-	system ( "rm -Rf $_" ) if ( $killable->{$_} );
+	foreach ( keys %$killable ) {
+		print "rm -Rf $_\n" if ( $killable->{$_} );
+		system ( "rm -Rf $_" ) if ( $killable->{$_} );
+	}
+	
 }
 
-#Carp::confess(  "find $path/tmp/ -amin -61  | cut -d/ -f 2 | uniq > $path/new" );
-#system ( "find $path/tmp/ -amin -61  | cut -d/ -f 2 | uniq > $path/new");
-#system ( "find ./ -amin +61 | cut -d/ -f 2 | uniq | grep -vw -f$path/new | xargs rm -Rf {};");
-#system ( 'rm -Rf '.__PACKAGE__->config->{'root'}."/tmp/*" );
+close ( PATHS  );
 

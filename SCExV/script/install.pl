@@ -35,8 +35,7 @@ my $plugin_path = "$FindBin::Bin";
 
 my $VERSION = 'v1.0';
 
-my ( $install_path,$help,$server_user,$debug, @options, 
-	$capture_rgl_libs, $web_root );
+my ( $install_path,$help,$server_user,$debug, @options, $web_root, $perlLibPath );
 
 #my $root_path = "/var/www/html/HTPCR/";
 
@@ -45,7 +44,7 @@ Getopt::Long::GetOptions(
 	"-server_user=s" => \$server_user,
 	"-web_root=s" => \$web_root,
 	"-options=s{,}" => \@options,
-	"-capture_rgl_libs" => \$capture_rgl_libs, 
+	"-perlLibPath=s" => \$perlLibPath,
 
 	"-help"  => \$help,
 	"-debug" => \$debug
@@ -87,9 +86,8 @@ sub helpString {
    -web_root      :the root of the web server - css and jscript files are installed there
                    default to '/var/www/html/'
    -options       :additional option for the SCExV server like
-                   randomForest 1 ncore 4
-                   
-   -capture_rgl_libs  :if unsure do not use! local modifications to the rglClass.src.js will be lost!
+                   randomForest 1 ncore 4 
+   -perlLibPath   :an optional perl lib path to run two separate SCExV server on one system
    
    -help   :print this help
    -debug  :verbose output
@@ -98,7 +96,244 @@ sub helpString {
 ";
 }
 
-## I have changed the logics of the server - all served files /root/ will get located in the /var/www/http/HTPCR/ folder
+
+my $username = $ENV{LOGNAME} || $ENV{USER} || getpwuid($<);
+unless ( $username eq "root" ){
+	die"Please run this script as root to make all the steps work!\n";
+}
+
+## Change the HTpcrA.pm file to include the right config! Not the best way, but workable!
+# patch the main function to include the new root path
+
+my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
+
+system ( "cp $plugin_path/../lib/HTpcrA.pm $plugin_path/../lib/HTpcrA.save" );
+
+my $OK = $patcher -> replace_string( "root =\\>.*,?\\n" , "root => '$install_path',\n" );
+my $add = '';
+if ( defined $perlLibPath) {
+	my @tmp = split("/", "$perlLibPath");
+	$add = pop( @tmp );
+}
+
+# replace the tmp file for the session::filemap plugin so that we can use multiple servers
+$OK = $patcher -> replace_string( "'/tmp/session_develop'", "'/tmp/session_$add'");
+
+# add all options
+
+my $options ='';
+for ( my $i = 0; $i < @options; $i += 2 ){
+	$options .= "\t$options[$i] => '$options[$i+1]',\n" if ( defined $options[$i+1] );
+}
+unless ( $options =~ m/ncore/ ) {
+	$options .= "\tncore => 1,\n";
+}
+unless ( $options =~ m/production/ ){
+	$options .= "\tproduction => 1,\n";
+}
+$patcher -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,", "root => '$install_path',\n$options" );
+
+$patcher -> write_file();
+
+## almost done HTpcrA.pm
+
+
+
+## change all tt2-, form- and java script files
+
+my ($save, $save_home);
+
+my $replace = $install_path;
+my @files ;
+if ( $replace =~ s/$web_root// ){	
+	warn "I have the replace path '$replace'\n";
+	if ( $replace =~ m/\w/ ){
+		## the server is installed downstream of the web root place
+		## this kills my form files as they use fixed path
+		foreach my $wpath ( "$plugin_path/../root/src/form/", "$plugin_path/../root/src/" ){
+			opendir( DIR ,$wpath ) or die "could not open the path '$wpath'\n";
+			@files = readdir(DIR);
+			closedir(DIR);
+			@files = map {$wpath.$_ } @files ;
+			#print "And now I have the files". join(", ",@files )."\n";
+			&patch_files( "'/help/", "'/$replace"."help/", @files );
+		}
+		&patch_files( '/scrapbook/imageadd/', "/$replace".'scrapbook/imageadd/', "$plugin_path/../root/scripts/scrapbook.js");
+		&patch_files( '/scrapbook/screenshotadd', "/$replace".'scrapbook/screenshotadd', "$plugin_path/../root/scripts/scrapbook.js");
+	}
+	
+}
+
+
+my $cmd = "cd $plugin_path/../ ; perl Makefile.PL";
+if ( defined $perlLibPath ) {
+	unless ( -d $perlLibPath ) {
+		system( "mkdir -p $perlLibPath ");
+	}
+	$cmd .= " PREFIX=$perlLibPath INSTALLDIRS=site INSTALLSITELIB=$perlLibPath";
+}
+
+#&cleanup();
+#die "This is the command to install the Perl source:\n$cmd\nand\nmv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm\n";
+
+system( $cmd );
+
+system ( "make -C $plugin_path/../" );
+system ( "make -C $plugin_path/../ install" );
+
+
+mkdir( $install_path ) unless ( -p $install_path );
+unless ( -d $install_path ) {
+	die "Sorry - I could not create the path '$install_path'\n$!\n";
+}
+
+## create the PCGI file
+open ( PSGI, ">$install_path/htpcra.psgi" ) or die "I could not create the PSGI file\n";
+
+print PSGI "use strict;\n"."use warnings;\n";
+if ( defined  $perlLibPath ){
+	print PSGI "use lib '$perlLibPath';\n";
+}
+print PSGI "use HTpcrA;\n\n"."my \$app = HTpcrA->apply_default_middlewares(HTpcrA->psgi_app(\@_));\n"."\n\$app\n";
+
+close ( PSGI );
+
+
+system( "cp $plugin_path/htpcra_fastcgi.pl $install_path/htpcra_fastcgi.pl" );
+
+my $patcher31 = stefans_libs::install_helper::Patcher->new("$install_path/htpcra_fastcgi.pl" );
+$patcher31->replace_string( "use Catalyst::ScriptRunner;", "use Catalyst::ScriptRunner;\nuse lib '$perlLibPath';");
+$patcher31-> write_file();
+
+system( "cp $plugin_path/../SCExV.starman.initd $install_path/SCExV.starman.initd" );
+
+my $patcher3 = stefans_libs::install_helper::Patcher->new("$install_path/SCExV.starman.initd" );
+$patcher3->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
+$patcher3->replace_string( "name\\s+= '\\w+';", "name    = 'SCExV_$add';" );
+$patcher3-> write_file();
+
+system( "cp $plugin_path/../SCExV.fastcgi.initd $install_path/SCExV.fastcgi.initd" );
+
+my $patcher4 = stefans_libs::install_helper::Patcher->new("$install_path/SCExV.fastcgi.initd" );
+$patcher4->replace_string( "my \\\$app_home = '.*\\n", "my \$app_home = '$install_path';\n" );
+$patcher4->replace_string( "name\\s+= '\\w+';", "name    = 'SCExV_$add';" );
+$patcher4-> write_file();
+
+## copy all files that are required for the server.
+
+my $do_not_copy = { 'lib' => { 'site' => { 'piwik' => 1 }, 'tmp' => 1 } };
+&copy_files($plugin_path."/../root/", $install_path, '', $do_not_copy);
+mkdir ( $install_path."tmp/" ) unless ( -d $install_path."tmp/"  );
+foreach ( 'css', 'rte', 'scripts', 'static', 'example_data' ){
+	#die "I wold copy the files from '$plugin_path/../root/$_/' to '$web_root$_/'\n";
+	&copy_files($plugin_path."/../root/$_/", $web_root."$_/" );
+}
+
+my $tmp = $install_path;
+$tmp =~ s/$web_root/\//;
+unless ( -f $web_root."index.html" ){
+	
+	
+	open ( OUT ,">".$web_root."index.html" ) or die "I could not create a simple index.html file in '$web_root'\n";
+	print OUT "<!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'>
+<title>Stem Cell Center Bioinformatics Group</title>
+</head>
+<body>
+<h1>Stem Cell Center Bioinformatics Group</h1>
+
+<p>Page under development!<p>
+
+<p>Meanwhile you can access our <a href='$tmp' target='_blank'>HTpcrA tool (open beta)</a> </p>
+
+</body>
+</html>
+	"
+}
+
+
+
+#### cron fixes the killing of the tmp files
+unless ( -f "/usr/local/bin/CleanTemp.pl" ){
+	#install the script
+	system ( "cp $plugin_path../script/CleanTemp.pl /usr/local/bin/");
+	system ( "chmod +x /usr/local/bin/CleanTemp.pl" );
+}
+
+mkdir ( "/etc/SCExV/" ) unless ( -d "/etx/SCExV/" );
+my $f = "/etc/SCExV/tmpPaths.txt";
+if  (-f $f  ) {
+	open ( PATHS, "<$f" ) or die "Could not open the file '$f'\n$!\n";
+	$tmp = {map {chomp; $_ => 1 } <PATHS>};
+	close ( PATHS );
+}else {
+	system( "touch $f");
+	$tmp = {};
+}
+unless ( $tmp ->{ $install_path."tmp/" } ) {
+	open ( PATHS, ">>$f") or die $!;
+	print PATHS $install_path."tmp/\n";
+	close ( PATHS );
+}
+
+print "Please add to the root crontab the a ourly check of the tmp path using the /usr/local/bin/CleanTemp.pl script.\n"
+."0\t*\t*\t*\t*\t/usr/local/bin/CleanTemp.pl\n";
+
+
+unless ( -d "$install_path/tmp/"){
+	mkdir ("$install_path/tmp/" );
+	print "You need to allow the httpd to get access to the tem dir!\n"."execute on fedora or CentOS:\n"
+	."chcon -R system_u:object_r:httpd_sys_rw_content_t:s0 $install_path/tmp/\n";
+}
+
+system( "chmod +x $install_path"."htpcra.psgi" );
+system ( "chown -R $server_user:root $install_path");
+
+#print "\nAll server files stored in '$install_path'\n\n"."If you want to set up a apache server\nyou should modify your apache2 configuration like that:\n".
+#"<VirtualHost *:80>
+#        ServerName localhost
+#        ServerAdmin email\@host
+#        HostnameLookups Off
+#        UseCanonicalName Off
+#        <Location $tmp>
+#                SetHandler modperl
+#                PerlResponseHandler Plack::Handler::Apache2
+#                PerlSetVar psgi_app \"$install_path"."htpcra.psgi\"
+#        </Location>
+#</VirtualHost>
+#\nPlease see this only as a hint on how to set up apache to work with this server!\n";
+
+print "IN case the server does not work as expected (fedora):\n"
+."chcon -R system_u:object_r:httpd_sys_content_t:s0 $install_path\n"
+."chcon -R system_u:object_r:httpd_sys_rw_content_t:s0 $install_path/tmp/\n"
+."chcon -R system_u:object_r:httpd_sys_rw_content_t:s0 $install_path/R_lib/\n"
+;
+
+&cleanup();
+
+sub cleanup {
+	print "Cleaning up ...\n";
+	
+	system( "mv $plugin_path/../lib/HTpcrA.save $plugin_path/../lib/HTpcrA.pm");
+	
+	print "Done\n";
+}
+
+sub patch_files {
+	my ( $pattern, $replace, @files ) = @_;
+	my $OK;
+	foreach my $file ( @files ) {
+		next unless ( -f $file );
+		my $patcher = stefans_libs::install_helper::Patcher->new( $file );
+		$OK = 0;
+		$OK = $patcher -> replace_string( $pattern, $replace );
+		print "Replaced '$pattern' with '$replace' at $OK position(s) of file $file\n" if ( $OK > 0);
+		$patcher -> write_file() if ( $OK );
+	}
+}
+
 sub copy_files {
 	my ( $source_path, $target_path, $subpath, $test_hash) = @_;
 	$test_hash ||= {};
@@ -142,202 +377,3 @@ sub copy_files {
 	return @return;
 }
 
-
-system ( "$plugin_path/capture_rgl_javascript.pl" ) if ( $capture_rgl_libs );
-
-
-
-## patch the main function to include the new root path
-
-## this is a horrible hack, but I have not found where the config would be loaded from!
-my $patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA.pm" );
-my $OK = $patcher -> replace_string( "\\sroot =\\> '[\\/\\w]*'," , " root => '$install_path',\nhome => '$install_path'," );
-my $options ='';
-for ( my $i = 0; $i < @options; $i += 2 ){
-	$options .= "\t$options[$i] => '$options[$i+1]',\n" if ( defined $options[$i+1] );
-}
-unless ( $options =~ m/ncore/ ) {
-	$options .= "\tncore => 1,\n";
-}
-my $OK2 = $patcher -> replace_string("randomForest => 1,\\n\\s*ncore => \\d+,","$options" );
-$patcher -> write_file();
-
-#$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../lib/HTpcrA/htpcra.conf" );
-#print "Before:".$patcher->print();
-my ($save, $save_home);
-#$patcher -> {'str_rep'} =~ m/root (.*)/;
-#$save = $1;
-#$patcher -> {'str_rep'} =~ m/Home (.*)/;
-#$save_home = $1;
-#Carp::confess ($patcher->{'filename'}. "  root_save = $save; Home save = $save_home\n" );
-
-#$OK = $patcher -> replace_string( "root .*", "root $install_path" );
-#$OK += $patcher -> replace_string( "Home .*", "Home $install_path" );
-#$OK += $patcher -> replace_string( "\tform_path .*", "\tform_path $install_path"."src/form/");
-#
-##Carp::confess ( $patcher->{'str_rep'}. "written to file ".$patcher ->{'filename'}  );
-#Carp::confess ( "I could not patch the config file!\n" ) unless ( $OK==3);
-#print $patcher;
-
-#$patcher -> write_file();
-
-my $replace = $install_path;
-my @files ;
-if ( $replace =~ s/$web_root// ){	
-	warn "I have the replace path '$replace'\n";
-	if ( $replace =~ m/\w/ ){
-		## the server is installed downstream of the web root place
-		## this kills my form files as they use fixed path
-		foreach my $wpath ( "$plugin_path/../root/src/form/", "$plugin_path/../root/src/" ){
-			opendir( DIR ,$wpath ) or die "could not open the path '$wpath'\n";
-			@files = readdir(DIR);
-			closedir(DIR);
-			@files = map {$wpath.$_ } @files ;
-			#print "And now I have the files". join(", ",@files )."\n";
-			&patch_files( "'/help/", "'/$replace"."help/", @files );
-		}
-		&patch_files( '/scrapbook/imageadd/', "/$replace".'scrapbook/imageadd/', "$plugin_path/../root/scripts/scrapbook.js");
-		&patch_files( '/scrapbook/screenshotadd', "/$replace".'scrapbook/screenshotadd', "$plugin_path/../root/scripts/scrapbook.js");
-	}
-}
-
-system ( 'cat '.$patcher->{'filename'} ) ;
-system ( "make -C $plugin_path/../" );
-system ( "make -C $plugin_path/../ install" );
-
-
-my $username = $ENV{LOGNAME} || $ENV{USER} || getpwuid($<);
-unless ( $username eq "root" ){
-	die"Please run this script as root to make all the steps work!\n";
-}
-print "Installing R modules\n";
-warn "Please start a R session and paste call:\nsource('$install_path/Install.R')\nto make sure you have the required R packages.\n";
-#system ( "sudo R CMD BATCH $plugin_path/Install.R");
-
-mkdir( $install_path ) unless ( -p $install_path );
-unless ( -d $install_path ) {
-	die "Sorry - I could not create the path '$install_path'\n$!\n";
-}
-system ( "sed -e's!plugin_path!/$install_path!' $plugin_path/../htpcra.psgi >$install_path/htpcra.psgi ");
-
-# no longer necessary - I expect you to intall the libs in a global position!
-#&copy_files($plugin_path."/..", $install_path, "lib/" );
-#&copy_files($plugin_path."/../root/", $install_path );
-my $do_not_copy = { 'lib' => { 'site' => { 'piwik' => 1 }, 'tmp' => 1 } };
-&copy_files($plugin_path."/../root/", $install_path, '', $do_not_copy);
-mkdir ( $install_path."tmp/" ) unless ( -d $install_path."tmp/"  );
-foreach ( 'css', 'rte', 'scripts', 'static', 'example_data' ){
-	#die "I wold copy the files from '$plugin_path/../root/$_/' to '$web_root$_/'\n";
-	&copy_files($plugin_path."/../root/$_/", $web_root."$_/" );
-}
-
-warn "Fixing $patcher->{'filename'} back to normal ($save) and ($save_home)\n";
-$patcher -> replace_string( "root .*", "root $save" );
-$patcher -> replace_string( "Home .*", "Home $save_home" );
-$patcher -> replace_string( "\tform_path .*", "\tform_path $save"."src/form/");
-$patcher -> write_file();
-
-
-
-my $tmp = $install_path;
-$tmp =~ s/$web_root/\//;
-unless ( -f $web_root."index.html" ){
-	
-	
-	open ( OUT ,">".$web_root."index.html" ) or die "I could not create a simple index.html file in '$web_root'\n";
-	print OUT "<!DOCTYPE html>
-<html>
-<head>
-<meta charset='UTF-8'>
-<title>Stem Cell Center Bioinformatics Group</title>
-</head>
-<body>
-<h1>Stem Cell Center Bioinformatics Group</h1>
-
-<p>Page under development!<p>
-
-<p>Meanwhile you can access our <a href='$tmp' target='_blank'>HTpcrA tool (open beta)</a> </p>
-
-</body>
-</html>
-	"
-}
-
-
-
-#### cron fixes the killing of the tmp files
-unless ( -f "/usr/local/bin/CleanTemp.pl" ){
-	#install the script
-	system ( "cp $plugin_path../script/CleanTemp.pl /usr/local/bin/");
-	system ( "chmod +x /usr/local/bin/CleanTemp.pl" );
-}
-
-system ( "crontab -l > crontab" );
-open ( IN ,"<crontab" ) or die "crontab info file has not been created?\$!\n";
-my $add2crontab = 0;
-while ( <IN> ) {
-	$add2crontab =1 if ( $_ =~m/CleanUpCronTab/ );
-}
-close ( IN );
-if ( $add2crontab ){
-	$patcher = stefans_libs::install_helper::Patcher->new($plugin_path."/../CleanUpCronTab.txt" );
-	$save = '';
-	$save = $1 if ($patcher->{'str_rep'} =~ m!/usr/local/bin/CleanTemp.pl -check_path (.*)! ) ;
-	Carp::confess ( "I could not identify the important clean area in the old crontab!\n" ) unless ( $save );
-	$patcher -> replace_string( $save, $install_path."tmp/" );
-	$patcher ->  write_file();
-	system( "cat crontab $plugin_path/../CleanUpCronTab.txt > crontab.used" );
-	system ( 'crontab crontab.used' );
-	$patcher -> replace_string( $install_path."root/tmp/", $save );
-	$patcher ->  write_file();
-}
-### crontab fixed
-
-
-unless ( -d "$install_path/tmp/"){
-	mkdir ("$install_path/tmp/" );
-	print "You need to allow the httpd to get access to the tem dir!\n"."execute on fedora or CentOS:\n"
-	."chcon -R system_u:object_r:httpd_sys_rw_content_t:s0 $install_path/tmp/\n";
-}
-
-## modif the htpcra script
-#print "sed -e's!plugin_path!$plugin_path!' $plugin_path/../htpcra.psgi >$root_path/htpcra.psgi \n";
-system( "cp $plugin_path/../htpcra.psgi $install_path"."htpcra.psgi" );
-system( "chmod +x $install_path"."htpcra.psgi" );
-system ( "chown -R $server_user:root $install_path");
-
-
-
-print "\nAll server files stored in '$install_path'\n\n"."If you want to set up a apache server\nyou should modify your apache2 configuration like that:\n".
-"<VirtualHost *:80>
-        ServerName localhost
-        ServerAdmin email\@host
-        HostnameLookups Off
-        UseCanonicalName Off
-        <Location $tmp>
-                SetHandler modperl
-                PerlResponseHandler Plack::Handler::Apache2
-                PerlSetVar psgi_app \"$install_path"."htpcra.psgi\"
-        </Location>
-</VirtualHost>
-\nPlease see this only as a hint on how to set up apache to work with this server!\n";
-
-print "IN case the server does not work as expected (fedora):\n"
-."chcon -R system_u:object_r:httpd_sys_content_t:s0 $install_path\n"
-."chcon -R system_u:object_r:httpd_sys_rw_content_t:s0 $install_path/tmp/\n"
-."chcon -R system_u:object_r:httpd_sys_rw_content_t:s0 $install_path/R_lib/\n"
-;
-
-
-sub patch_files {
-	my ( $pattern, $replace, @files ) = @_;
-	my $OK;
-	foreach my $file ( @files ) {
-		next unless ( -f $file );
-		my $patcher = stefans_libs::install_helper::Patcher->new( $file );
-		$OK = 0;
-		$OK = $patcher -> replace_string( $pattern, $replace );
-		print "Replaced '$pattern' with '$replace' at $OK position(s) of file $file\n";
-		$patcher -> write_file() if ( $OK );
-	}
-}
