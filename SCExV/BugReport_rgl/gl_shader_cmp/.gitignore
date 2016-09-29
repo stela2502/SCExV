@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /diff_new_shaders.txt
 /diff_old_shader_scripts.txt
 /new_rgl_shader_script_density.js
@@ -8,3 +9,15 @@
 /old_rgl_shader_scripts_density.js_mod.log
 /old_rgl_shader_scripts_points.js
 /diff_new_old_density.shader
+=======
+/diff_new_old_density.shader
+/diff_new_shaders.txt
+/diff_old_shader_scripts.txt
+/new_rgl_shader_script_density.js
+/new_rgl_shader_script_density.js_mod
+/new_rgl_shader_script_points.js
+/old_rgl_shader_scripts_density.js
+/old_rgl_shader_scripts_density.js_mod
+/old_rgl_shader_scripts_density.js_mod.log
+/old_rgl_shader_scripts_points.js
+>>>>>>> branch 'OldVersion' of git@github.com:stela2502/SCExV.git

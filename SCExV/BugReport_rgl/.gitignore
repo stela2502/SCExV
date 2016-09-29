@@ -1,4 +1,5 @@
 /.RData
+<<<<<<< HEAD
 /OrigDensityWebGL.html
 /OrigDensityWebGL_mod.html
 /OrigDensityWebGL_mod.html.log
@@ -17,3 +18,22 @@
 /points.html
 /md5_Density.txt
 /md5_Points.txt
+=======
+/analysis.RData
+/create_3d_source_files.R
+/create_3d_source_files.Rout
+/density.html
+/difference_md5.txt
+/differences_md5_sums.txt
+/index.html
+/md5_Density.txt
+/md5_Points.txt
+/OrigDensityWebGL.html
+/OrigDensityWebGL_mod.html
+/OrigDensityWebGL_mod.html.log
+/OrigPointsWebGL.html
+/OrigPointsWebGL_mod.html
+/OrigPointsWebGL_mod.html.log
+/points.html
+/rgl.js
+>>>>>>> branch 'OldVersion' of git@github.com:stela2502/SCExV.git

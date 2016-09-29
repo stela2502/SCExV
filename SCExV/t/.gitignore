@@ -1,4 +1,5 @@
 /.RData
+<<<<<<< HEAD
 /RScript.Rout
 /nytprof.out
 /rainbow_2.Rout
@@ -8,3 +9,12 @@
 /R_result.txt.Rout
 /createNew.Rout
 /createNewK.Rout
+=======
+/createNew.Rout
+/createNewK.Rout
+/nytprof.out
+/R_result.txt.Rout
+/rainbow_2.Rout
+/rainbow_5.Rout
+/RScript.Rout
+>>>>>>> branch 'OldVersion' of git@github.com:stela2502/SCExV.git
