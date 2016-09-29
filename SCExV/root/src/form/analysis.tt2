@@ -121,7 +121,7 @@
 <span id="formField"><tmpl_var field-cluster_amount></span></BR>
 
 <div id="horizontalLine"></div>
-<p>Advanced options</p>
+<p><b>Advanced options</b></p>
 <span id="formName"><tmpl_var comment-plotsvg></span>
 <a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/plotsvg/','MyWindow',
  'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
@@ -129,12 +129,35 @@
 	</BR>
 <span id="formField"><tmpl_var field-plotsvg></span></BR>
 
+<p>Expression distribution plots</p>
+
+<span id="formName"><tmpl_var comment-use_beans></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/use_beans/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-use_beans></span></BR>
+
 <span id="formName"><tmpl_var comment-zscoredVioplot></span>
 <a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/zscoredVioplot/','MyWindow',
  'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
 	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
 	</BR>
 <span id="formField"><tmpl_var field-zscoredVioplot></span></BR>
+
+<span id="formName"><tmpl_var comment-plot_neg></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/plot_neg/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-plot_neg></span></BR>
+
+<span id="formName"><tmpl_var comment-move_neg></span>
+<a href="#" onClick="MyWindow=window.open('/help/index/analyse/index/move_neg/','MyWindow',
+ 'width=500,heig‌​ht=500', menubar='no', toolbar='no', titlebar='no', location='no'); return false;" id="analyse" name="analyse">
+	<img style="border:0px;" src="/static/images/Questions.gif"/ width =20px></a> 
+	</BR>
+<span id="formField"><tmpl_var field-move_neg></span></BR>
 
 <div id="horizontalLine"></div>
 
