@@ -2,6 +2,9 @@ package HTpcrA;
 use Moose;
 use namespace::autoclean;
 use File::Spec;
+use FindBin;
+my $plugin_path = "$FindBin::Bin";
+
 
 use Catalyst::Runtime 5.80;
 
@@ -45,8 +48,15 @@ our $VERSION = '1.00';
 # with an external configuration file acting as an override for
 # local deployment.
 
+my @curdir = File::Spec->splitdir($0);
+pop(@curdir);
+pop(@curdir);
+
+
+
+
 __PACKAGE__->config(
-	root => '/home/med-sal/git_Projects/SCexV/SCExV/root/',
+	root => "$plugin_path/../root/",
 	name => 'SCExV',
 	# Disable deprecated behavior needed by old applications
 	#disable_component_resolution_regex_fallback => 1,

@@ -1,0 +1,59 @@
+
+
+<td id='tab20100' rowspan="4" valign='top'>
+
+<div >
+
+[% INCLUDE 'File_area.tt2' %]
+
+
+
+
+[% form.render %]
+
+
+</div>
+
+[% FOREACH name IN formNames %]
+<p>[% name %]</p>
+[% END %]
+
+<div id='message'> [% message | html %] </div>
+
+
+
+
+</td></tr><tr>
+
+<td id='tab4050'>
+
+This is my first slot here
+	
+[% figure_2d %]
+
+
+
+</td><td id='tab4050'>
+
+This is the second
+[% webGL %]
+
+</td>
+
+</tr><tr>
+
+<td colspan="2">
+
+and here sometjhing else with realllllll, lllllllllllllllllllllllllllllllllllllllllllllllllllllllllll,lllllllllllllllllllllllllllllllllllllllllllllllllllllllllll, lllllllllllllllllllllllllllll, llllllllllllllllllllllllllllll, lllllllllllllllllllllllllllllllllllllllllllllllllllllllllll, lllllllllllllllllllllllllllll, llllllllllllllllllllllllllllll, lllllllllllllllllllllllllllllllllllllllllllllllllllllllllll, lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllly much space
+[% PCRHeatmap %]
+
+</td></tr>
+
+<tr> <td colspan="2" >
+And here somethjhing big like a heatmap
+[% HeatmapStatic %]
+
+</td></tr>
+
+
+
