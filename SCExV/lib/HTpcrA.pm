@@ -48,15 +48,12 @@ our $VERSION = '1.00';
 # with an external configuration file acting as an override for
 # local deployment.
 
-my @curdir = File::Spec->splitdir($0);
+my @curdir = File::Spec->splitdir($plugin_path);
 pop(@curdir);
-pop(@curdir);
-
-
 
 
 __PACKAGE__->config(
-	root => "$plugin_path/../root/",
+	root => join("/", @curdir, 'root/' ),
 	name => 'SCExV',
 	# Disable deprecated behavior needed by old applications
 	#disable_component_resolution_regex_fallback => 1,
