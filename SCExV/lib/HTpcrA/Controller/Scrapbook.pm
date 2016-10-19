@@ -23,11 +23,12 @@ Catalyst Controller.
 
 sub index : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	$self->check($c,'upload');
+	$self->check( $c, 'upload' );
 	my $path = $self->path($c);
-	$c->stash->{'scrapbook'} = $c->model('scrapbook')->init( $c->scrapbook() )
+	$c->stash->{'scrapbook'} =
+	  $c->model('scrapbook')->init( $c->scrapbook() )
 	  ->AsString( $c->uri_for( '/files/index/' . $path ) );
-	$self->file_upload( $c, {});
+	$self->file_upload( $c, {} );
 	$c->stash->{'template'} = 'ScrapBook.tt2';
 }
 
@@ -51,7 +52,7 @@ sub ajaxgroups : Local {
 
 sub imageadd : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	$self->check($c,'upload');
+	$self->check( $c, 'upload' );
 	my $path = $self->path($c);
 
 	$c->form->field(
@@ -85,32 +86,34 @@ sub imageadd : Local : Form {
 		}
 		$filemap = root->filemap( join( "/", '', @args ) );
 	}
-	$c->stash->{'figure'} =
-	  $c->uri_for( join( "/", "/files/index", @args ) );
+	$c->stash->{'figure'} = $c->uri_for( join( "/", "/files/index", @args ) );
 
 	if ( $c->form->submitted && $c->form->validate ) {
 		my $dataset = $self->__process_returned_form($c);
 		$c->model('scrapbook')->init( $c->scrapbook() )
-		  ->Add( $dataset->{'Caption'}, $filemap->{'total'} );
+		  ->Add( $dataset->{'Caption'}, $filemap->{'total'}, 'Picture' );
 		$c->res->redirect( $c->uri_for("/scrapbook/index/") );
 		$c->detach();
 	}
 
-  #$c->form->template( $c->config->{'root'}.'src'. '/form/dropsamples.tt2' );
-    $self->file_upload( $c, {});
+	#$c->form->template( $c->config->{'root'}.'src'. '/form/dropsamples.tt2' );
+	$self->file_upload( $c, {} );
 	$c->stash->{'template'} = 'imageadd.tt2';
 }
 
 sub screenshotadd : Local {
 	my ( $self, $c, @args ) = @_;
-	$self->check($c,'upload');
+	$self->check( $c, 'upload' );
 	my $path = $self->path($c);
+
 	open( IN, "<" . $c->req->body );
 	my ( $tag, $data ) = split( ",", join( "\n", <IN> ) );
 	close(IN);
+
 	open( OUT, ">" . $path . 'MDS_3D.png' );
 	print OUT decode_base64($data);
 	close(OUT);
+
 	$c->res->header( "Content-type", "application/json; charset=utf-8" );
 	$c->res->write(
 		$c->uri_for(
@@ -121,9 +124,62 @@ sub screenshotadd : Local {
 
 }
 
+sub screenshotaddDENSITY : Local {
+	my ( $self, $c, @args ) = @_;
+	$self->check( $c, 'upload' );
+	my $path = $self->path($c);
+	eval{
+	$c->model('scrapbook')->init( $c->scrapbook() )
+	  ->Add( "Click here to open the correponding 3D object",
+		$c->session_path . "densityWebGL/index.html", 'HTML' );
+	};
+	open( IN, "<" . $c->req->body );
+	my ( $tag, $data ) = split( ",", join( "\n", <IN> ) );
+	close(IN);
+
+	open( OUT, ">" . $path . 'MDS_3D.png' );
+	print OUT decode_base64($data);
+	close(OUT);
+	$c->res->redirect( $c->uri_for( '/scrapbook/imageadd/files/index/' . $path . 'MDS_3D.png') );
+#	$c->res->header( "Content-type", "application/json; charset=utf-8" );
+#	$c->res->write(
+#		$c->uri_for(
+#			'/scrapbook/imageadd/files/index/' . $path . 'MDS_3D.png'
+#		)
+#	);
+#	Carp::confess("Do I even get here?" );
+	$c->detach();
+}
+
+sub screenshotaddPOINTS : Local {
+	my ( $self, $c, @args ) = @_;
+	$self->check( $c, 'upload' );
+	my $path = $self->path($c);
+	eval {
+	$c->model('scrapbook')->init( $c->scrapbook() )
+	  ->Add( "Click here to open the correponding 3D object",
+		$c->session_path . "webGL/index.html", 'HTML' );
+	};
+	open( IN, "<" . $c->req->body );
+	my ( $tag, $data ) = split( ",", join( "\n", <IN> ) );
+	close(IN);
+
+	open( OUT, ">" . $path . 'MDS_3D.png' );
+	print OUT decode_base64($data);
+	close(OUT);
+	
+	$c->res->header( "Content-type", "application/json; charset=utf-8" );
+	$c->res->write(
+		$c->uri_for(
+			'/scrapbook/imageadd/files/index/' . $path . 'MDS_3D.png'
+		)
+	);
+	$c->res->code(204);
+}
+
 sub textadd : Local : Form {
 	my ( $self, $c, @args ) = @_;
-	$self->check($c,'nothing');
+	$self->check( $c, 'nothing' );
 	my $path = $self->path($c);
 
 	$c->form->field(

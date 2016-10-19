@@ -325,6 +325,7 @@ sub run_RF_local {
 	    "subset = $dataset->{'Number of Used Cells'}\n"
 	  . "if ( subset + 20 > nrow(data\@data)) {subset = nrow(data\@data) - 20}\n"
 	  . "$cmd\n"
+	  . "saveObj(data)\n" ## to make this process a little more error prone!
 	  . "run = 1\n"
 	  . "while ( run ) {\n"
 	  . "   try( { $cmd } )\n"

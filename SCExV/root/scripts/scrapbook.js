@@ -12,11 +12,21 @@ function capture3D( cid ) {
 	  else{
 	        var xhReq = new ActiveXObject("Microsoft.XMLHTTP");
 	  }
-	  xhReq.open('POST',"/scrapbook/screenshotadd" , true);
+	  if ( cid === 'Kdiv' ) {
+		  xhReq.open('POST',"/scrapbook/screenshotaddDENSITY" , true);
+	  }
+	  else if ( cid === 'div' ) {
+		  xhReq.open('POST',"/scrapbook/screenshotaddPOINTS" , true);
+	  }else {
+	  	  altert('no div captured??')
+		  xhReq.open('POST',"/scrapbook/screenshotadd" , true);
+	  }
+	  
 	  xhReq.setRequestHeader("Content-type", "attachment; charset=utf-8" );
 
 	  xhReq.onreadystatechange = function() {
 		  if ( xhReq.readyState != 4 ) return ;
+		  alter( JSON.parse(xhr.responseText) );
 		  var myWindow = window.open( xhReq.responseText ,'ScrapBook' );
 		  myWindow.focus();
 	  }
