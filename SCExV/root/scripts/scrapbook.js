@@ -26,13 +26,39 @@ function capture3D( cid ) {
 
 	  xhReq.onreadystatechange = function() {
 		  if ( xhReq.readyState != 4 ) return ;
-		  alter( JSON.parse(xhr.responseText) );
+		 // alter( JSON.parse(xhr.responseText) );
 		  var myWindow = window.open( xhReq.responseText ,'ScrapBook' );
 		  myWindow.focus();
 	  }
 
 	  xhReq.send(data);
 }
+
+function storeWebGL ( cid ) {
+	
+	if (window.XMLHttpRequest){
+        var xhReq = new XMLHttpRequest();
+  }
+  else{
+        var xhReq = new ActiveXObject("Microsoft.XMLHTTP");
+  }
+	if ( cid === 'Kdiv' ) {
+		  xhReq.open('GET',"/scrapbook/storeDensityWebGL" , true);
+	  }
+	  else if ( cid === 'div' ) {
+		  xhReq.open('GET',"/scrapbook/storeWebGL" , true);
+	  }else {
+		  altert( "Nothing to store - interface error - ignored" )
+	  }
+	xhReq.onreadystatechange = function() {
+		  if ( xhReq.readyState != 4 ) return ;
+		  var myWindow = window.open( xhReq.responseText ,'ScrapBook' );
+		  myWindow.focus();
+	  }
+
+	  xhReq.send(data);
+}
+
 
 function capture2D( cid ) {
 	var img = document.getElementById(cid);
