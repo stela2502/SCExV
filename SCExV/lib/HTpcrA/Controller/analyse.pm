@@ -150,7 +150,7 @@ sub update_form {
 		{
 			'comment'  => 'multi dimensional scaling (MDS) Algorithm',
 			'name'     => 'mds_alg',
-			'options'  => [ 'PCA', 'LLE', 'ISOMAP', 'ZIFA' ],
+			'options'  => [ 'PCA', 'LLE', 'ISOMAP', 'ZIFA', 'DDRTree' ],
 			'value'    => $hash->{'mds_alg'},
 			'required' => 1,
 			'jsclick'  => 'mds_show( )'

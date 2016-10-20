@@ -132,7 +132,7 @@ sub newgrouping : Local : Form {
 	my ( $self, $c, @args ) = @_;
 	my $path = $self->check($c,'upload');	
 	my $grps = { map {$_ => 1} $c->all_groupings() };
-	unless ( $grps->{'Rscexv_RFclust_1'} ) {
+	unless ( $grps->{'RFgrouping RFclust 1'} ) {
 		$c->stash->{'ERROR'} = "Sorry you first need to create the random forest grouping once to use this function.";
 	}
 	$self->{'form_array'} = [];
@@ -155,7 +155,8 @@ sub newgrouping : Local : Form {
 		$c->form->field( %{$_} );
 	}
 	if ( $c->form->submitted && $c->form->validate ) {
-		unless ( $grps->{'Rscexv_RFclust_1'} ) {
+		
+		unless ( $grps->{'RFgrouping RFclust 1'} ) {
 			$c->res->redirect( $c->uri_for("/analyse/index/" )) ;
 			$c->detach();
 		}
@@ -170,7 +171,7 @@ sub newgrouping : Local : Form {
 		  $c->model('RScript')->create_script( $c, 'recluster_RF_data', $dataset );
 		$c->model('RScript')
 		  ->runScript( $c, $path, 'recluster_RF_data.R', $script, 'wait' );
-		  
+
 		$c->res->redirect( $c->uri_for("/analyse/re_run/".$dataset->{'Group Name'}."/$analysis_conf->{'GeneUG'}/") );
 		$c->detach();
 	}

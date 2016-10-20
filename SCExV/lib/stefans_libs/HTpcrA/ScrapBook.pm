@@ -110,15 +110,19 @@ sub StoreFile {
 	return $self->{'path'} . "/$type/$add" . "_" . $filemap->{'filename'};
 }
 
+
+
 sub Add {
-	my ( $self, $text, $file ) = @_;
+	my ( $self, $text, $file, $type ) = @_;
 	my $str;
+	$type ||= "Pictures";
+	
 	if (defined $file &&  -f $file ) {
-		unless ( $file =~ m!^$self->{'path'}/?Pictures! ) {
-			$file = $self->StoreFile($file);
+		unless ( $file =~ m!^$self->{'path'}/?$type! ) {
+			$file = $self->StoreFile($file, $type);
 		}
 	}
-	if ( defined $file ) {
+	if ( defined $file and $type eq "Picture" ) {
 		Carp::confess("Internal error: Picture file $file could not be found!")
 		  if ( !-f $file && !-f $self->{'path'} . "/" . $file );
 		$file =~ s/$self->{'path'}//;
@@ -129,6 +133,14 @@ sub Add {
 		  . "\t<figcaption>$text</figcaption>\n"
 		  . "</figure> \n\n";
 	}
+	elsif ( defined $file and $type eq "HTML" ) {
+		Carp::confess("Internal error: HTML file $file could not be found on the server!")
+		  if ( !-f $file && !-f $self->{'path'} . "/" . $file );
+		$file =~ s/$self->{'path'}//;
+		$file =~ s!^/!!;
+		$str =
+		    "\n<a href='$file' target='_blank'>$text</a></BR>\n</</br>";
+	} 
 	else {
 		$str = "\n<p>$text</p>\n\n";
 	}

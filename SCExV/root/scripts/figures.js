@@ -22,5 +22,4 @@ function hideElementByDisplay(obj) {
 function updatefirst() {
 	showimage('mygallery', 'picture_exclude','picture');
 	return
-	showimage('mygalleryx', 'picture_array','picturex');
 }

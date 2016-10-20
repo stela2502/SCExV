@@ -313,19 +313,25 @@ sub run_RF_local {
 
 	#my $info = Sys::Info->new;
 	#my $cpu = $info->device( CPU => {} );
+	#$cpu = $cpu->count || 1;
 	my $cpu = 2;
 
 	my $cmd =
 	    "data <- rfCluster(data, rep = 1, SGE = F, email='none\@nowhere.de', "
 	  . " subset = subset, k = $dataset->{'k'}, nforest = $dataset->{'Number of Forests'},"
 	  . " ntree = $dataset->{'Number of Trees'},"
+<<<<<<< HEAD
 	  . " slice = "
 	  . ( $cpu || 1 )
 	  . " )";
+=======
+	  . " slice = $cpu )";
+>>>>>>> branch 'testing' of git@github.com:stela2502/SCExV.git
 	$Rscript .=
 	    "subset = $dataset->{'Number of Used Cells'}\n"
 	  . "if ( subset + 20 > nrow(data\@data)) {subset = nrow(data\@data) - 20}\n"
 	  . "$cmd\n"
+	  . "saveObj(data)\n" ## to make this process a little more error prone!
 	  . "run = 1\n"
 	  . "while ( run ) {\n"
 	  . "   try( { $cmd } )\n"
