@@ -320,13 +320,7 @@ sub run_RF_local {
 	    "data <- rfCluster(data, rep = 1, SGE = F, email='none\@nowhere.de', "
 	  . " subset = subset, k = $dataset->{'k'}, nforest = $dataset->{'Number of Forests'},"
 	  . " ntree = $dataset->{'Number of Trees'},"
-<<<<<<< HEAD
-	  . " slice = "
-	  . ( $cpu || 1 )
-	  . " )";
-=======
 	  . " slice = $cpu )";
->>>>>>> branch 'testing' of git@github.com:stela2502/SCExV.git
 	$Rscript .=
 	    "subset = $dataset->{'Number of Used Cells'}\n"
 	  . "if ( subset + 20 > nrow(data\@data)) {subset = nrow(data\@data) - 20}\n"
