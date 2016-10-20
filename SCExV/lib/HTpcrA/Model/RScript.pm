@@ -320,7 +320,7 @@ sub run_RF_local {
 	  . " subset = subset, k = $dataset->{'k'}, nforest = $dataset->{'Number of Forests'},"
 	  . " ntree = $dataset->{'Number of Trees'},"
 	  . " slice = "
-	  . ( $cpu->count || 1 )
+	  . ( $cpu || 1 )
 	  . " )";
 	$Rscript .=
 	    "subset = $dataset->{'Number of Used Cells'}\n"
