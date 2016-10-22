@@ -77,16 +77,36 @@ sub create_script {
 }
 
 sub _add_fileRead {
-	my ( $self, $path ) = @_;
+	my ( $self, $path, $lock ) = @_;
+	my $str;
+	$lock ||= 1;
 	if ( -f $path . "analysis.RData" ) {
-		return "load('analysis.RData')\n";
+		$str= "'analysis.RData'\n";
 	}
 	if ( -f $path . "norm_data.RData" ) {
-		return "load('norm_data.RData')\n";
+		$str = "'norm_data.RData'\n";
 	}
-	return '## probably a problem : no file existst in path "' . $path . '"'
+	unless ( defined ($str)) {
+		if ( -f $path."Error_system_message.txt" ) {
+			open ( OUT, ">>".$path."Error_system_message.txt");
+		}else {
+			open ( OUT, ">".$path."Error_system_message.txt");
+		}
+		print OUT 'probably a problem : no expected .RData file existst in path "' . $path . '"'
 	  . "\n";
+	  	close ( OUT );
+	}
+	if ( $lock ) {
+		$str = "while ( locked( $str ) ){Sys.sleep(5)}\n"
+			. "set.lock ( $str )\n"
+			. "load( $str )\n";
+	}else {
+		$str = "load( $str )\n";
+	}
+	
+	return $str;
 }
+
 
 =head2 pValues
 
@@ -335,7 +355,8 @@ sub run_RF_local {
 	  . "   else {\n"
 	  . "      Sys.sleep(20)\n"
 	  . "   }\n" . "}\n"
-	  . "data <- implyCloseOrder( data, groupName = 'Rscexv_RFclust_1')\n"
+	  . $self->_add_fileRead($path)
+	  . "$cmd\n"
 	  . "saveObj( data )\n";
 
 	return $Rscript;
