@@ -42,6 +42,9 @@ sub runScript {
 	  if ( -f $c->session_path() . "R.error" );
 	open( OUT, ">" . $path . $file ) or Carp::confess($!);
 	print OUT $script;
+	if ( $script =~ m/norm_data.RData/ ) {
+		print OUT "\nrelease.lock( 'norm_data.RData') \n";
+	}
 	close(OUT);
 	$wait ||= '';
 	if ( $wait eq 'NoRun' ) {
@@ -55,8 +58,7 @@ sub runScript {
 	}
 	chdir($path);
 	system(
-'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- '
-		  . $file
+'/bin/bash -c "DISPLAY=:7 R CMD BATCH --no-save --no-restore --no-readline -- '.$file
 		  . " $wait\"" );
 	return 1;
 }
@@ -80,11 +82,13 @@ sub _add_fileRead {
 	my ( $self, $path, $lock ) = @_;
 	my $str;
 	$lock ||= 1;
+	$path .= "/" unless ( $path=~m!/$!);
 	if ( -f $path . "analysis.RData" ) {
 		$str= "'analysis.RData'\n";
 	}
 	if ( -f $path . "norm_data.RData" ) {
 		$str = "'norm_data.RData'\n";
+		$lock = 0;
 	}
 	unless ( defined ($str)) {
 		if ( -f $path."Error_system_message.txt" ) {

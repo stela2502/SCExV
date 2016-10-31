@@ -570,6 +570,7 @@ sub R_script {
 	$c->model('RScript')->runScript( $c, $path, 'RScript.R', $script, 1 );
 	
 	$script =  $c->model('RScript')->create_script($c, 'densityPlot', $dataset );
+
 	$c->model('RScript')->runScript( $c, $path, 'densityWebGL.R', $script, 1 );
 	
 	$self->{'webGL'} = "$path/webGL/index.html";
