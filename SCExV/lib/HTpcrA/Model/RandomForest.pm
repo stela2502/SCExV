@@ -85,7 +85,6 @@ sub localRFcluster {
 	if ( $c->config->{'production'} ) {
 		Carp::confess( $c->stash->{'ERROR'} );
 	}
-		  
 	my $script =
 	  $c->model('RScript')->create_script( $c, 'run_RF_local', $dataset );
 	$c->model('RScript')

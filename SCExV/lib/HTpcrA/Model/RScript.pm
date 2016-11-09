@@ -81,13 +81,15 @@ sub create_script {
 sub _add_fileRead {
 	my ( $self, $path, $lock ) = @_;
 	my $str;
-	$lock ||= 1;
-	$path .= "/" unless ( $path=~m!/$!);
-	if ( -f $path . "analysis.RData" ) {
-		$str= "'analysis.RData'\n";
+	$lock = 1 unless ( defined $lock);
+	unless ( -f $path ){
+		$path .= "/" unless ( $path=~m!/$!);
 	}
-	if ( -f $path . "norm_data.RData" ) {
-		$str = "'norm_data.RData'\n";
+	if ( -f $path . "analysis.RData" ) {
+		$str= "'analysis.RData'";
+	}
+	elsif ( -f $path . "norm_data.RData" ) {
+		$str = "'norm_data.RData'";
 		$lock = 0;
 	}
 	unless ( defined ($str)) {
@@ -126,10 +128,10 @@ sub pValues {
 	  $dataset->{'lin_lang_file'} ||= 'lin_lang_stats.xls';
 	$dataset->{'sca_ofile'} ||= "Significant_genes.csv";
 	my $script =
-	    "load('analysis.RData')\n"
+		$self->_add_fileRead( $c->session_path() )
 	  . "stat_obj <- create_p_values( data, boot = $dataset->{'boot'}, "
 	  . "lin_lang_file= '$dataset->{'lin_lang_file'}', sca_ofile ='$dataset->{'sca_ofile'}' )\n"
-	  . "saveObj( data, file='analysis.RData' )\n";
+	  . "saveObj( data )\n";
 	return $script;
 }
 
@@ -158,7 +160,7 @@ This R script creates all figures for the web frontend 1D gene grouping
 
 sub geneGroup1D_backend {
 	my ( $self, $c, $dataset ) = @_;
-	my $script = $self->_add_fileRead( $dataset->{'path'} . "../" );
+	my $script = $self->_add_fileRead( $dataset->{'path'} . "../", 0 );
 
 	## load the previousely defined cut regions
 	opendir( DIR, $dataset->{'path'} );
@@ -241,7 +243,7 @@ sub remove_samples {
 	$script .=
 	    "data <- sd.filter(data)\n"
 	  . "data <- z.score.PCR.mad(data)\n"
-	  . "save( data, file='analysis.RData' )\n";
+	  . "saveObj( data )\n";
 
 	return $script;
 }
@@ -467,7 +469,7 @@ sub fixPath {
 	my $path   = $c->session_path();
 	my $script = $self->_add_fileRead($path);
 	$script .=
-	  "data\@outpath <- pwd()\n" . "save( data, file='analysis.RData' )\n";
+	  "data\@outpath <- pwd()\n" . "saveObj( data )\n";
 	return $script;
 }
 
@@ -496,7 +498,7 @@ sub remove_genes {
 	$script .=
 	    "data <- sd.filter(data)\n"
 	  . "data <- z.score.PCR.mad(data)\n"
-	  . "save( data, file='analysis.RData' )\n";
+	  . "saveObj( data )\n";
 	return $script;
 }
 
@@ -511,7 +513,7 @@ sub densityPlot {
 	my $path = $c->session_path();
 
 	#	my $script = $self->file_load($c, $dataset);
-	my $script = $self->_add_fileRead($path);
+	my $script = $self->_add_fileRead($path, 0);
 	$script .= "library(ks)\n";
 	$script .= "plotDensity(data)\n";
 	return $script;
@@ -527,7 +529,7 @@ sub coexpression {
 	my ( $self, $c, $dataset ) = @_;
 	my $path = $c->session_path();
 	return
-	    $self->_add_fileRead($path)
+	    $self->_add_fileRead($path,0)
 	  . "t <- coexpressGenes(data)\n"
 	  . "write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')\n";
 }
@@ -546,7 +548,7 @@ sub RandomForest {
 	  . "data <- rfCluster(data,rep=1, SGE=F, email, k= $dataset->{'cluster_amount'},"
 	  . " slice=4, subset=nrow(data\@data}-20, pics=F ,nforest=500, ntree=500, name='RFclust', recover=F)\n"
 	  . "write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')\n"
-	  . "save( data, file='analysis.RData' )\n";
+	  . "saveObj( data )\n";
 }
 
 =head2 analyze
@@ -560,15 +562,6 @@ sub analyze {
 	my $path   = $c->session_path();
 	my $script = $self->_add_fileRead($path);
 
-	if ( -f $path . "Gene_grouping.randomForest.txt" ) {
-		Carp::confess(
-			"RF Grouping is broken in the developmental version! FIXME!!!");
-		$script .=
-		    "source ('libs/Tool_RandomForest.R')\n"
-		  . "load('RandomForestdistRFobject_genes.RData')\n"
-		  . "createGeneGroups_randomForest (data, $dataset->{'randomForest'})\n"
-		  . "source ('Gene_grouping.randomForest.txt')\n";
-	}
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {
 		$script .= "groups.n <- max( as.numeric(data\@samples[,'ArrayID']))\n"
 		  . "useGrouping <- 'ArrayID'\n";
