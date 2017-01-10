@@ -288,7 +288,7 @@ sub source_groups {
 	my ( $red, $green, $blue, $HexC );
 
 	foreach ( @{ $data_table->GetAll_AsHashArrayRef() } ) {
-		$HexC = $self->rgbToHex( split( " ", $_->{'colors'} ) );
+		$HexC =$self->rgbToHex( $_->{'red'}, $_->{'green'}, $_->{'blue'} );
 		push( @{ $c->stash->{'groups'} }, $HexC );
 		$str .=
 		    "<tr><td>"

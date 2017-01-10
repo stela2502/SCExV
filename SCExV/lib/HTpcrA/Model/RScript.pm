@@ -131,7 +131,8 @@ sub pValues {
 		$self->_add_fileRead( $c->session_path() )
 	  . "stat_obj <- create_p_values( data, boot = $dataset->{'boot'}, "
 	  . "lin_lang_file= '$dataset->{'lin_lang_file'}', sca_ofile ='$dataset->{'sca_ofile'}' )\n"
-	  . "saveObj( data )\n";
+	  . "saveObj( data )\n"
+	  . "release.lock( 'analysis.RData')\n";
 	return $script;
 }
 
@@ -147,7 +148,8 @@ sub geneGroup2D {
 
 	my $script = $self->_add_fileRead( $c->session_path() );
 	$script .= $dataset->{'gg'}->export_R( 'data', $dataset->{'groupname'} );
-	$script .= "saveObj(data)\n";
+	$script .= "saveObj(data)\n"
+	  . "release.lock( 'analysis.RData')\n";
 
 	return $script;
 }
@@ -211,7 +213,8 @@ sub geneGroup1D {
 	  . "data <- group_1D (data, '$dataset->{'GOI'}', c("
 	  . join( ", ", @values )
 	  . " ) )\n"
-	  . "saveObj( data )\n";
+	  . "saveObj( data )\n"
+	  . "release.lock( 'analysis.RData')\n";
 	return $script;
 }
 
@@ -243,7 +246,8 @@ sub remove_samples {
 	$script .=
 	    "data <- sd.filter(data)\n"
 	  . "data <- z.score.PCR.mad(data)\n"
-	  . "saveObj( data )\n";
+	  . "saveObj( data )\n"
+	  . "release.lock( 'analysis.RData')\n";
 
 	return $script;
 }
@@ -293,7 +297,8 @@ sub regroup {
 	}
 	chop($Rscript);
 	$Rscript .=
-	  " )\n, name='$dataset->{GroupingName}')\n" . "saveObj(userGroups)\n";
+	  " )\n, name='$dataset->{GroupingName}')\n" . "saveObj(userGroups)\n"
+	  . "release.lock( 'analysis.RData')\n";
 
 	return $Rscript;
 
@@ -321,7 +326,8 @@ sub recolor {
 	$dataset->{'UG'} = $c->usedSampleGrouping();
 
 	$Rscript .= "data\@usedObj\$colorRange[['$dataset->{UG}']] = newCol\n"
-	  . "saveObj( data )\n";
+	  . "saveObj( data )\n"
+	  . "release.lock( 'analysis.RData')\n";
 
 	return $Rscript;
 }
@@ -363,7 +369,8 @@ sub run_RF_local {
 	  . "   }\n" . "}\n"
 	  . $self->_add_fileRead($path)
 	  . "$cmd\n"
-	  . "saveObj( data )\n";
+	  . "saveObj( data )\n"
+	  . "release.lock( 'analysis.RData')\n";
 
 	return $Rscript;
 }
@@ -381,7 +388,8 @@ sub recluster_RF_data {
 	$Rscript .=
 	    "data <- createRFgrouping_samples( data, "
 	  . "RFname = 'Rscexv_RFclust_1', k=$dataset->{'k'}, single_res_col='$dataset->{'Group Name'}' )\n"
-	  . "saveObj(data)\n";
+	  . "saveObj(data)\n"
+	  . "release.lock( 'analysis.RData')\n";
 	return $Rscript;
 }
 
@@ -400,7 +408,8 @@ sub geneorder {
 	$Rscript .=
 "data\@annotation\$'$dataset->{'GroupingName'}' = factor(data\@annotation[,1], levels= c( '"
 	  . join( "', '", @{ $dataset->{gOrder} } ) . "'))\n"
-	  . "saveObj(data)\n";
+	  . "saveObj(data)\n"
+	  . "release.lock( 'analysis.RData')\n";
 
 	return $Rscript;
 }
@@ -427,7 +436,8 @@ sub genegrouping {
 		  . $i++ . "\n";
 	}
 	$Rscript .= "data\@annotation\$'$dataset->{'GroupingName'}' = group\n"
-	  . "saveObj(data)\n";
+	  . "saveObj(data)\n"
+	  . "release.lock( 'analysis.RData')\n";
 
 	return $Rscript;
 }
@@ -454,7 +464,8 @@ sub userGroups {
 	    "data <-group_on_strings ( data, c( '"
 	  . join( "', '", @groupsnames )
 	  . "' ) )\n"
-	  . "saveObj( data)\n";
+	  . "saveObj( data)\n"
+	  . "release.lock( 'analysis.RData')\n";
 	return $Rscript;
 }
 
@@ -498,7 +509,8 @@ sub remove_genes {
 	$script .=
 	    "data <- sd.filter(data)\n"
 	  . "data <- z.score.PCR.mad(data)\n"
-	  . "saveObj( data )\n";
+	  . "saveObj( data )\n"
+	  . "release.lock( 'analysis.RData')\n";
 	return $script;
 }
 
@@ -548,7 +560,8 @@ sub RandomForest {
 	  . "data <- rfCluster(data,rep=1, SGE=F, email, k= $dataset->{'cluster_amount'},"
 	  . " slice=4, subset=nrow(data\@data}-20, pics=F ,nforest=500, ntree=500, name='RFclust', recover=F)\n"
 	  . "write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')\n"
-	  . "saveObj( data )\n";
+	  . "saveObj( data )\n"
+	  . "release.lock( 'analysis.RData')\n";
 }
 
 =head2 analyze
@@ -611,7 +624,8 @@ sub analyze {
 	  . "ctype= '$dataset->{'cluster_type'}',  zscoredVioplot = zscoredVioplot"
 	  . ", move.neg = move.neg, plot.neg=plot.neg, beanplots=beanplots, plotsvg =plotsvg, useGrouping=useGrouping $dataset->{'GeneUG'})\n"
 	  . "\n"
-	  . "saveObj( data )\n";
+	  . "saveObj( data )\n"
+	  . "release.lock( 'analysis.RData')\n";
 
 	unlink("$path/Summary_Stat_Outfile.xls")
 	  if ( -f "$path/Summary_Stat_Outfile.xls" );
@@ -649,7 +663,8 @@ sub file_load {
 	  . " use_pass_fail = '$dataset->{'use_pass_fail'}', "
 	  . "max.value=40, max.ct= $dataset->{'maxCT'} , max.control=$dataset->{'maxGenes'}, "
 	  . "norm.function='$dataset->{'normalize2'}', negContrGenes=negContrGenes )\n"
-	  . "saveObj( data, file='norm_data.RData' )\n";
+	  . "saveObj( data, file='norm_data.RData' )\n"
+	  . "release.lock( 'norm_data.RData')\n";
 	$script =~ s/c\( '.?.?\/?' \)/NULL/g;
 	return $script;
 }

@@ -187,20 +187,20 @@ sub source_groups {
 	my $percent_width = int( 95 / $data_table->Lines() );
 	$c->stash->{'sourceGroups'} = '';
 	$c->stash->{'groups'}       = $data_table->Lines();
-	my ( $red, $green, $blue );
+	my ( $hexCol );
 
 	foreach ( @{ $data_table->GetAll_AsHashArrayRef() } ) {
-		( $red, $green, $blue ) =
-		  split( " ", $_->{'colors'} );
+		$hexCol =$self->rgbToHex( $_->{'red'}, $_->{'green'}, $_->{'blue'} );
+		
 		$str2 .=
 		    "<button style=\"width:$percent_width\%;height:70;background-color:"
-		  . $self->rgbToHex( $red, $green, $blue )
+		  . $hexCol
 		  . "\"><b>Group $i</b></button>\n";
 		$str .=
 "<div id='div$i'  class='resizableContainer' ondrop='drop(event)' ondragover='allowDrop(event)'>\n</div>";
 		$c->stash->{'sourceGroups'} .=
 "<canvas id='Group$i' name='Group$i' style='width:$percent_width\%;height:70px;background-color:"
-		  . $self->rgbToHex( $red, $green, $blue )
+		  . $hexCol
 		  . "' draggable='true' ondragstart='drag(event)' >Group $i</canvas>";
 		$i++;
 	}

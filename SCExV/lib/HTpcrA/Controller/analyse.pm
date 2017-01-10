@@ -499,7 +499,8 @@ sub index : Path : Form {
 				  . "data <- remove.samples( data, match(excludeSamples, rownames(data\@data) ) )\n"
 				  . "data <- sd.filter(data)\n"
 				  . "## write the new data\n"
-				  . "save( data, file='analysis.RData' )\n";
+				  . "save( data, file='analysis.RData' )\n"
+				  . "release.lock( 'norm_data.RData')\n";
 				
 				$c->model('RScript')->runScript( $c, $path, "ExcludeSamples.R", $script );
 
