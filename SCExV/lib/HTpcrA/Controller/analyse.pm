@@ -451,11 +451,12 @@ sub index : Path : Form {
 			  if ( -f $path . "mdsGrouping" );
 
 			#Carp::confess ( $data->AsString() );
+			eval {
 			$data->plotXY_fixed_Colors(
 				$path . "webGL/MDS_2D.png",
 				@{ $data->{'Header'} }[ 1, 2 ],
 				$data->new( { 'filename' => $path . '2D_data_color.xls' } )
-			);
+			);};
 		}
 		elsif ( $c->form->submitted() eq "0E0" )
 		{    ## this is when the RemoveSamples is pressed in 2D MDS view
