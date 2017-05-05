@@ -32,7 +32,7 @@ requires 'Sys::Info';
 requires_external_bin('dos2unix');
 
 test_requires 'Test::More' => '0.88';
-test_requires 'jQuery::File::Upload';
+#test_requires 'jQuery::File::Upload';
 
 catalyst;
 
