@@ -25,6 +25,7 @@ requires 'Catalyst::Plugin::Session::State::Cookie';
 requires 'Catalyst::Plugin::Session::Store::FastMmap';
 requires 'HTML::Template';
 requires 'Catalyst::Model::Factory::PerRequest';
+requires 'Catalyst::Plugin::FormBuilder';
 requires 'Stefans_Libs_Essentials';
 requires 'Sys::Info';
 #requires 'Stefans_Lib_Essentials' => '1.01';
