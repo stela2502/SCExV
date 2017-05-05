@@ -311,6 +311,19 @@ print "IN case the server does not work as expected (fedora):\n"
 ."chcon -R system_u:object_r:httpd_sys_rw_content_t:s0 $install_path/R_lib/\n"
 ;
 
+open ( NGINX , ">$install_path/SCExV.nginx") or die "I could not create the nginx config file '$install_path/SCExV.nginx'\n$!\n";
+print NGINX "server {
+    listen       80;
+    server_name  SCExV;
+    location / {
+        include fastcgi_params; # We'll discuss this later
+        fastcgi_pass  unix: $install_path/SCExV.fastcgi.initd;
+    }
+}
+";
+close ( NGINX );
+
+
 &cleanup();
 
 sub cleanup {
