@@ -20,10 +20,17 @@ sub new {
 
 sub read_file {
 	my ( $self, $file ) = @_;
-	$self->{'file'} = $file if ( -f $file);
+	$self->{'file'} = $file;
 	my $ret = data_table->new();
-	$ret->read_file($file);
-	$self->{'data'} = {};
+	if ( -f $file ) {
+		$ret->read_file($file);
+	}
+	else {
+		$ret->Add_2_Header( [ 'controller', 'function', 'variable', 'text' ] );
+		warn "I create the help file '$file'\n";
+		$ret->write_file( $file );
+	}
+	$self->{'data'}  = {};
 	$self->{'index'} = {};
 	my $i = 0;
 	foreach ( @{ $ret->GetAll_AsHashArrayRef() } ) {
@@ -50,7 +57,8 @@ sub HelpText {
 	my ( $self, $c, $controler, $function, $variable ) = @_;
 	my @probs =
 	  eval { return $self->{'data'}->{$controler}->{$function}->{$variable}; };
-	return $probs[0]. "</br><button onclick=\"window.close();return false;\">Close page</button> ";
+	return $probs[0]
+	  . "</br><button onclick=\"window.close();return false;\">Close page</button> ";
 }
 
 sub AddData {
