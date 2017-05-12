@@ -35,7 +35,7 @@ my $plugin_path = "$FindBin::Bin";
 
 my $VERSION = 'v1.0';
 
-my ( $install_path,$help,$server_user,$debug, @options, $web_root, $perlLibPath );
+my ( $install_path,$help,$server_user,$debug, $nginx_web_path, @options, $web_root, $perlLibPath );
 
 #my $root_path = "/var/www/html/HTPCR/";
 
@@ -45,7 +45,7 @@ Getopt::Long::GetOptions(
 	"-web_root=s" => \$web_root,
 	"-options=s{,}" => \@options,
 	"-perlLibPath=s" => \$perlLibPath,
-
+    "-nginx_web_path=s" => \$nginx_web_path,
 	"-help"  => \$help,
 	"-debug" => \$debug
 );
@@ -88,7 +88,9 @@ sub helpString {
    -options       :additional option for the SCExV server like
                    randomForest 1 ncore 4 
    -perlLibPath   :an optional perl lib path to run two separate SCExV server on one system
-   
+   -nginx_web_path:
+                   which web path should the server have downstream of the main servername
+                   
    -help   :print this help
    -debug  :verbose output
    
@@ -145,8 +147,9 @@ my ($save, $save_home);
 
 my $replace = $install_path;
 my @files ;
-if ( $replace =~ s/$web_root// ){	
-	warn "I have the replace path '$replace'\n";
+if ( defined $nginx_web_path ){
+	$nginx_web_path .= "/" unless ( $nginx_web_path =~ m/\/$/ );
+	warn "I have the replace path '$nginx_web_path'\n";
 	if ( $replace =~ m/\w/ ){
 		## the server is installed downstream of the web root place
 		## this kills my form files as they use fixed path
@@ -156,10 +159,10 @@ if ( $replace =~ s/$web_root// ){
 			closedir(DIR);
 			@files = map {$wpath.$_ } @files ;
 			#print "And now I have the files". join(", ",@files )."\n";
-			&patch_files( "'/help/", "'/$replace"."help/", @files );
+			&patch_files( "'/help/", "'/$nginx_web_path"."help/", @files );
 		}
-		&patch_files( '/scrapbook/imageadd/', "/$replace".'scrapbook/imageadd/', "$plugin_path/../root/scripts/scrapbook.js");
-		&patch_files( '/scrapbook/screenshotadd', "/$replace".'scrapbook/screenshotadd', "$plugin_path/../root/scripts/scrapbook.js");
+		&patch_files( '/scrapbook/imageadd/', "/$nginx_web_path".'scrapbook/imageadd/', "$plugin_path/../root/scripts/scrapbook.js");
+		&patch_files( '/scrapbook/screenshotadd', "/$nginx_web_path".'scrapbook/screenshotadd', "$plugin_path/../root/scripts/scrapbook.js");
 	}
 	
 }
@@ -231,6 +234,8 @@ foreach ( 'css', 'rte', 'scripts', 'static', 'example_data' ){
 
 my $tmp = $install_path;
 $tmp =~ s/$web_root/\//;
+$tmp = $nginx_web_path;
+
 unless ( -f $web_root."index.html" ){
 	
 	
@@ -315,7 +320,7 @@ open ( NGINX , ">$install_path/SCExV.nginx") or die "I could not create the ngin
 print NGINX "server {
     listen       80;
     server_name  SCExV;
-    location / {
+    location /SCExV/ {
         include fastcgi_params; # We'll discuss this later
         fastcgi_pass  unix: $install_path/SCExV.fastcgi.initd;
     }
