@@ -322,7 +322,7 @@ print NGINX "server {
     server_name  SCExV;
     location /SCExV/ {
         include fastcgi_params; # We'll discuss this later
-        fastcgi_pass  unix: $install_path/SCExV.fastcgi.initd;
+        fastcgi_pass  unix:$install_path/SCExV.fastcgi.initd;
     }
 }
 ";
