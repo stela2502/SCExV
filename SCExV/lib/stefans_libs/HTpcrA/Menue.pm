@@ -105,7 +105,7 @@ sub Reinit {
 			[ "Gene Custom Order", '/complex_grouping/geneorder/' ],
 			[ "Gene User Defined Grouping", '/complex_grouping/genegroup/' ],
 			[ "Group Color Picker", '/complex_grouping/colorpicker/' ],
-			[ "Unsupervised random forest grouping"],
+			[ "Unsupervised random forest grouping", '/],
 		],
 		[], ## Download
 		[

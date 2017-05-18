@@ -63,7 +63,7 @@ __PACKAGE__->config(
 		emit_module => 'HTpcrA::Controller::Error',
 	},
 	'Plugin::Session' => {
-            expires => 3600,
+            expires => 7200,
             storage => '/tmp/session_develop'
     },
 	randomForest => 0,
