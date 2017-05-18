@@ -29,7 +29,7 @@ use Catalyst qw/
   Static::Simple
   Session
   Session::State::Cookie
-  Session::Store::FastMmap
+  Session::Store::File
   FormBuilder
   StackTrace
   ErrorCatcher
@@ -64,6 +64,7 @@ __PACKAGE__->config(
 	},
 	'Plugin::Session' => {
             expires => 7200,
+            flash_to_stash => 1,
             storage => '/tmp/session_develop'
     },
 	randomForest => 0,

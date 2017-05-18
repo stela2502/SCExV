@@ -30,6 +30,8 @@ requires 'Daemon::Control';
 requires 'Catalyst::Plugin::Session';
 requires 'Catalyst::Plugin::Session::State::Cookie';
 requires 'Catalyst::Plugin::Session::Store::FastMmap';
+
+requires 'Catalyst::Plugin::Session::Store::File';
 requires 'HTML::Template';
 requires 'Catalyst::Model::Factory::PerRequest';
 requires 'Stefans_Libs_Essentials';
