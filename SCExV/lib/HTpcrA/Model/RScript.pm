@@ -463,7 +463,7 @@ sub userGroups {
 	$Rscript .=
 	    "data <-group_on_strings ( data, c( '"
 	  . join( "', '", @groupsnames )
-	  . "' ) )\n"
+	  . "' ) , name = '$dataset->{'GroupingName'}' )\n"
 	  . "saveObj( data)\n"
 	  . "release.lock( 'analysis.RData')\n";
 	return $Rscript;
