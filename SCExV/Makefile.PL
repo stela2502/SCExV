@@ -27,7 +27,7 @@ requires 'HTML::Template';
 requires 'Catalyst::Model::Factory::PerRequest';
 requires 'Catalyst::Plugin::FormBuilder';
 requires 'Stefans_Libs_Essentials';
-requires 'Sys::Info';
+#requires 'Sys::Info'; # buggy class does not install any more - replaced as static one processor!
 #requires 'Stefans_Lib_Essentials' => '1.01';
 
 requires_external_bin('dos2unix');
