@@ -2,7 +2,7 @@ package HTpcrA::Model::RScript;
 use Moose;
 use namespace::autoclean;
 use File::Copy "mv";
-use Sys::Info;
+#use Sys::Info;
 
 extends 'Catalyst::Model';
 
@@ -311,15 +311,15 @@ sub run_RF_local {
 	my $path    = $c->session_path();
 	my $Rscript = $self->_add_fileRead($path);
 
-	my $info = Sys::Info->new;
-	my $cpu = $info->device( CPU => {} );
-
+	#my $info = Sys::Info->new;
+	#my $cpu = $info->device( CPU => {} );
+	my $cpu = { 'count' => 1 };
 	my $cmd =
 	    "data <- rfCluster(data, rep = 1, SGE = F, email='none\@nowhere.de', "
 	  . " subset = subset, k = $dataset->{'k'}, nforest = $dataset->{'Number of Forests'},"
 	  . " ntree = $dataset->{'Number of Trees'},"
 	  . " slice = "
-	  . ( $cpu->count || 1 )
+	  . ( $cpu->{count} || 1 )
 	  . " )";
 	$Rscript .=
 	    "subset = $dataset->{'Number of Used Cells'}\n"
@@ -425,7 +425,7 @@ sub userGroups {
 	$Rscript .=
 	    "data <-group_on_strings ( data, c( '"
 	  . join( "', '", @groupsnames )
-	  . "' ) )\n"
+	  . "' ), name = '$dataset->{'GroupingName'}' )\n"
 	  . "saveObj( data)\n";
 	return $Rscript;
 }
