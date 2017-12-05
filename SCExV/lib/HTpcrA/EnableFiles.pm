@@ -244,7 +244,8 @@ sub __fix_file_problems {
 	}
 	else {
 		while (<IN>) {
-			$_ =~ s/;"?(\d+)[\.,](\d+)"?;+?/;$1.$2;/g;
+			$_ =~ s/;"?(\d+),(\d+)"?;+?/;$1.$2;/g;
+			$_ =~ s/;"?(\d+),(\d+)"?;+?/;$1.$2;/g;## this has to be run twice! as #1 will miss every second number!
 			$_ =~ s/;/,/g;
 			print OUT $_;
 		}
