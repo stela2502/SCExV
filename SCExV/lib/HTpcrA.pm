@@ -172,7 +172,7 @@ sub session_path {
 
 	#	my $root = "/var/www/html/HTPCR";
 	$session_id = $self->get_session_id();
-	unless ( $session_id = "[w\\d]" ) {
+	unless ( $session_id =~ m/^[\w\d]+$/ ) {
 		$self->res->redirect( $self->uri_for("/") );
 		$self->detach();
 	}
