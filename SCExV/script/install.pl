@@ -221,7 +221,7 @@ $patcher4-> write_file();
 
 ## copy all files that are required for the server.
 
-my $do_not_copy = { 'lib' => { 'site' => { 'piwik' => 1 }, 'tmp' => 1 } };
+my $do_not_copy = { 'lib' => { 'site' => { 'piwik' => 1, 'matomo_opt_out' => 1 }, 'tmp' => 1 } };
 &copy_files($plugin_path."/../root/", $install_path, '', $do_not_copy);
 mkdir ( $install_path."tmp/" ) unless ( -d $install_path."tmp/"  );
 foreach ( 'css', 'rte', 'scripts', 'static', 'example_data' ){

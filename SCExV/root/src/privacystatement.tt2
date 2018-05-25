@@ -1,0 +1,14 @@
+[% IF message %]
+<p>
+[% message %]
+</p>
+[% END %]
+
+<p>
+[% PROCESS site/matomoOptOut %] 
+
+</p>
+
+
+
+

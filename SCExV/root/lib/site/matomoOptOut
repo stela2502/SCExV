@@ -1,0 +1,7 @@
+<!-- replace this file with your piwik configuration -->
+
+<iframe
+        style="border: 0; height: 200px; width: 600px;"
+        src="http://stemsysbio.bmc.lu.se/piwik/index.php?module=CoreAdminHome&action=optOut&language=en&backgroundColor=&fontColor=&fontSize=&fontFamily="
+        ></iframe>
+        

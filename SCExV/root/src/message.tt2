@@ -1,4 +1,3 @@
-
 [% IF message %]
 <p>
 [% message %]
@@ -12,4 +11,3 @@
 [% IF form %]
 [% form.render %]
 [% END %]
-
