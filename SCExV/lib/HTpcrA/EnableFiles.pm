@@ -542,6 +542,7 @@ sub input_sec_check {
 	my ( $self, $str ) = @_;
 	## all " and ' have to be removed unless in a regexp
 	## script html entries have to be blocked
+	return $str unless ( $str );
 	$str =~ s/(?<!\\)["']//g;
     $str =~ s/<script .*<\/script>//g;
     $str =~ s/[\n\r]/ /g;

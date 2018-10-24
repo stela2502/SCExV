@@ -583,6 +583,7 @@ sub analyze {
 		$script .= "groups.n <- $dataset->{'cluster_amount'}\n";
 	}
 	elsif ( $dataset->{'UG'} =~ m/\w/ ) {    ## an expression based grouping!
+		#Carp::confess( root->print_perl_var_def( [$dataset->{'UG'}] ) );# if ( ref($dataset->{'UG'}) eq "ARRAY");
 		$script .= "useGrouping <-  '$dataset->{'UG'}'\n"
 		  . "groups.n <- max( as.numeric(data\@samples[,useGrouping]))\n ";
 	}
