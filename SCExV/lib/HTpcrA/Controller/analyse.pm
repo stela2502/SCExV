@@ -501,7 +501,7 @@ sub index : Path : Form {
 				  . "data <- sd.filter(data)\n"
 				  . "## write the new data\n"
 				  . "save( data, file='analysis.RData' )\n"
-				  . "release.lock( 'norm_data.RData')\n";
+				  . "release.lock( 'analysis.RData')\n";
 				
 				$c->model('RScript')->runScript( $c, $path, "ExcludeSamples.R", $script );
 
