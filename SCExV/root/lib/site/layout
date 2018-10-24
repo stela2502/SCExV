@@ -46,7 +46,8 @@
 
 <table border = 2 width = 100% bgcolor="white" bordercolor=red >
 <tr><td> 
-<b>This page uses cookies that contain a unique identifier for one session. Without cookies you will not be able to use this page. No tracking!</b></br>
+<b>This page uses cookies that contain a unique identifier for one session. Without cookies you will not be able to use this page. </b></br>
+<b>We use Matomo geo tracking out of curiosity. IP information is anonymized and you can opt out on out <a href="/privacystatement/">privacy page</a>.</b></br> 
 <b>This page relies heavily on javascript - so please activate it.</b></br>
 
 

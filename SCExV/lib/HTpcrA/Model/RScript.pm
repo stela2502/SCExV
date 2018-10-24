@@ -104,7 +104,7 @@ sub _add_fileRead {
 	}
 	if ( $lock ) {
 		$str = "while ( locked( $str ) ){Sys.sleep(5)}\n"
-			. "set.lock ( $str )\n"
+			. "set.lock ( $str, 'RScript.pm - $lock' )\n"
 			. "load( $str )\n";
 	}else {
 		$str = "load( $str )\n";
@@ -128,7 +128,7 @@ sub pValues {
 	  $dataset->{'lin_lang_file'} ||= 'lin_lang_stats.xls';
 	$dataset->{'sca_ofile'} ||= "Significant_genes.csv";
 	my $script =
-		$self->_add_fileRead( $c->session_path() )
+		$self->_add_fileRead( $c->session_path(), 'pValues' )
 	  . "stat_obj <- create_p_values( data, boot = $dataset->{'boot'}, "
 	  . "lin_lang_file= '$dataset->{'lin_lang_file'}', sca_ofile ='$dataset->{'sca_ofile'}' )\n"
 	  . "saveObj( data )\n"
@@ -146,7 +146,7 @@ This is dependant on the GeneGroups class that is provided in the dataset->{'gg'
 sub geneGroup2D {
 	my ( $self, $c, $dataset ) = @_;
 
-	my $script = $self->_add_fileRead( $c->session_path() );
+	my $script = $self->_add_fileRead( $c->session_path(), 'geneGroup2D' );
 	$script .= $dataset->{'gg'}->export_R( 'data', $dataset->{'groupname'} );
 	$script .= "saveObj(data)\n"
 	  . "release.lock( 'analysis.RData')\n";
@@ -209,7 +209,7 @@ sub geneGroup1D {
 	print OUT join( "\n", @values );
 	close(OUT);
 	my $script =
-	    $self->_add_fileRead( $dataset->{'path'} . "../" )
+	    $self->_add_fileRead( $dataset->{'path'} . "../" , 'geneGroup1D')
 	  . "data <- group_1D (data, '$dataset->{'GOI'}', c("
 	  . join( ", ", @values )
 	  . " ) )\n"
@@ -227,7 +227,7 @@ This function is called from the DropGenes contoller
 sub remove_samples {
 	my ( $self, $c, $dataset ) = @_;
 	my $path   = $c->session_path();
-	my $script = $self->_add_fileRead($path);
+	my $script = $self->_add_fileRead($path, 'remove_samples');
 
 #Carp::confess ("These are the keys - do we have a 'Samples' one?: ". join(", ", keys %$dataset));
 	if ( defined @{ $dataset->{'Samples'} }[0] ) {
@@ -262,7 +262,7 @@ sub regroup {
 	my ( $self, $c, $dataset ) = @_;
 
 	my $path    = $c->session_path();
-	my $Rscript = $self->_add_fileRead($path);
+	my $Rscript = $self->_add_fileRead($path, 'regroup');
 
 	my $data_table =
 	  data_table->new( { 'filename' => $path . 'Sample_Colors.xls' } );
@@ -314,7 +314,7 @@ sub recolor {
 	my ( $self, $c, $dataset ) = @_;
 	my $path = $c->session_path();
 
-	my $Rscript = $self->_add_fileRead($path);
+	my $Rscript = $self->_add_fileRead($path, 'recolor');
 
 	$Rscript .=
 "if ( is.null( data\@usedObj\$colorRange)) {data\@usedObj\$colorRange <- list() }\nnewCol = c(";
@@ -341,7 +341,7 @@ Calculates the random forest clusters on the local computer. NOT recommended for
 sub run_RF_local {
 	my ( $self, $c, $dataset ) = @_;
 	my $path    = $c->session_path();
-	my $Rscript = $self->_add_fileRead($path);
+	my $Rscript = $self->_add_fileRead($path, 'run_RF_local');
 
 	#my $info = Sys::Info->new;
 	#my $cpu = $info->device( CPU => {} );
@@ -384,7 +384,7 @@ Reuse the rf distribution to create a new grouping.
 sub recluster_RF_data {
 	my ( $self, $c, $dataset ) = @_;
 	my $path    = $c->session_path();
-	my $Rscript = $self->_add_fileRead($path);
+	my $Rscript = $self->_add_fileRead($path, 'recluster_RF_data');
 	$Rscript .=
 	    "data <- createRFgrouping_samples( data, "
 	  . "RFname = 'Rscexv_RFclust_1', k=$dataset->{'k'}, single_res_col='$dataset->{'Group Name'}' )\n"
@@ -403,7 +403,7 @@ sub geneorder {
 	my ( $self, $c, $dataset ) = @_;
 	my $path = $c->session_path();
 
-	my $Rscript = $self->_add_fileRead($path);
+	my $Rscript = $self->_add_fileRead($path, 'geneorder');
 
 	$Rscript .=
 "data\@annotation\$'$dataset->{'GroupingName'}' = factor(data\@annotation[,1], levels= c( '"
@@ -424,7 +424,7 @@ sub genegrouping {
 	my ( $self, $c, $dataset ) = @_;
 	my $path = $c->session_path();
 
-	my $Rscript = $self->_add_fileRead($path);
+	my $Rscript = $self->_add_fileRead($path, 'genegrouping');
 
 	$Rscript .= "group <- rep( 0 ,nrow(data\@annotation))\n";
 	my $i = 1;
@@ -458,7 +458,7 @@ sub userGroups {
 	my $data_table =
 	  data_table->new( { 'filename' => $path . 'Sample_Colors.xls' } );
 
-	my $Rscript = $self->_add_fileRead($path);
+	my $Rscript = $self->_add_fileRead($path, 'userGroups');
 
 	$Rscript .=
 	    "data <-group_on_strings ( data, c( '"
@@ -478,9 +478,9 @@ This short R script fixes the path in an uploaded zip file R object!
 sub fixPath {
 	my ( $self, $c, $dataset ) = @_;
 	my $path   = $c->session_path();
-	my $script = $self->_add_fileRead($path);
+	my $script = $self->_add_fileRead($path, 'fixPath');
 	$script .=
-	  "data\@outpath <- pwd()\n" . "saveObj( data )\n";
+	  "data\@outpath <- pwd()\n" . "saveObj( data )\n". "release.lock( 'analysis.RData')\n";
 	return $script;
 }
 
@@ -493,7 +493,7 @@ This function is called from the DropGenes contoller
 sub remove_genes {
 	my ( $self, $c, $dataset ) = @_;
 	my $path   = $c->session_path();
-	my $script = $self->_add_fileRead($path);
+	my $script = $self->_add_fileRead($path, 'remove_genes');
 
 	if ( defined @{ $dataset->{'Genes'} }[0] ) {
 		$script .=
@@ -556,7 +556,7 @@ sub RandomForest {
 	my ( $self, $c, $dataset ) = @_;
 	my $path = $c->session_path();
 	return
-	    $self->_add_fileRead($path)
+	    $self->_add_fileRead($path, 'RandomForest')
 	  . "data <- rfCluster(data,rep=1, SGE=F, email, k= $dataset->{'cluster_amount'},"
 	  . " slice=4, subset=nrow(data\@data}-20, pics=F ,nforest=500, ntree=500, name='RFclust', recover=F)\n"
 	  . "write.table(t,'Coexpression_4_Cytoscape.txt',row.names=F, sep=' ')\n"
@@ -573,7 +573,7 @@ Creates the body of the analysis script.
 sub analyze {
 	my ( $self, $c, $dataset ) = @_;
 	my $path   = $c->session_path();
-	my $script = $self->_add_fileRead($path);
+	my $script = $self->_add_fileRead($path, 'analyze');
 
 	if ( $dataset->{'UG'} eq "Group by plateID" ) {
 		$script .= "groups.n <- max( as.numeric(data\@samples[,'ArrayID']))\n"

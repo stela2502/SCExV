@@ -84,7 +84,8 @@ sub Reinit {
 		[ 'Custom Grouping', '/regroup/index/' ],
 		[ 'Download',        '/files/as_zip_file/' ],
 		[ 'Utilities',       "/filemerger/" ],
-		[ 'Clear all',       "/clear_all/" ]
+		[ 'Clear all',       "/clear_all/" ],
+		[ 'Privacy',        "/privacystatement/"]
 	];
 	$self->{'entries'} = [
 		[
@@ -117,6 +118,7 @@ sub Reinit {
 		[	
 			[ "renew R lib files", '/files/renew_rlib/' ],
 		], ## clear_all
+		[], ## privacy statement (no subpages)
 	];
 	return $self;
 }

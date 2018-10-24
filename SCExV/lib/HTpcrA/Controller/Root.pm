@@ -58,6 +58,8 @@ sub index : Path : Form : Args(0) {
 	$c->stash->{'template'}   = 'start.tt2';
 }
 
+
+
 sub end : ActionClass('RenderView') {
 	my ( $self, $c ) = @_;
 	if ( -f $c->session_path() . "Sample_Colors.xls" ) {
